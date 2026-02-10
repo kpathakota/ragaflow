@@ -1,20 +1,12 @@
 {
   "ragams": [
     {
-      "id": "bhoopalam",
-      "name": "Bhoopalam",
+      "id": "bhairavi",
+      "name": "Bhairavi",
       "mode": "focus",
-      "description": "A serene pentatonic raga that evokes the calm of early dawn. Its simplicity and clarity make it ideal for sustained concentration.",
+      "description": "A profound and expressive raga often called the queen of ragas. Its rich, grounding phrases sharpen concentration and sustain deep focus.",
       "timeOfDay": "morning",
-      "audioUrl": "/audio/focus/bhoopalam.mp3"
-    },
-    {
-      "id": "bilahari",
-      "name": "Bilahari",
-      "mode": "focus",
-      "description": "A confident, expansive raga associated with courage and determination. Ideal for deep work sessions.",
-      "timeOfDay": "morning",
-      "audioUrl": "/audio/focus/bilahari.mp3"
+      "audioUrl": "/audio/focus/Bhairavi_440Hz_with_percussion.m4a"
     },
     {
       "id": "neelambari",
@@ -22,22 +14,7 @@
       "mode": "sleep",
       "description": "The quintessential lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.",
       "timeOfDay": "night",
-      "audioUrl": "/audio/sleep/neelambari.mp3"
-    },
-    {
-      "id": "khamaj",
-      "name": "Khamaj",
-      "mode": "sleep",
-      "description": "A tender, soothing raga associated with late evening. Its soft melodic movements ease the transition into rest.",
-      "timeOfDay": "night",
-      "audioUrl": "/audio/sleep/khamaj.mp3"
-    },
-    {
-      "id": "ananda-bhairavi",
-      "name": "Ananda Bhairavi",
-      "mode": "meditate",
-      "description": "A raga of blissful devotion and gentle introspection. Its warm, lyrical phrases cultivate stillness and inner peace.",
-      "audioUrl": "/audio/meditate/ananda-bhairavi.mp3"
+      "audioUrl": "/audio/sleep/Neelambari_440Hz_with_percussion.mp3"
     },
     {
       "id": "sahana",
@@ -45,7 +22,7 @@
       "mode": "meditate",
       "description": "A deeply emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.",
       "timeOfDay": "evening",
-      "audioUrl": "/audio/meditate/sahana.mp3"
+      "audioUrl": "/audio/meditate/Sahana_440Hz_with_percussion.mp3"
     }
   ]
 }

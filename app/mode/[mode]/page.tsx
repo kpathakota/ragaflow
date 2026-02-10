@@ -44,15 +44,16 @@ export default async function ModePage({
 
       <main className="flex w-full max-w-sm flex-col gap-3">
         {ragams.map((ragam) => (
-          <div
+          <Link
             key={ragam.id}
-            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
+            href={`/mode/${mode}/${ragam.id}`}
+            className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4 transition-colors hover:border-neutral-600 hover:bg-neutral-800/60"
           >
             <h2 className="text-lg font-medium">{ragam.name}</h2>
             <p className="mt-1 text-sm text-neutral-400">
               {ragam.description}
             </p>
-          </div>
+          </Link>
         ))}
       </main>
     </div>
