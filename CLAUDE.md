@@ -42,58 +42,22 @@ Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data acce
 
 ## Key files
 
-### Data layer
-- `lib/types.ts` — TypeScript types for all entities
-- `lib/data.ts` — async data access functions (Supabase → seed fallback)
-- `content/seed.ts` — local seed data (3 ragams + 3 tracks)
-- `supabase/migrations/001_initial_schema.sql` — DDL + RLS policies
-- `supabase/seed.sql` — insert statements for Supabase
-
-### Supabase
-- `lib/supabase/client.ts` — browser client (returns null if env vars missing)
-- `lib/supabase/server.ts` — server client (cookies adapter)
-- `lib/supabase/session.ts` — session refresh logic (used by proxy)
-- `proxy.ts` — Next.js 16 proxy (renamed from middleware.ts) calling Supabase session refresh
-
-### Auth
-- `lib/auth/auth-context.tsx` — `AuthProvider` + `useAuth()` hook
-- `app/auth/page.tsx` — sign-in/sign-up form
-- `app/auth/callback/route.ts` — email confirmation callback
-
-### Features
-- `lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
-- `lib/preferences.ts` — set default track per scenario (client-side)
-- `lib/sessions.ts` — start/end listening session logging (client-side)
-
-### Components
-- `components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
-- `components/track-card.tsx` — reusable track card with heart icon
-- `components/nav-header.tsx` — reusable back-link + title header
-- `components/user-badge.tsx` — top-right user initial badge linking to /profile
-
-### Pages
-- `app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
-- `app/profile/page.tsx` — profile page (account info, stats, defaults, sign-out)
-- `app/mode/[scenario]/page.tsx` — track list per scenario (dynamic, force-dynamic)
-- `app/mode/[scenario]/track-list-client.tsx` — client wrapper for track list with favorites
-- `app/mode/[scenario]/[trackId]/page.tsx` — session player server page
-- `app/mode/[scenario]/[trackId]/session-player.tsx` — client component: timer + audio + favorite + set-default
-- `app/explore/page.tsx` — browse all tracks grouped by ragam with tag filter
-- `app/explore/explore-client.tsx` — client wrapper for explore with tag filtering
+- `content/ragams.json` — ragam catalog (id, name, mode, description, audioUrl)
+- `public/audio/` — audio files organized by mode (`focus/`, `sleep/`, `meditate/`)
+- `app/page.tsx` — homepage / mode selection
+- `app/mode/[mode]/page.tsx` — ragam list per mode (cards link to session player)
+- `app/mode/[mode]/[ragamId]/page.tsx` — session player server page (params validation + static generation)
+- `app/mode/[mode]/[ragamId]/session-player.tsx` — client component with Pomodoro timer + looping audio
 - `app/globals.css` — global styles (always-dark theme)
 
 ## Routing
 
 ```
-/                              → Home (personalized if rasika has defaults, otherwise scenario selection)
-/mode/focus                    → Focus tracks list
-/mode/sleep                    → Sleep tracks list
-/mode/meditate                 → Meditate tracks list
-/mode/[scenario]/[trackId]     → Session player (timer + audio + ♡ favorite + set-default)
-/explore                       → All tracks — browse by ragam, tag, or mood
-/profile                       → Profile (account info, stats, defaults, sign out)
-/auth                          → Sign in / sign up
-/auth/callback                 → Email confirmation redirect
+/                        → Mode selection (Focus, Sleep, Meditate)
+/mode/focus              → Focus ragams list
+/mode/sleep              → Sleep ragams list
+/mode/meditate           → Meditate ragams list
+/mode/[mode]/[ragamId]   → Session player (timer + audio)
 ```
 
 ## Scenarios
@@ -131,6 +95,14 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Downloads paid (subscribers only)
 - 10-hour cumulative listening gate → must subscribe to continue
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
+
+## Gotchas
+
+- Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
+- `generateStaticParams` pre-renders mode routes at build time — add new entries when adding modes
+- Audio files go in `public/audio/{mode}/` matching `audioUrl` paths in ragams.json
+- Session player is a server page (for `generateStaticParams`) wrapping a client `SessionPlayer` component (for interactivity)
+- Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
 
 ## Process
 
