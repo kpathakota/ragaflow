@@ -2,7 +2,7 @@
 
 Ragaflow is a web app that serves Indian classical ragas for focus, sleep, and meditation. Rasikas (users) select a scenario, browse tracks tagged to that scenario, and play audio sessions. Tracks belong to ragams (melodic frameworks) and are tagged with scenarios and emotions — not hard-mapped 1:1.
 
-See `spec.md` and `dev-design.md` for the full product specification and development plan.
+See `docs/spec.md` and `docs/dev-design.md` for the full product specification and development plan.
 
 ## Tech stack
 
