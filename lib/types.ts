@@ -4,7 +4,6 @@ export type Ragam = {
   id: string;
   name: string;
   description: string;
-  tradition: "carnatic" | "hindustani" | "both";
   time_of_day: string | null;
 };
 

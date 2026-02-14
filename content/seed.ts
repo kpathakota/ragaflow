@@ -6,7 +6,6 @@ export const ragams: Ragam[] = [
     name: "Bhairavi",
     description:
       "A profound and expressive raga often called the queen of ragas. Its rich, emotive phrases have been used for centuries in devotional and contemplative music.",
-    tradition: "both",
     time_of_day: "morning",
   },
   {
@@ -14,7 +13,6 @@ export const ragams: Ragam[] = [
     name: "Neelambari",
     description:
       "The quintessential lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.",
-    tradition: "carnatic",
     time_of_day: "night",
   },
   {
@@ -22,7 +20,6 @@ export const ragams: Ragam[] = [
     name: "Sahana",
     description:
       "A deeply emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.",
-    tradition: "carnatic",
     time_of_day: "evening",
   },
 ];
