@@ -29,7 +29,7 @@
 
 **Phase 1 — Still TODO**
 - Listening gate (10-hour cumulative → must subscribe to continue)
-- Middleware → proxy migration
+- ~~Middleware → proxy migration~~ ✅ (Next.js 16 codemod: `middleware.ts` → `proxy.ts`)
 
 **Phase 1 — Not Yet Started**
 - Google Drive content pipeline (Tasks 1.3–1.6)

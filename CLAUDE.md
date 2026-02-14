@@ -52,8 +52,8 @@ Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data acce
 ### Supabase
 - `lib/supabase/client.ts` — browser client (returns null if env vars missing)
 - `lib/supabase/server.ts` — server client (cookies adapter)
-- `lib/supabase/middleware.ts` — session refresh middleware
-- `middleware.ts` — root middleware calling Supabase session refresh
+- `lib/supabase/session.ts` — session refresh logic (used by proxy)
+- `proxy.ts` — Next.js 16 proxy (renamed from middleware.ts) calling Supabase session refresh
 
 ### Auth
 - `lib/auth/auth-context.tsx` — `AuthProvider` + `useAuth()` hook
