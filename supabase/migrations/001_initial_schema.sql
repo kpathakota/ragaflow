@@ -3,8 +3,6 @@ create table ragams (
   id text primary key,
   name text not null,
   description text not null default '',
-  tradition text not null default 'carnatic'
-    check (tradition in ('carnatic', 'hindustani', 'both')),
   time_of_day text
 );
 

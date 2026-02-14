@@ -16,7 +16,7 @@ See `../spec.md` for the full product specification.
 ## Supabase setup
 
 1. Create a Supabase project
-2. Copy `.env.example` → `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`
+2. Copy `.env.example` → `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
 3. Run `supabase/migrations/001_initial_schema.sql` in SQL editor
 4. Run `supabase/seed.sql` to insert starter data
 5. Without env vars, app gracefully falls back to local seed data in `content/seed.ts`

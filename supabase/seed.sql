@@ -1,8 +1,8 @@
 -- Ragams
-insert into ragams (id, name, description, tradition, time_of_day) values
-  ('bhairavi', 'Bhairavi', 'A profound and expressive raga often called the queen of ragas. Its rich, emotive phrases have been used for centuries in devotional and contemplative music.', 'both', 'morning'),
-  ('neelambari', 'Neelambari', 'The quintessential lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.', 'carnatic', 'night'),
-  ('sahana', 'Sahana', 'A deeply emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.', 'carnatic', 'evening');
+insert into ragams (id, name, description, time_of_day) values
+  ('bhairavi', 'Bhairavi', 'A profound and expressive raga often called the queen of ragas. Its rich, emotive phrases have been used for centuries in devotional and contemplative music.', 'morning'),
+  ('neelambari', 'Neelambari', 'The quintessential lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.',  'night'),
+  ('sahana', 'Sahana', 'A deeply emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.', 'evening');
 
 -- Tracks
 insert into tracks (id, title, ragam_id, scenarios, tags, description, duration, audio_url, free, created_at) values
