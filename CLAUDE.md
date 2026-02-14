@@ -24,7 +24,7 @@ See `../spec.md` for the full product specification.
 ## Data model (Phase 1 — current)
 
 **Ragam** — a melodic framework, no scenario binding:
-- id, name, description, tradition, time_of_day
+- id, name, description, time_of_day
 
 **Track** — a recorded session, the atomic content unit:
 - id, title, ragam_id, scenarios[], tags[], description, duration, audio_url, download_url, free, created_at
@@ -69,9 +69,11 @@ Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data acce
 - `components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
 - `components/track-card.tsx` — reusable track card with heart icon
 - `components/nav-header.tsx` — reusable back-link + title header
+- `components/user-badge.tsx` — top-right user initial badge linking to /profile
 
 ### Pages
-- `app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link)
+- `app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
+- `app/profile/page.tsx` — profile page (account info, stats, defaults, sign-out)
 - `app/mode/[scenario]/page.tsx` — track list per scenario (dynamic, force-dynamic)
 - `app/mode/[scenario]/track-list-client.tsx` — client wrapper for track list with favorites
 - `app/mode/[scenario]/[trackId]/page.tsx` — session player server page
@@ -89,6 +91,7 @@ Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data acce
 /mode/meditate                 → Meditate tracks list
 /mode/[scenario]/[trackId]     → Session player (timer + audio + ♡ favorite + set-default)
 /explore                       → All tracks — browse by ragam, tag, or mood
+/profile                       → Profile (account info, stats, defaults, sign out)
 /auth                          → Sign in / sign up
 /auth/callback                 → Email confirmation redirect
 ```
@@ -112,6 +115,8 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 
 ## Gotchas
 
+- Supabase now uses **publishable keys** (`sb_publishable_...`) instead of the legacy "anon key". Env var is `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, not `ANON_KEY`. See: https://github.com/orgs/supabase/discussions/29260
+- Ragam has no `tradition` column — intentionally removed. Don't re-add it.
 - Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
 - Pages use `force-dynamic` since data comes from Supabase (no `generateStaticParams`)
 - Audio files go in `public/audio/{scenario}/` matching `audio_url` paths in seed/database

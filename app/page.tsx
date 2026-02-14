@@ -2,6 +2,7 @@ import Link from "next/link";
 import { scenarios } from "@/components/scenario-config";
 import { createClient } from "@/lib/supabase/server";
 import { getTrackById } from "@/lib/data";
+import { UserBadge } from "@/components/user-badge";
 import type { RasikaPreferences, Track, Scenario } from "@/lib/types";
 
 async function getPreferencesAndFavorites(): Promise<{
@@ -47,7 +48,10 @@ export default async function Home() {
   const { defaults, user, prefs } = await getPreferencesAndFavorites();
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center px-6 py-16">
+    <div className="relative flex min-h-screen flex-col items-center justify-center px-6 py-16">
+      <div className="absolute right-6 top-6">
+        <UserBadge />
+      </div>
       <header className="mb-12 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Ragaflow</h1>
         <p className="mt-3 text-lg text-neutral-400">
