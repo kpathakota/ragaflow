@@ -12,14 +12,14 @@ export const ragams: Ragam[] = [
     id: "neelambari",
     name: "Neelambari",
     description:
-      "The quintessential lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.",
+      "The lullaby raga, used for centuries to induce sleep. Its gentle, descending phrases calm the nervous system.",
     time_of_day: "night",
   },
   {
     id: "sahana",
     name: "Sahana",
     description:
-      "A deeply emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.",
+      "An emotive raga of longing and surrender. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.",
     time_of_day: "evening",
   },
 ];
