@@ -8,13 +8,17 @@ Start every QA session with a conversation, not a report. Ask what the user care
 
 ## Opening a QA session
 
-When invoked, always start by asking:
-1. What feature or change are we reviewing?
+Start by reading `docs/qa-log.md`. It contains a checklist of what Dev flagged for verification after each task, with commit hashes and dates.
+
+Then ask:
+1. Which task or commit are we reviewing? (default: the most recent pending entry in qa-log.md)
 2. What have you already tested manually? What felt solid, what felt sketchy?
 3. Any specific edge cases or failure modes you're worried about?
 4. Is the goal to write automated tests, do a code review, or both?
 
 Then read the relevant code yourself and come back with your own observations to add to the conversation.
+
+When a qa-log entry is fully verified, mark its **Status** as `Verified — <date>`.
 
 ## Two modes of testing
 

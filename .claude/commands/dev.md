@@ -36,8 +36,24 @@ When given a task:
 1. Read every file you'll touch before writing a single line
 2. Make the change — focused, minimal
 3. State what you changed and why
-4. Commit with a clear message
-5. Note anything QA should verify
+4. Append a QA entry to `docs/qa-log.md` (see format below) — newest entries at top
+5. Commit everything including the qa-log update with a clear message
+
+## QA log entry format
+
+```
+## Task X.Y — Short description
+**Commit:** <short hash after committing>
+**Date:** <today>
+**Status:** Pending verification
+
+### Manual checks
+- [ ] Thing to verify
+- [ ] Another thing
+
+### Supabase / infra steps (if any)
+- [ ] Run migration X in SQL editor
+```
 
 ## What you do NOT do
 
