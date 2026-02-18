@@ -146,6 +146,7 @@ export function SessionPlayer({
         </Link>
         {user && (
           <button
+            type="button"
             onClick={handleToggleFavorite}
             className={`text-xl transition-colors ${
               isFavorite ? "text-red-400" : "text-neutral-600 hover:text-neutral-400"
@@ -176,6 +177,7 @@ export function SessionPlayer({
       {track.artist_note && session !== "complete" && (
         <div className="mb-6">
           <button
+            type="button"
             onClick={() => setNoteExpanded((v) => !v)}
             className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
           >
@@ -199,6 +201,7 @@ export function SessionPlayer({
               {DURATION_OPTIONS.map((d) => (
                 <button
                   key={d}
+                  type="button"
                   onClick={() => setDuration(d)}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     duration === d
@@ -211,6 +214,7 @@ export function SessionPlayer({
               ))}
             </div>
             <button
+              type="button"
               onClick={startSessionHandler}
               className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
             >
@@ -222,16 +226,21 @@ export function SessionPlayer({
         {(session === "running" || session === "paused") && (
           <>
             <span className="text-xs tabular-nums text-neutral-600">{display}</span>
-            <div className="flex items-center gap-4">
+            <div className="relative flex items-center justify-center">
               {session === "running" ? (
                 <button
+                  type="button"
                   onClick={pause}
-                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
+                  className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
                 >
-                  ⏸
+                  <span aria-hidden="true" className="flex gap-[3px]">
+                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                  </span>
                 </button>
               ) : (
                 <button
+                  type="button"
                   onClick={resume}
                   className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
                 >
@@ -239,8 +248,9 @@ export function SessionPlayer({
                 </button>
               )}
               <button
+                type="button"
                 onClick={stop}
-                className="text-sm text-neutral-600 transition-colors hover:text-neutral-400"
+                className="absolute left-full ml-4 whitespace-nowrap text-sm text-neutral-600 transition-colors hover:text-neutral-400"
               >
                 stop
               </button>
@@ -259,12 +269,14 @@ export function SessionPlayer({
                 </p>
                 <div className="flex gap-3">
                   <button
+                    type="button"
                     onClick={handleSetDefault}
                     className={`rounded-full px-4 py-2 text-sm font-medium text-white ${accent.bg} transition-opacity hover:opacity-80`}
                   >
                     Yes
                   </button>
                   <button
+                    type="button"
                     onClick={() => setShowDefaultPrompt(false)}
                     className="rounded-full bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700"
                   >
@@ -280,6 +292,7 @@ export function SessionPlayer({
 
             <div className="flex gap-4">
               <button
+                type="button"
                 onClick={restart}
                 className={`rounded-full px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80 ${accent.bg}`}
               >
