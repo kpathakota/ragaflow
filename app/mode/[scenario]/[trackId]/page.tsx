@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getTrackById } from "@/lib/data";
+import { getTrackById, getRagamById } from "@/lib/data";
 import { validScenarios } from "@/components/scenario-config";
 import { SessionPlayer } from "./session-player";
 import type { Scenario } from "@/lib/types";
@@ -18,5 +18,7 @@ export default async function SessionPage({
   const track = await getTrackById(trackId);
   if (!track) notFound();
 
-  return <SessionPlayer track={track} scenario={scenario as Scenario} />;
+  const ragam = await getRagamById(track.ragam_id);
+
+  return <SessionPlayer track={track} ragam={ragam} scenario={scenario as Scenario} />;
 }

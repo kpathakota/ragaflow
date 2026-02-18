@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRef, useState, useEffect, useCallback } from "react";
-import type { Track, Scenario } from "@/lib/types";
+import type { Track, Ragam, Scenario } from "@/lib/types";
 import { scenarioMap } from "@/components/scenario-config";
 import { useAuth } from "@/lib/auth/auth-context";
 import { toggleFavoriteTrackClient, getPreferencesClient } from "@/lib/favorites";
@@ -15,9 +15,11 @@ type SessionState = "idle" | "running" | "paused" | "complete";
 
 export function SessionPlayer({
   track,
+  ragam,
   scenario,
 }: {
   track: Track;
+  ragam: Ragam | undefined;
   scenario: Scenario;
 }) {
   const config = scenarioMap[scenario];
@@ -32,8 +34,8 @@ export function SessionPlayer({
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
+  const [noteExpanded, setNoteExpanded] = useState(false);
 
-  // Load favorite state
   useEffect(() => {
     if (!user) return;
     getPreferencesClient().then((prefs) => {
@@ -88,10 +90,8 @@ export function SessionPlayer({
     stopAudio();
   }, [stopAudio]);
 
-  // Timer tick
   useEffect(() => {
     if (session !== "running") return;
-
     const id = setInterval(() => {
       setRemaining((prev) => {
         if (prev <= 1) {
@@ -101,11 +101,9 @@ export function SessionPlayer({
         return prev - 1;
       });
     }, 1000);
-
     return () => clearInterval(id);
   }, [session]);
 
-  // Detect timer completion
   useEffect(() => {
     if (session === "running" && remaining === 0) {
       setSession("complete");
@@ -136,35 +134,65 @@ export function SessionPlayer({
   const display = `${String(mins).padStart(2, "0")}:${String(secs).padStart(2, "0")}`;
 
   return (
-    <div className="flex min-h-screen flex-col items-center px-6 py-16">
-      <header className="mb-10 w-full max-w-sm">
-        <div className="flex items-center justify-between">
-          <Link
-            href={`/mode/${scenario}`}
-            className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+    <div className="flex min-h-screen flex-col px-6 pt-6 pb-10">
+
+      {/* Top bar: back + favorite */}
+      <div className="flex items-center justify-between">
+        <Link
+          href={`/mode/${scenario}`}
+          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+        >
+          &larr; Back
+        </Link>
+        {user && (
+          <button
+            onClick={handleToggleFavorite}
+            className={`text-xl transition-colors ${
+              isFavorite ? "text-red-400" : "text-neutral-600 hover:text-neutral-400"
+            }`}
+            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
-            &larr; Back
-          </Link>
-          {user && (
-            <button
-              onClick={handleToggleFavorite}
-              className={`text-xl transition-colors ${
-                isFavorite ? "text-red-400" : "text-neutral-600 hover:text-neutral-400"
-              }`}
-              aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-            >
-              {isFavorite ? "♥" : "♡"}
-            </button>
+            {isFavorite ? "♥" : "♡"}
+          </button>
+        )}
+      </div>
+
+      {/* Ragam name + brief description */}
+      <div className="mt-5">
+        <h1 className="text-2xl font-semibold tracking-tight text-neutral-100">
+          {ragam?.name ?? track.title}
+        </h1>
+        <p className="mt-1.5 text-sm leading-relaxed text-neutral-500">
+          {track.description}
+        </p>
+      </div>
+
+      {/* Visual zone — replace contents with animation when ready */}
+      <div className="flex flex-1 items-center justify-center overflow-hidden">
+        <div className={`h-56 w-56 rounded-full ${accent.bg} opacity-20 blur-3xl`} />
+      </div>
+
+      {/* Artist note — expandable, hidden if empty */}
+      {track.artist_note && session !== "complete" && (
+        <div className="mb-6">
+          <button
+            onClick={() => setNoteExpanded((v) => !v)}
+            className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
+          >
+            <span>{noteExpanded ? "▴" : "▾"}</span>
+            <span>From the session</span>
+          </button>
+          {noteExpanded && (
+            <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
+              {track.artist_note}
+            </p>
           )}
         </div>
-        <h1 className={`mt-4 text-3xl font-semibold tracking-tight ${accent.text}`}>
-          {track.title}
-        </h1>
-        <p className="mt-2 text-sm text-neutral-400">{track.description}</p>
-      </header>
+      )}
 
-      <main className="flex w-full max-w-sm flex-col items-center gap-8">
-        {/* Idle: duration picker + play */}
+      {/* Controls — bottom third */}
+      <div className="flex flex-col items-center gap-5">
+
         {session === "idle" && (
           <>
             <div className="flex gap-2">
@@ -178,59 +206,51 @@ export function SessionPlayer({
                       : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                   }`}
                 >
-                  {d} min
+                  {d}m
                 </button>
               ))}
             </div>
-
             <button
               onClick={startSessionHandler}
-              className={`flex h-20 w-20 items-center justify-center rounded-full ${accent.bg} text-white text-3xl transition-opacity hover:opacity-80`}
+              className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
             >
               ▶
             </button>
           </>
         )}
 
-        {/* Running / Paused: timer + controls */}
         {(session === "running" || session === "paused") && (
           <>
-            <div className="text-6xl font-light tracking-widest tabular-nums">
-              {display}
-            </div>
-
-            <div className="flex gap-4">
+            <span className="text-xs tabular-nums text-neutral-600">{display}</span>
+            <div className="flex items-center gap-4">
               {session === "running" ? (
                 <button
                   onClick={pause}
-                  className="rounded-full bg-neutral-800 px-6 py-3 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700"
+                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
                 >
-                  Pause
+                  ⏸
                 </button>
               ) : (
                 <button
                   onClick={resume}
-                  className={`rounded-full px-6 py-3 text-sm font-medium text-white transition-opacity hover:opacity-80 ${accent.bg}`}
+                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
                 >
-                  Resume
+                  ▶
                 </button>
               )}
               <button
                 onClick={stop}
-                className="rounded-full bg-neutral-800 px-6 py-3 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700"
+                className="text-sm text-neutral-600 transition-colors hover:text-neutral-400"
               >
-                Stop
+                stop
               </button>
             </div>
           </>
         )}
 
-        {/* Complete */}
         {session === "complete" && (
-          <>
-            <p className="text-2xl font-medium text-neutral-200">
-              Session complete
-            </p>
+          <div className="flex flex-col items-center gap-4 text-center">
+            <p className="text-lg font-medium text-neutral-200">Session complete</p>
 
             {showDefaultPrompt && !defaultSet && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4">
@@ -255,9 +275,7 @@ export function SessionPlayer({
             )}
 
             {defaultSet && (
-              <p className="text-sm text-emerald-400">
-                Default set! Quick-play from home.
-              </p>
+              <p className="text-sm text-emerald-400">Default set! Quick-play from home.</p>
             )}
 
             <div className="flex gap-4">
@@ -274,9 +292,10 @@ export function SessionPlayer({
                 Back to list
               </Link>
             </div>
-          </>
+          </div>
         )}
-      </main>
+
+      </div>
 
       <audio ref={audioRef} src={track.audio_url} loop preload="auto" />
     </div>

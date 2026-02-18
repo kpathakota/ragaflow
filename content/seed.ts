@@ -33,6 +33,7 @@ export const tracks: Track[] = [
     tags: ["grounding", "concentration", "warmth"],
     description:
       "A grounding Bhairavi improvisation with percussion. Its rich phrases sharpen concentration and sustain deep focus.",
+    artist_note: null,
     duration: 2700,
     audio_url: "/audio/focus/Bhairavi_440Hz_with_percussion.m4a",
     download_url: null,
@@ -47,6 +48,7 @@ export const tracks: Track[] = [
     tags: ["calm", "surrender", "warmth"],
     description:
       "The quintessential lullaby raga with gentle percussion. Its descending phrases calm the nervous system and ease you into rest.",
+    artist_note: null,
     duration: 3600,
     audio_url: "/audio/sleep/Neelambari_440Hz_with_percussion.mp3",
     download_url: null,
@@ -61,6 +63,7 @@ export const tracks: Track[] = [
     tags: ["contemplative", "longing", "surrender"],
     description:
       "A deeply emotive Sahana improvisation for meditation. Its contemplative phrases draw the listener inward, ideal for breathwork and presence.",
+    artist_note: null,
     duration: 3600,
     audio_url: "/audio/meditate/Sahana_440Hz_with_percussion.mp3",
     download_url: null,

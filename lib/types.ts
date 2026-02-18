@@ -14,6 +14,7 @@ export type Track = {
   scenarios: Scenario[];
   tags: string[];
   description: string;
+  artist_note: string | null;
   duration: number; // seconds
   audio_url: string;
   download_url: string | null;
