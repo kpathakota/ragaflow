@@ -106,5 +106,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 
 ## Process
 
-- Commit and push after every task
+- All dev work goes on the `dev` branch — never commit directly to `main`
+- PRs into `main` are handled by the human (production deploys from `main`)
+- Commit and push to `dev` after every task
 - Update this file each conversation with new context
