@@ -37,27 +37,34 @@ export function TrackCard({
 
   const durationMin = Math.round(track.duration / 60);
 
+  const dateLabel = track.recorded_date
+    ? new Date(track.recorded_date + "T00:00:00").toLocaleDateString("en-US", {
+        month: "short",
+        day: "numeric",
+      })
+    : null;
+
+  const headline =
+    dateLabel && track.location
+      ? `${dateLabel} · ${track.location}`
+      : dateLabel || track.location || track.title || "Untitled";
+
   return (
     <Link
       href={`/mode/${scenario}/${track.id}`}
       className="group flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4 transition-colors hover:border-neutral-600 hover:bg-neutral-800/60"
     >
       <div className="min-w-0 flex-1">
-        <h2 className="text-lg font-medium">{track.title}</h2>
-        <p className="mt-1 text-sm text-neutral-400 line-clamp-2">
+        <p className="text-sm font-medium text-neutral-200">{headline}</p>
+        <p className="mt-1 text-xs text-neutral-500">
+          {durationMin} min
+          {track.tags.slice(0, 3).map((tag) => (
+            <span key={tag}> · {tag}</span>
+          ))}
+        </p>
+        <p className="mt-1 text-xs text-neutral-500 line-clamp-2">
           {track.description}
         </p>
-        <div className="mt-2 flex items-center gap-2">
-          <span className="text-xs text-neutral-500">{durationMin} min</span>
-          {track.tags.slice(0, 3).map((tag) => (
-            <span
-              key={tag}
-              className="rounded-full bg-neutral-800 px-2 py-0.5 text-xs text-neutral-400"
-            >
-              {tag}
-            </span>
-          ))}
-        </div>
       </div>
 
       {user && onToggleFavorite && (
