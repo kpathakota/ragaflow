@@ -15,11 +15,18 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 
 ## Supabase setup
 
-1. Create a Supabase project
-2. Copy `.env.example` → `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-3. Run all migrations in `supabase/migrations/` in order in the SQL editor
-4. Run `supabase/seed.sql` to insert starter data
-5. Supabase is required — without env vars the app renders empty (no local seed fallback)
+Two Supabase projects: **production** and **staging**.
+
+| Environment | Supabase project | How env vars are set |
+|---|---|---|
+| Local dev (`npm run dev`) | staging | `.env.local` |
+| Vercel preview (branch pushes) | staging | Vercel "Preview" env vars |
+| Vercel production (main) | production | Vercel "Production" env vars |
+
+1. Copy `.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
+2. Run all migrations in `supabase/migrations/` in order in the SQL editor
+3. Run `supabase/seed.sql` to insert starter data
+4. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
 
