@@ -9,12 +9,14 @@ export type Ragam = {
 
 export type Track = {
   id: string;
-  title: string;
+  title: string | null;
   ragam_id: string;
   scenarios: Scenario[];
   tags: string[];
   description: string;
   artist_note: string | null;
+  recorded_date: string | null;
+  location: string | null;
   duration: number; // seconds
   audio_url: string;
   download_url: string | null;

@@ -6,6 +6,29 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 1.13a — Schema: add recorded_date + location to tracks, make title nullable
+
+**Commit:** (pending)
+**Date:** 2026-02-20
+**Status:** Pending verification
+
+### Manual checks
+- [ ] `lib/types.ts` — `Track` type has `recorded_date: string | null`, `location: string | null`, `title: string | null`
+- [ ] `content/seed.ts` — all 3 seed tracks have `recorded_date` and `location` values
+- [ ] App compiles without type errors (`npx tsc --noEmit`)
+- [ ] No runtime regressions — track list, session player, homepage, profile all render correctly (title is still non-null in seed data so existing UI is unaffected)
+
+### Supabase migration
+- [ ] Run `supabase/migrations/004_track_date_location.sql` in Supabase SQL editor (staging and production)
+- [ ] Verify columns added: `SELECT column_name, data_type, is_nullable FROM information_schema.columns WHERE table_name = 'tracks' AND column_name IN ('recorded_date', 'location', 'title');`
+- [ ] `recorded_date` is type `date`, nullable
+- [ ] `location` is type `text`, nullable
+- [ ] `title` is now nullable (was `NOT NULL`)
+- [ ] Existing track rows unaffected — new columns get NULL, title values preserved
+- [ ] Update existing rows with seed values: `UPDATE tracks SET recorded_date = '2025-01-12', location = 'Home studio, Portland' WHERE id = 'bhairavi-focus-01';` (and similarly for other tracks)
+
+---
+
 ## Task 1.9a-wire — Wire intended_duration + completed into sessions
 
 **Commit:** (pending)
