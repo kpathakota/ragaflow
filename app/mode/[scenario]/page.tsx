@@ -1,5 +1,5 @@
 import { notFound } from "next/navigation";
-import { getTracksByScenario } from "@/lib/data";
+import { getTracksByScenario, getAllRagams } from "@/lib/data";
 import { scenarioMap, validScenarios } from "@/components/scenario-config";
 import { NavHeader } from "@/components/nav-header";
 import { TrackListClient } from "./track-list-client";
@@ -20,14 +20,14 @@ export default async function ScenarioPage({
 
   const s = scenario as Scenario;
   const config = scenarioMap[s];
-  const tracks = await getTracksByScenario(s);
+  const [tracks, ragams] = await Promise.all([getTracksByScenario(s), getAllRagams()]);
 
   return (
     <div className="flex min-h-screen flex-col items-center px-6 py-16">
       <NavHeader backHref="/" title={config.label} titleClass={config.accent.text} />
 
       <main className="flex w-full max-w-sm flex-col gap-3">
-        <TrackListClient tracks={tracks} scenario={s} />
+        <TrackListClient tracks={tracks} ragams={ragams} scenario={s} />
       </main>
     </div>
   );

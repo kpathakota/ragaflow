@@ -63,7 +63,15 @@ export function ExploreClient({
     });
     byRagam.forEach((groupTracks, ragamId) => {
       const ragam = ragamMap.get(ragamId);
-      if (ragam) groups.push({ ragam, tracks: groupTracks });
+      if (ragam) {
+        const sorted = groupTracks.sort((a, b) => {
+          if (!a.recorded_date && !b.recorded_date) return 0;
+          if (!a.recorded_date) return 1;
+          if (!b.recorded_date) return -1;
+          return b.recorded_date.localeCompare(a.recorded_date);
+        });
+        groups.push({ ragam, tracks: sorted });
+      }
     });
     return groups;
   }, [filtered, ragamMap]);
