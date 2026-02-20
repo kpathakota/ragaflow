@@ -56,7 +56,7 @@ export function SessionPlayer({
     setSession("running");
     audioRef.current?.play();
     if (user) {
-      const id = await startListeningSession(track.id, scenario);
+      const id = await startListeningSession(track.id, scenario, duration * 60);
       if (id) setSessionId(id);
     }
   }, [duration, user, track.id, scenario]);
@@ -77,7 +77,7 @@ export function SessionPlayer({
     setRemaining(0);
     stopAudio();
     if (sessionId) {
-      await endListeningSession(sessionId, elapsed);
+      await endListeningSession(sessionId, elapsed, false);
       setSessionId(null);
     }
   }, [stopAudio, sessionId, duration, remaining]);
@@ -109,7 +109,7 @@ export function SessionPlayer({
       setSession("complete");
       stopAudio();
       if (sessionId) {
-        endListeningSession(sessionId, duration * 60);
+        endListeningSession(sessionId, duration * 60, true);
         setSessionId(null);
       }
       if (user) setShowDefaultPrompt(true);

@@ -6,6 +6,24 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 1.9a-wire — Wire intended_duration + completed into sessions
+
+**Commit:** (pending)
+**Date:** 2026-02-20
+**Status:** Pending verification
+
+### Manual checks
+- [ ] `lib/sessions.ts` — `startListeningSession` accepts optional `intendedDurationSeconds` param and inserts it
+- [ ] `lib/sessions.ts` — `endListeningSession` accepts `completed` boolean param and updates it
+- [ ] Session player passes `duration * 60` as intended duration on start
+- [ ] Timer fires naturally → `endListeningSession` called with `completed: true`
+- [ ] User taps "stop" early → `endListeningSession` called with `completed: false`
+- [ ] App compiles without errors (`npm run dev`)
+- [ ] Start a session, let timer complete — check Supabase row has `intended_duration_seconds` and `completed = true`
+- [ ] Start a session, stop early — check Supabase row has `completed = false`
+
+---
+
 ## Task 1.9a — Listening session completion schema
 
 **Commit:** (pending)

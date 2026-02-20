@@ -28,10 +28,9 @@
 ### What Remains
 
 **Phase 1 — Up Next (ordered)**
-1. Track list UI — group tracks by ragam (flat list; session player redesign made ragam name primary but list was not updated). `TrackCard` shows `track.title` as heading; should show ragam name as the group header and differentiate tracks within a ragam by title/tags/duration. Requires ragam name in the data layer (Track only carries `ragam_id`). Open question: how to differentiate multiple tracks of the same ragam — see issues.md.
-2. Task 1.9a — Listening session completion schema (migration + types; see task below)
-3. Dev/Staging Environment Separation (Task 1.12)
-3. Listening session schema: add `intended_duration_seconds` + `completed` (Task 1.9a) — get data flowing into production before building UI
+1. Track list UI — group tracks by ragam (flat list; session player redesign made ragam name primary but list was not updated). `TrackCard` shows `track.title` as heading; should show ragam name as the group header and differentiate tracks within a ragam by title/tags/duration. Requires ragam name in the data layer (Track only carries `ragam_id`). **PM discussion needed:** Differentiate tracks by **recording date** (when it was recorded) and **location** (freeform text — city/place, e.g. "Portland"). These are new fields on Track. Needs PM to spec: schema changes, seed data, UI layout for track cards within a ragam group.
+2. Dev/Staging Environment Separation (Task 1.12)
+3. Task 1.9a follow-up — wire `lib/sessions.ts` + session player to pass `intended_duration_seconds` and `completed` (schema layer done, integration pending)
 4. Certifications UI: progress bars + badges on /profile (Task 1.9)
 5. Listening gate (Task 1.10) — defer until Stripe/payments are ready (Phase 2 dependency)
 
@@ -248,14 +247,15 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Certification calculation (Bronze → Platinum) — schema exists, UI not yet built
 - Progress bars, badges in UI — not yet built
 
-**Task 1.9a: Listening Session Schema — Completion Tracking** *(prerequisite for 1.9)*
+**Task 1.9a: Listening Session Schema — Completion Tracking** ✅ *(schema layer — 2026-02-20, commit c8648e0)*
 - Add two fields to `listening_sessions`:
   - `intended_duration_seconds integer` (nullable — null means open play, no timer)
   - `completed boolean` (true only when the timer fires naturally; false if rasika stops early)
-- Migration: `supabase/migrations/003_session_completion.sql`
-- Update `lib/types.ts` `ListeningSession` type
-- Update `lib/sessions.ts` `startSession()` to accept `intendedDuration`, `endSession()` to accept `completed`
-- Update session player to pass timer duration on start and pass `completed=true` only when timer fires (not when stop is tapped)
+- Migration: `supabase/migrations/003_session_completion.sql` ✅
+- Update `lib/types.ts` `ListeningSession` type ✅
+- Migration applied to production Supabase ✅
+- **Still TODO (follow-up task):** Update `lib/sessions.ts` `startSession()` to accept `intendedDuration`, `endSession()` to accept `completed`
+- **Still TODO (follow-up task):** Update session player to pass timer duration on start and pass `completed=true` only when timer fires (not when stop is tapped)
 
 **Completion counting rules (what counts toward certification):**
 | Scenario | Rule |
@@ -498,6 +498,7 @@ Since all variants of a Ragam are improvisation sessions recorded simultaneously
 7. Background audio on iOS native (deferred to Phase 3)
 
 ### Future Enhancements (Post-MVP)
+- **Track of the Day** — Daily curated track featured on homepage with artist-written blurb. Simple `track_of_the_day` table (date, track_id, blurb, selected_by). Reuses existing tracks — no new content format. See spec.md §5 for full details. Tasks: schema migration, data access function, homepage UI card, selection workflow (manual Supabase insert initially, Google Sheets integration later).
 - Apple Watch integration (show current Ragam, control playback)
 - Journal/mood tracking (correlate Ragams with mood improvements)
 - Adaptive playback based on user behavior (recommend Ragams based on time of day, past preferences)
