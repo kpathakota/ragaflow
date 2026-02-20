@@ -17,9 +17,9 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 
 1. Create a Supabase project
 2. Copy `.env.example` → `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-3. Run `supabase/migrations/001_initial_schema.sql` in SQL editor
+3. Run all migrations in `supabase/migrations/` in order in the SQL editor
 4. Run `supabase/seed.sql` to insert starter data
-5. Without env vars, app gracefully falls back to local seed data in `content/seed.ts`
+5. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
 
@@ -27,7 +27,7 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 - id, name, description, time_of_day
 
 **Track** — a recorded session, the atomic content unit:
-- id, title, ragam_id, scenarios[], tags[], description, duration, audio_url, download_url, free, created_at
+- id, title (nullable), ragam_id, scenarios[], tags[], description, artist_note, recorded_date, location, duration, audio_url, download_url, free, created_at
 
 **RasikaPreferences** — per-user favorites and defaults:
 - rasika_id, favorite_tracks[], favorite_ragams[], default_focus_track, default_sleep_track, default_meditate_track
@@ -38,16 +38,47 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 **Certification** — per ragam per rasika achievement:
 - rasika_id, ragam_id, level (1–4), total_seconds
 
-Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data access via `lib/data.ts` (Supabase-first, falls back to seed).
+Types defined in `lib/types.ts`. Seed data in `supabase/seed.sql`. Data access via `lib/data.ts` (Supabase only, returns empty arrays without connection).
 
 ## Key files
 
-- `content/ragams.json` — ragam catalog (id, name, mode, description, audioUrl)
-- `public/audio/` — audio files organized by mode (`focus/`, `sleep/`, `meditate/`)
-- `app/page.tsx` — homepage / mode selection
-- `app/mode/[mode]/page.tsx` — ragam list per mode (cards link to session player)
-- `app/mode/[mode]/[ragamId]/page.tsx` — session player server page (params validation + static generation)
-- `app/mode/[mode]/[ragamId]/session-player.tsx` — client component with Pomodoro timer + looping audio
+### Data layer
+- `lib/types.ts` — TypeScript types for all entities
+- `lib/data.ts` — async data access functions (Supabase only)
+- `supabase/migrations/` — DDL + RLS policies (run in order)
+- `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
+
+### Supabase
+- `lib/supabase/client.ts` — browser client (returns null if env vars missing)
+- `lib/supabase/server.ts` — server client (cookies adapter)
+- `lib/supabase/session.ts` — session refresh logic (used by proxy)
+- `proxy.ts` — Next.js 16 proxy (renamed from middleware.ts) calling Supabase session refresh
+
+### Auth
+- `lib/auth/auth-context.tsx` — `AuthProvider` + `useAuth()` hook
+- `app/auth/page.tsx` — sign-in/sign-up form
+- `app/auth/callback/route.ts` — email confirmation callback
+
+### Features
+- `lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
+- `lib/preferences.ts` — set default track per scenario (client-side)
+- `lib/sessions.ts` — start/end listening session logging (client-side)
+
+### Components
+- `components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
+- `components/track-card.tsx` — reusable track card with heart icon
+- `components/nav-header.tsx` — reusable back-link + title header
+- `components/user-badge.tsx` — top-right user initial badge linking to /profile
+
+### Pages
+- `app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
+- `app/profile/page.tsx` — profile page (account info, stats, defaults, sign-out)
+- `app/mode/[scenario]/page.tsx` — track list per scenario (dynamic, force-dynamic)
+- `app/mode/[scenario]/track-list-client.tsx` — client wrapper for track list with favorites
+- `app/mode/[scenario]/[trackId]/page.tsx` — session player server page
+- `app/mode/[scenario]/[trackId]/session-player.tsx` — client component: timer + audio + favorite + set-default
+- `app/explore/page.tsx` — browse all tracks grouped by ragam with tag filter
+- `app/explore/explore-client.tsx` — client wrapper for explore with tag filtering
 - `app/globals.css` — global styles (always-dark theme)
 
 ## Routing
@@ -86,7 +117,8 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Audio files go in `public/audio/{scenario}/` matching `audio_url` paths in seed/database
 - Session player is a server page wrapping a client `SessionPlayer` component (for interactivity)
 - Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
-- Supabase clients return `null` when env vars are missing — all code handles this gracefully
+- Supabase is required — without env vars the app renders empty (no local seed fallback)
+- Supabase clients return `null` when env vars are missing — data functions return empty arrays
 - RLS policies: ragams/tracks publicly readable; rasika_preferences/listening_sessions/certifications owner-only
 
 ## Monetization model

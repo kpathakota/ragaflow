@@ -1,5 +1,4 @@
 import type { Scenario, Ragam, Track } from "@/lib/types";
-import { ragams as seedRagams, tracks as seedTracks } from "@/content/seed";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -24,7 +23,7 @@ export async function getAllRagams(): Promise<Ragam[]> {
     const { data } = await sb.from("ragams").select("*");
     if (data && data.length > 0) return data as Ragam[];
   }
-  return seedRagams;
+  return [];
 }
 
 export async function getRagamById(id: string): Promise<Ragam | undefined> {
@@ -33,7 +32,7 @@ export async function getRagamById(id: string): Promise<Ragam | undefined> {
     const { data } = await sb.from("ragams").select("*").eq("id", id).single();
     if (data) return data as Ragam;
   }
-  return seedRagams.find((r) => r.id === id);
+  return undefined;
 }
 
 // ---------------------------------------------------------------------------
@@ -46,7 +45,7 @@ export async function getAllTracks(): Promise<Track[]> {
     const { data } = await sb.from("tracks").select("*");
     if (data && data.length > 0) return data as Track[];
   }
-  return seedTracks;
+  return [];
 }
 
 export async function getTracksByScenario(scenario: Scenario): Promise<Track[]> {
@@ -58,7 +57,7 @@ export async function getTracksByScenario(scenario: Scenario): Promise<Track[]> 
       .contains("scenarios", [scenario]);
     if (data && data.length > 0) return data as Track[];
   }
-  return seedTracks.filter((t) => t.scenarios.includes(scenario));
+  return [];
 }
 
 export async function getTrackById(id: string): Promise<Track | undefined> {
@@ -67,5 +66,5 @@ export async function getTrackById(id: string): Promise<Track | undefined> {
     const { data } = await sb.from("tracks").select("*").eq("id", id).single();
     if (data) return data as Track;
   }
-  return seedTracks.find((t) => t.id === id);
+  return undefined;
 }
