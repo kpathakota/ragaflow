@@ -6,6 +6,24 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 1.9a — Listening session completion schema
+
+**Commit:** (pending)
+**Date:** 2026-02-20
+**Status:** Pending verification
+
+### Manual checks
+- [ ] `lib/types.ts` — `ListeningSession` type includes `intended_duration_seconds: number | null` and `completed: boolean | null`
+- [ ] App compiles without type errors (`npm run dev`)
+- [ ] No runtime regressions — session logging still works (start/end a session on the player)
+
+### Supabase migration
+- [ ] Run `supabase/migrations/003_session_completion.sql` in Supabase SQL editor (both staging and production)
+- [ ] Verify columns added: `SELECT column_name, data_type FROM information_schema.columns WHERE table_name = 'listening_sessions' AND column_name IN ('intended_duration_seconds', 'completed');`
+- [ ] Existing rows unaffected — new columns are nullable, so old sessions get NULL values
+
+---
+
 ## Task 1.11-fix — Fix pause button iOS appearance + circle button shift
 
 **Commit:** (see git log)

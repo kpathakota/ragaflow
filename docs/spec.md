@@ -110,7 +110,8 @@ Each Track entry includes:
 - Scenarios it appears under (editorial, not 1:1)
 - Emotion/mood tags
 - Duration
-- Description
+- **Description** — brief editorial context (1–2 sentences): time of day, mood, scenario fit. Always visible on the session player.
+- **Artist note** (`artist_note`) — Gautam's longer, personal voice: scene at the venue, what happened, poetry. Expandable/collapsible on the session player. Written by the artist per recording session.
 - Streaming URL
 - Download URL (paid only)
 - Whether it's free-tier or requires subscription
@@ -184,7 +185,12 @@ Configure session:
     ↓
 Begin session
     ↓
-Session screen: minimal UI, timer, play/pause, ♡ favorite, volume
+Session screen (top → bottom):
+    - Ragam name as primary title + ♡ favorite (top-right)
+    - Brief track description (always visible, 1–2 sentences)
+    - Scenario color fill — center visual (placeholder; future: hand-drawn animation)
+    - Artist note — collapsed by default, tap to expand/collapse
+    - Play/pause + small timer — bottom third (~20% from bottom, one-thumb reach)
     ↓
 Session ends → Log recorded → Progress updated → Certification check
     ↓
@@ -364,6 +370,12 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 
 1. **Tag vocabulary:** Full initial curated list of emotion/mood tags
 2. **Billing provider:** Stripe, RevenueCat, etc.
+
+### Resolved (listening time counting rules — 2026-02-18)
+- **Focus:** Only completed sessions count (timer must fire naturally — 100% threshold, no partial credit)
+- **Sleep:** All time always counts (falling asleep = success, not failure)
+- **Meditate / Explore / Open play:** All time ≥ 5 minutes counts
+- **Certifications are permanent:** `total_seconds` is additive only, never decremented. Tier earned = tier kept.
 ---
 
 ## Technical Architecture Notes (for Claude Code)

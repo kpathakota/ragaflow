@@ -40,4 +40,6 @@ export type ListeningSession = {
   started_at: string;
   ended_at: string | null;
   duration_seconds: number;
+  intended_duration_seconds: number | null;
+  completed: boolean | null;
 };
