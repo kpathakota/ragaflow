@@ -27,15 +27,20 @@
 
 ### What Remains
 
-**Phase 1 — Still TODO**
-- Listening gate (10-hour cumulative → must subscribe to continue)
-- ~~Middleware → proxy migration~~ ✅ (Next.js 16 codemod: `middleware.ts` → `proxy.ts`)
+**Phase 1 — Up Next (ordered)**
+1. Track list UI — group tracks by ragam (flat list; session player redesign made ragam name primary but list was not updated). `TrackCard` shows `track.title` as heading; should show ragam name as the group header and differentiate tracks within a ragam by title/tags/duration. Requires ragam name in the data layer (Track only carries `ragam_id`). Open question: how to differentiate multiple tracks of the same ragam — see issues.md.
+2. Task 1.9a — Listening session completion schema (migration + types; see task below)
+3. Dev/Staging Environment Separation (Task 1.12)
+3. Listening session schema: add `intended_duration_seconds` + `completed` (Task 1.9a) — get data flowing into production before building UI
+4. Certifications UI: progress bars + badges on /profile (Task 1.9)
+5. Listening gate (Task 1.10) — defer until Stripe/payments are ready (Phase 2 dependency)
 
-**Phase 1 — Not Yet Started**
-- Google Drive content pipeline (Tasks 1.3–1.6)
-- Audio transcoding pipeline
-- Cloud storage + CDN (currently serving from `/public`)
-- Certifications UI (progress bars, badges)
+**Phase 1 — Deferred (known, not blocking)**
+- Google Drive content pipeline (Tasks 1.3–1.6) — only needed when track count exceeds manual management
+- Audio transcoding pipeline (Task 1.5)
+- Cloud storage + CDN (Task 1.6) — currently serving from `/public`, fine for now
+
+~~Middleware → proxy migration~~ ✅
 
 **Phase 2+ — Future**
 - Stripe payments + subscription tiers
@@ -102,7 +107,8 @@ tracks (
   ragam_id,
   scenarios text[],        -- editorial: ["focus", "meditate"]
   tags text[],             -- editorial: ["grounding", "contemplative"]
-  description text,        -- artist narrative (scene, context, poetry)
+  description text,        -- brief editorial context (1–2 sentences, always visible on session player)
+  artist_note text,        -- Gautam's longer personal voice: scene, poetry, session context (expandable on session player)
   frequency (440, 432, 528, etc.),
   has_percussion (boolean),
   streaming_url,
@@ -242,10 +248,70 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Certification calculation (Bronze → Platinum) — schema exists, UI not yet built
 - Progress bars, badges in UI — not yet built
 
+**Task 1.9a: Listening Session Schema — Completion Tracking** *(prerequisite for 1.9)*
+- Add two fields to `listening_sessions`:
+  - `intended_duration_seconds integer` (nullable — null means open play, no timer)
+  - `completed boolean` (true only when the timer fires naturally; false if rasika stops early)
+- Migration: `supabase/migrations/003_session_completion.sql`
+- Update `lib/types.ts` `ListeningSession` type
+- Update `lib/sessions.ts` `startSession()` to accept `intendedDuration`, `endSession()` to accept `completed`
+- Update session player to pass timer duration on start and pass `completed=true` only when timer fires (not when stop is tapped)
+
+**Completion counting rules (what counts toward certification):**
+| Scenario | Rule |
+|----------|------|
+| Focus | Only completed sessions (completed=true). Bailing early = nothing counted. |
+| Sleep | All time always counted (falling asleep before timer = success state). |
+| Meditate | All time ≥ 5 minutes minimum. |
+| Explore / Open play | All time ≥ 5 minutes minimum (no timer to complete). |
+
+**Decided:** Completion threshold for Focus is 100% — timer must fire naturally. No partial credit.
+**Decided:** Certifications are additive-only. `total_seconds` never decrements. Tier earned = tier kept.
+
+**Task 1.11: Session Player Redesign + artist_note Schema** ✅
+- Add `artist_note text` (nullable) to tracks table: migration SQL + `lib/types.ts` + `content/seed.ts`
+- Redesign `session-player.tsx` layout (top → bottom):
+  - Top: ragam name as primary title, heart/favorite top-right
+  - Below title: `description` (brief, always visible)
+  - Center: scenario color fill block (swappable `<div>` for future animation — no hardcoded shape)
+  - Above controls: `artist_note` collapsed by default, tap to expand/collapse
+  - Bottom third (~20% from bottom): play/pause + small timer (timer small, non-prominent)
+- Remove scenario name ("Deep Focus") as primary header — ragam name takes that role
+- Keep layout flexible: color block and control strip should be easy to swap/rearrange without restructuring
+- iOS pause button appearance fix (1.11-A) + circle button anchor fix (1.11-B) ✅
+
 **Task 1.10: Paywall Gate**
 - Track cumulative listening time per rasika
 - After 10 hours: prompt to subscribe
 - Streaming free up to gate, downloads always paid
+
+**Task 1.12: Dev/Staging Environment Separation** *(pre-launch)*
+- **Problem:** Local dev and Vercel deployments currently all point to the single production Supabase project. Any test data, schema experiments, or bad seeds hit real user data.
+- **Goal:** Three clean environment tiers:
+  - **Local dev** → staging Supabase (`.env.local`)
+  - **Vercel preview deploys** (every branch push) → staging Supabase (Vercel "Preview" environment vars)
+  - **Vercel production** (ragaflow.io) → production Supabase (Vercel "Production" environment vars)
+
+- **Steps:**
+  1. Create a new Supabase project: `ragaflow-staging`
+  2. Run all migrations on the staging project (`001_initial_schema.sql`, `002_artist_note.sql`)
+  3. Run `supabase/seed.sql` on the staging project to populate it with the 3 test ragams + tracks
+  4. Update `.env.local` to point to the staging Supabase URL + publishable key (not production)
+  5. In Vercel project settings → Environment Variables:
+     - Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for **Preview** environment → staging credentials
+     - Confirm **Production** environment vars still point to production Supabase
+  6. Add `.env.production.local` to `.gitignore` (if not already) — never commit credentials
+  7. Update `.env.example` to document both sets of vars with comments explaining which env each belongs to
+
+- **Acceptance criteria:**
+  - `npm run dev` locally → writes go to staging Supabase, not production
+  - A branch push to Vercel preview → uses staging DB
+  - `ragaflow.io` production deployment → still uses production DB, unaffected
+  - Confirmed by: creating a test account on a preview deploy and verifying it does not appear in the production Supabase auth table
+
+- **Note on staging URL:** Vercel auto-generates a preview URL per branch (e.g. `ragaflow-git-branch-user.vercel.app`). This is sufficient for now. Add `staging.ragaflow.io` as a Vercel alias later if a fixed staging URL is needed for external testers.
+
+- **Future:** Once a local Docker-based Supabase setup is worthwhile (i.e. offline dev or CI), add Task Inf.1 for that. For now, staging Supabase is the dev database.
 
 ### Phase 2: Payments, Track Variants & Polish
 
