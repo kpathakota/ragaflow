@@ -6,6 +6,27 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 1.6 — Cloud Storage: Cloudflare R2
+
+**Commit:** (pending)
+**Date:** 2026-02-20
+**Status:** Pending verification
+
+### Manual checks
+- [ ] Audio plays in session player from R2 URL (local dev: `npm run dev`, open any track)
+- [ ] Audio plays on Vercel preview deploy (after push to `dev`)
+- [ ] No audio files in `public/audio/` (only README.md and empty subdirs)
+- [ ] `.gitignore` blocks `*.m4a`, `*.mp3`, `*.flac`, `*.wav` under `public/audio/`
+- [ ] `supabase/seed.sql` uses full R2 URLs (`https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/...`)
+
+### Supabase / infra steps
+- [ ] Run on **staging** Supabase: `UPDATE tracks SET audio_url = 'https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/Bhairavi_440Hz_with_percussion.m4a';`
+- [ ] Run on **production** Supabase: same UPDATE statement
+- [ ] Verify R2 CORS allows playback from `localhost:3000`, `*.vercel.app`, and `ragaflow.io`
+- [ ] After git history rewrite: confirm no audio files in old commits (`git log --all --diff-filter=A -- 'public/audio/*.m4a' 'public/audio/*.mp3'` returns nothing)
+
+---
+
 ## Task 1.13a — Schema: add recorded_date + location to tracks, make title nullable
 
 **Commit:** (pending)

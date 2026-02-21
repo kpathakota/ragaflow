@@ -99,18 +99,19 @@ Tags are a curated editorial vocabulary. Examples: `grounding`, `elation`, `empa
 Each Ragam entry includes:
 - Name
 - Brief description of its traditional usage
-- Tradition (Carnatic, Hindustani, or both)
 - Time of day association (if applicable)
 - Available tracks (recordings)
 - Rasika's listening progress and achievements for that ragam (going platinum)
 
 Each Track entry includes:
-- Title (e.g., "Morning Bhairavi — Session 3")
+- **Title** (nullable) — optional freeform name. When absent, the track is identified by its recording date and location.
 - Ragam it belongs to
 - Scenarios it appears under (editorial, not 1:1)
 - Emotion/mood tags
 - Duration
-- **Description** — brief editorial context (1–2 sentences): time of day, mood, scenario fit. Always visible on the session player.
+- **Recorded date** (`recorded_date`) — actual date the session was recorded. Displayed as a short date (e.g. "Jan 12"), used for sorting tracks newest-first within a ragam group.
+- **Location** (`location`) — evocative editorial text describing where/how it was recorded (e.g. "At dawn by the Willamette", "Home studio, Portland"). Not just a city name — this is part of the editorial voice.
+- **Description** — brief editorial context (1–2 sentences): time of day, mood, scenario fit. Always visible on the session player and on track cards (line-clamped).
 - **Artist note** (`artist_note`) — Gautam's longer, personal voice: scene at the venue, what happened, poetry. Expandable/collapsible on the session player. Written by the artist per recording session.
 - Streaming URL
 - Download URL (paid only)
@@ -144,14 +145,45 @@ The home screen transforms once a rasika has defaults:
 - Scenario cards move below
 - Recent favorites section at the bottom
 
-### 5. Adaptive Playback
+### 5. Track of the Day
+
+A single curated track featured daily on the homepage — gives the app a sense of liveness, editorial voice, and gravity.
+
+**How it works:**
+- Each day, one track from the existing library is selected as the "Track of the Day"
+- An artist (Gautam or Kiran) writes a short blurb for that day's pick — a sentence or two about why this track, what mood it fits, a memory from the recording session, etc. This is distinct from the track's permanent `description` or `artist_note`
+- The selection is stored as a simple date → track_id mapping with the daily blurb
+- Any track in the library can be featured — no special content needed
+
+**Homepage UI:**
+- Featured prominently at the top of the homepage, above scenario cards
+- Shows: ragam name, track title, daily blurb, and a play button
+- Tapping play enters the session player directly (with the track's scenario context)
+- Should feel curated and intentional — not algorithmic
+
+**Selection mechanism:**
+- A single row insert per day (in Supabase or via the Google Sheets content pipeline once built)
+- Should be dead simple for the artists — no admin panel needed initially
+
+**Data model — `track_of_the_day` table:**
+- `date` (date, primary key) — one entry per day
+- `track_id` (FK → tracks) — the featured track
+- `blurb` (text) — artist-written daily note
+- `selected_by` (text) — who picked it (Gautam, Kiran, etc.)
+
+**Open questions:**
+- Fallback behavior when no entry exists for today (hide section? show most recent?)
+- Whether old picks should be browsable as an archive
+- RLS: likely publicly readable (same as tracks)
+
+### 6. Adaptive Playback
 
 - Track which Ragams users skip vs. replay
 - Surface favorites more often
 - Learn preferred session lengths
 - Personalize recommendations over time
 
-### 6. Journal / Mood Check-In (Optional)
+### 7. Journal / Mood Check-In (Optional)
 
 - Pre-session: "How are you feeling?" (quick mood selector)
 - Post-session: "How do you feel now?"
@@ -159,7 +191,7 @@ The home screen transforms once a rasika has defaults:
 - Lightweight—not required, but available for users who want it
 - This is the primary mode that rasikas can figure out which ragas provide which moods. The descriptions in the library are just suggestions but it encourages people to find their own taste 
 
-### 7. Educational Layer
+### 8. Educational Layer
 
 - Brief intro cards explaining each Ragam
 - "Why this Ragam?" context for each emotional state
@@ -174,7 +206,9 @@ Open App (new rasika)
     ↓
 Select Scenario (Focus / Sleep / Meditate / Explore)
     ↓
-Browse tracks for that scenario (filterable by tags)
+Browse tracks grouped by ragam (sorted newest-first within each group)
+    ↓
+Track cards show: recording date · location, duration · tags, description
     ↓
 Select Track → See ragam info, description, tags, listening progress
     ↓

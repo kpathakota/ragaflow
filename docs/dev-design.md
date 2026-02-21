@@ -1,43 +1,42 @@
 # Raaga App - Development Design & Execution Plan
 
-## Current Status (as of 2026-02-13)
+## Current Status (as of 2026-02-20)
 
 ### What's Built
 
 **Phase 0 (Tracer Bullet) — Complete**
 - Next.js 16.1.6 project with TypeScript + Tailwind CSS v4, deployed to Vercel
 - Dark theme, mobile-first UI
-- Local seed data (`content/seed.ts`) with 3 ragams + 3 tracks
 - Scenario selection homepage → track list → session player flow
 - Audio playback with `<audio loop>` and ref-based play/pause
 - Timer with `setInterval` in `useEffect`
 - Audio files served from `public/audio/{scenario}/`
 
-**Phase 1 (Foundation) — Partially Complete**
+**Phase 1 (Foundation) — Nearly Complete**
 - Supabase auth (email sign-in/sign-up) with `AuthProvider` + `useAuth()` hook
-- Tag-based data model: ragams, tracks (with `scenarios[]` and `tags[]`), rasika_preferences, listening_sessions, certifications
-- Data layer with Supabase-first + local seed fallback (`lib/data.ts`)
+- Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasika_preferences, listening_sessions, certifications
+- Data layer: Supabase only (`lib/data.ts`), no local seed fallback — Supabase is required
+- Seed data in `supabase/seed.sql` (7 ragams, 30 tracks) — `content/seed.ts` removed
 - RLS policies: ragams/tracks public; preferences/sessions/certifications owner-only
 - Favorites: toggle favorite tracks/ragams (heart icon on track cards and session player)
 - Defaults: set default track per scenario, one-tap quick play on homepage
 - Explore page: browse all tracks grouped by ragam with tag filtering
-- Session logging: start/end listening sessions with duration tracking
+- Track list pages (focus/sleep/meditate): grouped by ragam with compact card layout (date · location)
+- Session logging: start/end listening sessions with duration, intended_duration_seconds, and completed flag
 - Profile page: account info, listening stats, default tracks, sign-out
 - User badge: top-right initial circle on homepage linking to /profile
+- Dev/staging environment separation: staging Supabase + Vercel preview env vars
 
 ### What Remains
 
 **Phase 1 — Up Next (ordered)**
-1. Track list UI — group tracks by ragam (flat list; session player redesign made ragam name primary but list was not updated). `TrackCard` shows `track.title` as heading; should show ragam name as the group header and differentiate tracks within a ragam by title/tags/duration. Requires ragam name in the data layer (Track only carries `ragam_id`). **PM discussion needed:** Differentiate tracks by **recording date** (when it was recorded) and **location** (freeform text — city/place, e.g. "Portland"). These are new fields on Track. Needs PM to spec: schema changes, seed data, UI layout for track cards within a ragam group.
-2. Dev/Staging Environment Separation (Task 1.12)
-3. Task 1.9a follow-up — wire `lib/sessions.ts` + session player to pass `intended_duration_seconds` and `completed` (schema layer done, integration pending)
-4. Certifications UI: progress bars + badges on /profile (Task 1.9)
-5. Listening gate (Task 1.10) — defer until Stripe/payments are ready (Phase 2 dependency)
+1. Cloud storage — Cloudflare R2 (Task 1.6) — move audio out of `/public` and git repo
+2. Certifications UI: progress bars + badges on /profile (Task 1.9)
 
 **Phase 1 — Deferred (known, not blocking)**
-- Google Drive content pipeline (Tasks 1.3–1.6) — only needed when track count exceeds manual management
-- Audio transcoding pipeline (Task 1.5)
-- Cloud storage + CDN (Task 1.6) — currently serving from `/public`, fine for now
+- Google Drive content pipeline (Tasks 1.3–1.4) — manual content management is fine at current track count
+- Audio transcoding pipeline (Task 1.5) — manual conversion before upload is fine for now
+- Listening gate (Task 1.10) — deferred until Stripe/payments are ready (Phase 2 dependency)
 
 ~~Middleware → proxy migration~~ ✅
 
@@ -102,12 +101,14 @@ rasikas (id, email, display_name, total_listening_seconds, subscription_status, 
 ragams (id, name, description, time_of_day)
 tracks (
   id,
-  title,
+  title text,              -- nullable; optional freeform name. If absent, date+location identify the track
   ragam_id,
   scenarios text[],        -- editorial: ["focus", "meditate"]
   tags text[],             -- editorial: ["grounding", "contemplative"]
   description text,        -- brief editorial context (1–2 sentences, always visible on session player)
   artist_note text,        -- Gautam's longer personal voice: scene, poetry, session context (expandable on session player)
+  recorded_date date,      -- actual recording date (nullable). Displayed as short date, used for sorting
+  location text,           -- evocative editorial text: where/how recorded (nullable, freeform)
   frequency (440, 432, 528, etc.),
   has_percussion (boolean),
   streaming_url,
@@ -125,7 +126,7 @@ rasika_preferences (
   default_sleep_track_id,
   default_meditate_track_id
 )
-listening_sessions (id, rasika_id, track_id, started_at, duration_seconds)
+listening_sessions (id, rasika_id, track_id, scenario, started_at, ended_at, duration_seconds, intended_duration_seconds, completed)
 certifications (id, rasika_id, ragam_id, total_hours, tier)
 ```
 
@@ -213,25 +214,44 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Tracks table: id, title, ragam_id, scenarios[], tags[], description, duration, audio_url, download_url, free, created_at
 - Rasika preferences: favorite_tracks[], favorite_ragams[], default track per scenario
 - Listening sessions + certifications tables with RLS
-- Supabase-first data layer with local seed fallback (`lib/data.ts`)
+- Supabase-only data layer (`lib/data.ts`) — no local seed fallback
 
-**Task 1.3: Google Drive Structure + Metadata Sheet**
+**Task 1.3: Google Drive Structure + Metadata Sheet** *(deferred)*
 - Set up folder structure on Drive (organized by ragam, not by mode)
 - Create metadata Google Sheet with track-level fields (ragam, scenarios, tags, artist description)
 - Upload initial content library (10+ tracks across multiple ragams)
+- *Deferred: manual content management is fine at current track count. Revisit when library exceeds ~50 tracks.*
 
-**Task 1.4: Drive → Database Sync**
+**Task 1.4: Drive → Database Sync** *(deferred)*
 - Sync script: scan Drive, parse filenames, upsert to Supabase
 - Replace hardcoded seed data with Supabase queries
+- *Deferred: depends on 1.3. Not needed until automated content pipeline becomes worthwhile.*
 
-**Task 1.5: Audio Transcoding Pipeline**
+**Task 1.5: Audio Transcoding Pipeline** *(deferred)*
 - FFmpeg: FLAC → Opus/AAC for streaming
-- Upload to Cloudflare R2
 - No pitch shifting — keep audio pure
+- *Deferred: manual conversion before upload is fine for now. Build this when content volume justifies it.*
 
-**Task 1.6: Cloud Storage + CDN**
-- Cloudflare R2 buckets: `streaming-audio`, `lossless-audio`
-- Public URLs for streaming, signed URLs for downloads
+**Task 1.6: Cloud Storage — Cloudflare R2**
+Audio is currently in `/public/audio/` (93MB, tracked in git). This doesn't scale — large files bloat the repo and Vercel serves them inefficiently. Move to Cloudflare R2.
+
+Sub-tasks:
+1. **Create R2 bucket** — Set up a Cloudflare R2 bucket with public access for streaming. Configure CORS for `ragaflow.io`, `*.vercel.app`, and `localhost:3000`.
+2. **Upload existing audio** — Upload the 3 current audio files to R2. Folder structure by ragam (e.g., `bhairavi/Bhairavi_440Hz_with_percussion.m4a`), not by scenario.
+3. **Update audio_url references** — Update `supabase/seed.sql` and both Supabase databases (staging + production) to use R2 URLs instead of `/audio/...` relative paths.
+4. **Remove audio from repo** — Delete `public/audio/` contents (keep the README), add `public/audio/*.m4a` and `public/audio/*.mp3` to `.gitignore`. Rewrite git history to remove audio files from all past commits (`git filter-repo` or BFG Repo Cleaner). Force push required — coordinate with any open branches.
+5. **Update docs** — CLAUDE.md and dev-design.md to document R2 setup and new audio upload workflow.
+
+Acceptance criteria:
+- Audio plays from R2 URLs in the session player (local dev + Vercel)
+- No audio files in git history (current or past commits)
+- `public/audio/` media files are gitignored
+- Seed SQL uses full R2 URLs
+- CORS allows playback from all deploy targets
+
+Decisions:
+- Use R2 default public URL for now. Custom domain (`audio.ragaflow.io`) can be added later.
+- One shared R2 bucket for staging and production (same audio files, no reason to duplicate).
 
 **Task 1.7: Favorites, Defaults & Personalized Home** ✅
 - Heart icon on session player and track cards (favorite tracks and ragams)
@@ -254,8 +274,8 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Migration: `supabase/migrations/003_session_completion.sql` ✅
 - Update `lib/types.ts` `ListeningSession` type ✅
 - Migration applied to production Supabase ✅
-- **Still TODO (follow-up task):** Update `lib/sessions.ts` `startSession()` to accept `intendedDuration`, `endSession()` to accept `completed`
-- **Still TODO (follow-up task):** Update session player to pass timer duration on start and pass `completed=true` only when timer fires (not when stop is tapped)
+- `lib/sessions.ts` wired: `startListeningSession` accepts `intendedDurationSeconds`, `endListeningSession` accepts `completed` ✅
+- Session player passes `duration * 60` on start, `completed=true` when timer fires, `completed=false` on manual stop ✅
 
 **Completion counting rules (what counts toward certification):**
 | Scenario | Rule |
@@ -280,38 +300,48 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Keep layout flexible: color block and control strip should be easy to swap/rearrange without restructuring
 - iOS pause button appearance fix (1.11-A) + circle button anchor fix (1.11-B) ✅
 
-**Task 1.10: Paywall Gate**
+**Task 1.13: Track List UI — Ragam Grouping + Recording Date/Location** ✅
+
+Two sub-tasks, both complete:
+
+**Task 1.13a: Schema — add `recorded_date` and `location` to tracks, make `title` nullable** ✅
+- Added `recorded_date date` (nullable) and `location text` (nullable) to tracks
+- Made `title` nullable — when absent, date + location identify the track
+- Migration: `supabase/migrations/004_track_date_location.sql`
+- Updated `lib/types.ts`, `supabase/seed.sql`
+- Dropped `content/seed.ts` — Supabase is now required (no local seed fallback)
+- Expanded seed data: 7 ragams, 30 tracks with varied dates, locations, and artist notes
+
+**Task 1.13b: UI — group track list by ragam, compact card layout** ✅
+- Scenario pages (focus/sleep/meditate) and explore page group tracks by ragam (ragam name + description as section header)
+- Tracks sorted newest-first by `recorded_date` within each group
+- Compact card layout:
+  - Line 1: `"Jan 12 · Home studio, Portland"` — date + location (falls back to title)
+  - Line 2: `"45 min · grounding · warmth"` — duration + tags (inline with dots)
+  - Line 3: description (line-clamped to 2 lines)
+- Session player unchanged — ragam name + description only
+
+**Decisions captured:**
+- `recorded_date` is a `date` column (sortable, displayed as short date)
+- `location` is evocative editorial text, not just a city name
+- `title` is nullable — existing titles stay, new tracks may omit it
+- Tracks sorted newest-first within each ragam group
+- Description kept on card (line-clamped)
+- Session player unchanged
+
+**Task 1.10: Paywall Gate (moved to phase 2)**
 - Track cumulative listening time per rasika
 - After 10 hours: prompt to subscribe
 - Streaming free up to gate, downloads always paid
 
-**Task 1.12: Dev/Staging Environment Separation** *(pre-launch)*
-- **Problem:** Local dev and Vercel deployments currently all point to the single production Supabase project. Any test data, schema experiments, or bad seeds hit real user data.
-- **Goal:** Three clean environment tiers:
-  - **Local dev** → staging Supabase (`.env.local`)
-  - **Vercel preview deploys** (every branch push) → staging Supabase (Vercel "Preview" environment vars)
-  - **Vercel production** (ragaflow.io) → production Supabase (Vercel "Production" environment vars)
-
-- **Steps:**
-  1. Create a new Supabase project: `ragaflow-staging`
-  2. Run all migrations on the staging project (`001_initial_schema.sql`, `002_artist_note.sql`)
-  3. Run `supabase/seed.sql` on the staging project to populate it with the 3 test ragams + tracks
-  4. Update `.env.local` to point to the staging Supabase URL + publishable key (not production)
-  5. In Vercel project settings → Environment Variables:
-     - Set `NEXT_PUBLIC_SUPABASE_URL` and `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` for **Preview** environment → staging credentials
-     - Confirm **Production** environment vars still point to production Supabase
-  6. Add `.env.production.local` to `.gitignore` (if not already) — never commit credentials
-  7. Update `.env.example` to document both sets of vars with comments explaining which env each belongs to
-
-- **Acceptance criteria:**
-  - `npm run dev` locally → writes go to staging Supabase, not production
-  - A branch push to Vercel preview → uses staging DB
-  - `ragaflow.io` production deployment → still uses production DB, unaffected
-  - Confirmed by: creating a test account on a preview deploy and verifying it does not appear in the production Supabase auth table
-
-- **Note on staging URL:** Vercel auto-generates a preview URL per branch (e.g. `ragaflow-git-branch-user.vercel.app`). This is sufficient for now. Add `staging.ragaflow.io` as a Vercel alias later if a fixed staging URL is needed for external testers.
-
-- **Future:** Once a local Docker-based Supabase setup is worthwhile (i.e. offline dev or CI), add Task Inf.1 for that. For now, staging Supabase is the dev database.
+**Task 1.12: Dev/Staging Environment Separation** ✅ *(completed 2026-02-20)*
+- Staging Supabase project created (`ragaflow-staging`)
+- All migrations (001–004) + seed data run on staging
+- `.env.local` points to staging Supabase
+- Vercel environment variables configured:
+  - **Preview** (all non-main branches) → staging Supabase
+  - **Production** (main) → production Supabase
+- Verified: dev branch preview deploys use staging DB, production unaffected
 
 ### Phase 2: Payments, Track Variants & Polish
 
@@ -320,6 +350,7 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Checkout, webhooks, subscription status sync to Supabase
 
 **Task 2.2: Track Variant Switching**
+- needs more PM discussion to close. 
 - Percussion toggle, frequency selector
 - Seamless switching with position preservation
 
