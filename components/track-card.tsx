@@ -8,6 +8,7 @@ import { useCallback, useState } from "react";
 type TrackCardProps = {
   track: Track;
   scenario: Scenario;
+  ragamName?: string;
   favoriteTrackIds?: string[];
   onToggleFavorite?: (trackId: string) => void;
 };
@@ -15,6 +16,7 @@ type TrackCardProps = {
 export function TrackCard({
   track,
   scenario,
+  ragamName,
   favoriteTrackIds = [],
   onToggleFavorite,
 }: TrackCardProps) {
@@ -58,6 +60,7 @@ export function TrackCard({
         <p className="text-sm font-medium text-neutral-200">{headline}</p>
         <p className="mt-1 text-xs text-neutral-500">
           {durationMin} min
+          {ragamName && <span> · {ragamName}</span>}
           {track.tags.slice(0, 3).map((tag) => (
             <span key={tag}> · {tag}</span>
           ))}

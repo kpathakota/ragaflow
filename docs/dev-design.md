@@ -21,7 +21,7 @@
 - Favorites: toggle favorite tracks/ragams (heart icon on track cards and session player)
 - Defaults: set default track per scenario, one-tap quick play on homepage
 - Explore page: browse all tracks grouped by ragam with tag filtering
-- Track list pages (focus/sleep/meditate): grouped by ragam with compact card layout (date · location)
+- Track list pages (focus/sleep/meditate): flat list sorted newest-first, ragam name on each card
 - Session logging: start/end listening sessions with duration, intended_duration_seconds, and completed flag
 - Profile page: account info, listening stats, default tracks, sign-out
 - User badge: top-right initial circle on homepage linking to /profile
@@ -312,9 +312,10 @@ Two sub-tasks, both complete:
 - Dropped `content/seed.ts` — Supabase is now required (no local seed fallback)
 - Expanded seed data: 7 ragams, 30 tracks with varied dates, locations, and artist notes
 
-**Task 1.13b: UI — group track list by ragam, compact card layout** ✅
-- Scenario pages (focus/sleep/meditate) and explore page group tracks by ragam (ragam name + description as section header)
-- Tracks sorted newest-first by `recorded_date` within each group
+**Task 1.13b: UI — track list layout, compact cards** ✅
+- Scenario pages (focus/sleep/meditate): flat list sorted newest-first, ragam name on each card (no ragam grouping — optimized for fast play)
+- Explore page: groups tracks by ragam (ragam name + description as section header) — optimized for browsing/discovery
+- Tracks sorted newest-first by `recorded_date`
 - Compact card layout:
   - Line 1: `"Jan 12 · Home studio, Portland"` — date + location (falls back to title)
   - Line 2: `"45 min · grounding · warmth"` — duration + tags (inline with dots)

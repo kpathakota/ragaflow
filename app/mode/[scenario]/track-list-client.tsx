@@ -40,52 +40,30 @@ export function TrackListClient({
     return map;
   }, [ragams]);
 
-  const grouped = useMemo(() => {
-    const byRagam = new Map<string, Track[]>();
-    tracks.forEach((t) => {
-      const arr = byRagam.get(t.ragam_id) || [];
-      arr.push(t);
-      byRagam.set(t.ragam_id, arr);
+  const sorted = useMemo(() => {
+    return [...tracks].sort((a, b) => {
+      if (!a.recorded_date && !b.recorded_date) return 0;
+      if (!a.recorded_date) return 1;
+      if (!b.recorded_date) return -1;
+      return b.recorded_date.localeCompare(a.recorded_date);
     });
-
-    const groups: { ragam: Ragam; tracks: Track[] }[] = [];
-    byRagam.forEach((groupTracks, ragamId) => {
-      const ragam = ragamMap.get(ragamId);
-      if (ragam) {
-        const sorted = groupTracks.sort((a, b) => {
-          if (!a.recorded_date && !b.recorded_date) return 0;
-          if (!a.recorded_date) return 1;
-          if (!b.recorded_date) return -1;
-          return b.recorded_date.localeCompare(a.recorded_date);
-        });
-        groups.push({ ragam, tracks: sorted });
-      }
-    });
-    return groups;
-  }, [tracks, ragamMap]);
+  }, [tracks]);
 
   return (
     <>
-      {grouped.map(({ ragam, tracks: groupTracks }) => (
-        <section key={ragam.id} className="mb-8">
-          <h2 className="mb-1 text-lg font-medium text-neutral-200">
-            {ragam.name}
-          </h2>
-          <p className="mb-3 text-xs text-neutral-500">{ragam.description}</p>
-          <div className="flex flex-col gap-3">
-            {groupTracks.map((t) => (
-              <TrackCard
-                key={t.id}
-                track={t}
-                scenario={scenario}
-                favoriteTrackIds={favoriteIds}
-                onToggleFavorite={user ? handleToggleFavorite : undefined}
-              />
-            ))}
-          </div>
-        </section>
-      ))}
-      {grouped.length === 0 && (
+      <div className="flex flex-col gap-3">
+        {sorted.map((t) => (
+          <TrackCard
+            key={t.id}
+            track={t}
+            scenario={scenario}
+            ragamName={ragamMap.get(t.ragam_id)?.name}
+            favoriteTrackIds={favoriteIds}
+            onToggleFavorite={user ? handleToggleFavorite : undefined}
+          />
+        ))}
+      </div>
+      {sorted.length === 0 && (
         <p className="text-sm text-neutral-500">No tracks available yet.</p>
       )}
     </>
