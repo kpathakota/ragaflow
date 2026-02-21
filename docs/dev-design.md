@@ -30,8 +30,7 @@
 ### What Remains
 
 **Phase 1 — Up Next (ordered)**
-1. Cloud storage — Cloudflare R2 (Task 1.6) — move audio out of `/public` and git repo
-2. Certifications UI: progress bars + badges on /profile (Task 1.9)
+1. Certifications UI: progress bars + badges on /profile (Task 1.9)
 
 **Phase 1 — Deferred (known, not blocking)**
 - Google Drive content pipeline (Tasks 1.3–1.4) — manual content management is fine at current track count
@@ -232,26 +231,12 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - No pitch shifting — keep audio pure
 - *Deferred: manual conversion before upload is fine for now. Build this when content volume justifies it.*
 
-**Task 1.6: Cloud Storage — Cloudflare R2**
-Audio is currently in `/public/audio/` (93MB, tracked in git). This doesn't scale — large files bloat the repo and Vercel serves them inefficiently. Move to Cloudflare R2.
-
-Sub-tasks:
-1. **Create R2 bucket** — Set up a Cloudflare R2 bucket with public access for streaming. Configure CORS for `ragaflow.io`, `*.vercel.app`, and `localhost:3000`.
-2. **Upload existing audio** — Upload the 3 current audio files to R2. Folder structure by ragam (e.g., `bhairavi/Bhairavi_440Hz_with_percussion.m4a`), not by scenario.
-3. **Update audio_url references** — Update `supabase/seed.sql` and both Supabase databases (staging + production) to use R2 URLs instead of `/audio/...` relative paths.
-4. **Remove audio from repo** — Delete `public/audio/` contents (keep the README), add `public/audio/*.m4a` and `public/audio/*.mp3` to `.gitignore`. Rewrite git history to remove audio files from all past commits (`git filter-repo` or BFG Repo Cleaner). Force push required — coordinate with any open branches.
-5. **Update docs** — CLAUDE.md and dev-design.md to document R2 setup and new audio upload workflow.
-
-Acceptance criteria:
-- Audio plays from R2 URLs in the session player (local dev + Vercel)
-- No audio files in git history (current or past commits)
-- `public/audio/` media files are gitignored
-- Seed SQL uses full R2 URLs
-- CORS allows playback from all deploy targets
-
-Decisions:
-- Use R2 default public URL for now. Custom domain (`audio.ragaflow.io`) can be added later.
-- One shared R2 bucket for staging and production (same audio files, no reason to duplicate).
+**Task 1.6: Cloud Storage — Cloudflare R2** ✅
+- Audio moved from `/public/audio/` to Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`)
+- `audio_url` in Supabase stores full R2 URLs
+- Audio files removed from git repo and history; `public/audio/*.m4a` and `*.mp3` gitignored
+- One shared R2 bucket for staging and production
+- See `public/audio/README.md` for upload instructions
 
 **Task 1.7: Favorites, Defaults & Personalized Home** ✅
 - Heart icon on session player and track cards (favorite tracks and ragams)
