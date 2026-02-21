@@ -206,9 +206,9 @@ Open App (new rasika)
     ↓
 Select Scenario (Focus / Sleep / Meditate / Explore)
     ↓
-Browse tracks grouped by ragam (sorted newest-first within each group)
+Browse tracks (flat list, sorted newest-first; Explore groups by ragam)
     ↓
-Track cards show: recording date · location, duration · tags, description
+Track cards show: recording date · location, duration · ragam · tags, description
     ↓
 Select Track → See ragam info, description, tags, listening progress
     ↓
