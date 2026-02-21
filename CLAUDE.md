@@ -121,7 +121,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Ragam has no `tradition` column — intentionally removed. Don't re-add it.
 - Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
 - Pages use `force-dynamic` since data comes from Supabase (no `generateStaticParams`)
-- Audio files go in `public/audio/{scenario}/` matching `audio_url` paths in seed/database
+- Audio files hosted on Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`). `audio_url` in the database is a full R2 URL. See `public/audio/README.md` for upload instructions.
 - Session player is a server page wrapping a client `SessionPlayer` component (for interactivity)
 - Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
 - Supabase is required — without env vars the app renders empty (no local seed fallback)
