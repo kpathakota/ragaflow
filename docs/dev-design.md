@@ -1,6 +1,6 @@
 # Raaga App - Development Design & Execution Plan
 
-## Current Status (as of 2026-02-20)
+## Current Status (as of 2026-02-25)
 
 ### What's Built
 
@@ -23,14 +23,14 @@
 - Explore page: browse all tracks grouped by ragam with tag filtering
 - Track list pages (focus/sleep/meditate): flat list sorted newest-first, ragam name on each card
 - Session logging: start/end listening sessions with duration, intended_duration_seconds, and completed flag
-- Profile page: account info, listening stats, default tracks, sign-out
+- Certifications: per-ragam progress computed from session history, tier badges + progress bars on /profile, auto-upsert after each session
+- Profile page: account info, listening stats, certifications, default tracks, sign-out
 - User badge: top-right initial circle on homepage linking to /profile
 - Dev/staging environment separation: staging Supabase + Vercel preview env vars
 
 ### What Remains
 
-**Phase 1 — Up Next (ordered)**
-1. Certifications UI: progress bars + badges on /profile (Task 1.9)
+**Phase 1 — All core tasks complete.**
 
 **Phase 1 — Deferred (known, not blocking)**
 - Google Drive content pipeline (Tasks 1.3–1.4) — manual content management is fine at current track count
@@ -247,10 +247,11 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - 4th entry point: browse all tracks grouped by ragam
 - Tag-based filtering
 
-**Task 1.9: Listening Progress & Certifications**
+**Task 1.9: Listening Progress & Certifications** ✅
 - Session tracking ✅ (start/end listening sessions with duration)
-- Certification calculation (Bronze → Platinum) — schema exists, UI not yet built
-- Progress bars, badges in UI — not yet built
+- Certification calculation (Bronze → Platinum) ✅ — `lib/certifications.ts` with tier logic, per-scenario counting rules, ragam progress aggregation, client-side upsert
+- Session player upserts certification after each session ✅ (timer completion + manual stop, applying counting rules)
+- Profile page shows certifications section ✅ — per-ragam cards with tier badge, progress bar, hours label
 
 **Task 1.9a: Listening Session Schema — Completion Tracking** ✅ *(schema layer — 2026-02-20, commit c8648e0)*
 - Add two fields to `listening_sessions`:
@@ -272,6 +273,30 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 
 **Decided:** Completion threshold for Focus is 100% — timer must fire naturally. No partial credit.
 **Decided:** Certifications are additive-only. `total_seconds` never decrements. Tier earned = tier kept.
+
+**Manual QA — Certifications (Task 1.9)**
+
+Pre-requisite: sign in, have at least one track available per scenario.
+
+1. **Profile loads clean** — visit `/profile`. If no sessions yet, certifications section should not appear. No console errors.
+
+2. **Focus — completed session counts** — go to `/mode/focus`, pick a track, set 5m timer, let it complete naturally. Visit `/profile` — certifications section appears with that track's ragam, showing 5m progress toward Bronze (10h). Progress bar should be visible but small (~0.8%).
+
+3. **Focus — manual stop does NOT count** — start another Focus session, stop manually after ~30s. Visit `/profile` — the ragam's total should still show 5m (unchanged from test 2). Focus requires `completed=true`.
+
+4. **Sleep — manual stop DOES count** — go to `/mode/sleep`, pick a track, start a session, stop manually after ~30s. Visit `/profile` — the ragam for that sleep track should appear with ~30s of progress. Sleep always counts all time.
+
+5. **Meditate — short session does NOT count** — go to `/mode/meditate`, pick a track, start a session, stop manually after ~1 minute. Visit `/profile` — that ragam's total should be 0 (or absent). Meditate requires ≥5 minutes.
+
+6. **Meditate — long session counts** — start a Meditate session, set 5m timer, let it complete. Visit `/profile` — that ragam now shows 5m progress.
+
+7. **Cumulative progress** — play multiple sessions on the same ragam (across scenarios). Profile should show cumulative total for that ragam, not per-session.
+
+8. **Multiple ragams** — play sessions on tracks from different ragams. Profile should show separate cards for each ragam, sorted by total time descending.
+
+9. **Tier badge** — if you accumulate 10+ hours on a ragam (use Supabase SQL editor to manually set `certifications.total_seconds = 36000`), the profile should show "Bronze" instead of "—".
+
+10. **No regressions** — verify listening stats (total time, session count) still display correctly above certifications. Verify default tracks section still works below certifications.
 
 **Task 1.11: Session Player Redesign + artist_note Schema** ✅
 - Add `artist_note text` (nullable) to tracks table: migration SQL + `lib/types.ts` + `content/seed.ts`
