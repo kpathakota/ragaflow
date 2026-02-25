@@ -8,6 +8,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { toggleFavoriteTrackClient, getPreferencesClient } from "@/lib/favorites";
 import { setDefaultTrackClient } from "@/lib/preferences";
 import { startListeningSession, endListeningSession } from "@/lib/sessions";
+import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
 const DURATION_OPTIONS = [5, 15, 25, 45];
 
@@ -80,7 +81,11 @@ export function SessionPlayer({
       await endListeningSession(sessionId, elapsed, false);
       setSessionId(null);
     }
-  }, [stopAudio, sessionId, duration, remaining]);
+    if (user) {
+      const countable = computeCountableSeconds(scenario, elapsed, false);
+      upsertCertificationClient(track.ragam_id, countable);
+    }
+  }, [stopAudio, sessionId, duration, remaining, user, scenario, track.ragam_id]);
 
   const restart = useCallback(() => {
     setSession("idle");
@@ -112,9 +117,12 @@ export function SessionPlayer({
         endListeningSession(sessionId, duration * 60, true);
         setSessionId(null);
       }
-      if (user) setShowDefaultPrompt(true);
+      if (user) {
+        setShowDefaultPrompt(true);
+        upsertCertificationClient(track.ragam_id, duration * 60);
+      }
     }
-  }, [session, remaining, stopAudio, sessionId, duration, user]);
+  }, [session, remaining, stopAudio, sessionId, duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!user) return;
