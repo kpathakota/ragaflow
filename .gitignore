@@ -39,3 +39,12 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# audio files (hosted on Cloudflare R2)
+public/audio/**/*.m4a
+public/audio/**/*.mp3
+public/audio/**/*.flac
+public/audio/**/*.wav
+
+# wrangler (Cloudflare CLI)
+.wrangler/

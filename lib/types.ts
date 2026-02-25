@@ -9,12 +9,14 @@ export type Ragam = {
 
 export type Track = {
   id: string;
-  title: string;
+  title: string | null;
   ragam_id: string;
   scenarios: Scenario[];
   tags: string[];
   description: string;
   artist_note: string | null;
+  recorded_date: string | null;
+  location: string | null;
   duration: number; // seconds
   audio_url: string;
   download_url: string | null;
@@ -40,4 +42,14 @@ export type ListeningSession = {
   started_at: string;
   ended_at: string | null;
   duration_seconds: number;
+  intended_duration_seconds: number | null;
+  completed: boolean | null;
+};
+
+export type Certification = {
+  id: string;
+  rasika_id: string;
+  ragam_id: string;
+  level: 1 | 2 | 3 | 4;
+  total_seconds: number;
 };

@@ -1,23 +1,23 @@
-# Audio Files — Drop recordings here
+# Audio Files
 
-Place MP3/FLAC/WAV files in the matching folder. Filenames must match
-what's in `content/ragams.json`.
+Audio is hosted on **Cloudflare R2**, not in the repo.
 
-## Expected files:
+- **Bucket:** `ragaflow-audio`
+- **Public URL:** `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/`
+- **Structure:** `tracks/<filename>`
 
-### focus/
-- bhoopalam.mp3
-- bilahari.mp3
+## Uploading new tracks
 
-### sleep/
-- neelambari.mp3
-- khamaj.mp3
+```bash
+npx wrangler r2 object put ragaflow-audio/tracks/<filename> \
+  --file <local-path> \
+  --content-type audio/mp4 \
+  --remote
+```
 
-### meditate/
-- ananda-bhairavi.mp3
-- sahana.mp3
+Then update the `audio_url` in Supabase (and `supabase/seed.sql` if it's seed data).
 
-## Notes
-- Any format works (mp3, flac, wav) — just update the extension in ragams.json
-- Long-form recordings (30–90 min) are ideal
-- Single variant per ragam for now (440Hz, no percussion toggle)
+## CORS
+
+Configured for `ragaflow.io`, `*.vercel.app`, and `localhost:3000`.
+Managed via Cloudflare dashboard: R2 > ragaflow-audio > Settings > CORS Policy.

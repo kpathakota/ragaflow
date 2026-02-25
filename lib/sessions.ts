@@ -3,7 +3,8 @@ import type { Scenario } from "@/lib/types";
 
 export async function startListeningSession(
   trackId: string,
-  scenario: Scenario
+  scenario: Scenario,
+  intendedDurationSeconds?: number
 ): Promise<string | null> {
   const supabase = createClient();
   if (!supabase) return null;
@@ -19,6 +20,7 @@ export async function startListeningSession(
       rasika_id: user.id,
       track_id: trackId,
       scenario,
+      intended_duration_seconds: intendedDurationSeconds ?? null,
     })
     .select("id")
     .single();
@@ -28,7 +30,8 @@ export async function startListeningSession(
 
 export async function endListeningSession(
   sessionId: string,
-  durationSeconds: number
+  durationSeconds: number,
+  completed: boolean
 ): Promise<void> {
   const supabase = createClient();
   if (!supabase) return;
@@ -38,6 +41,7 @@ export async function endListeningSession(
     .update({
       ended_at: new Date().toISOString(),
       duration_seconds: durationSeconds,
+      completed,
     })
     .eq("id", sessionId);
 }

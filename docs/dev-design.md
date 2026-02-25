@@ -1,41 +1,43 @@
 # Raaga App - Development Design & Execution Plan
 
-## Current Status (as of 2026-02-13)
+## Current Status (as of 2026-02-25)
 
 ### What's Built
 
 **Phase 0 (Tracer Bullet) — Complete**
 - Next.js 16.1.6 project with TypeScript + Tailwind CSS v4, deployed to Vercel
 - Dark theme, mobile-first UI
-- Local seed data (`content/seed.ts`) with 3 ragams + 3 tracks
 - Scenario selection homepage → track list → session player flow
 - Audio playback with `<audio loop>` and ref-based play/pause
 - Timer with `setInterval` in `useEffect`
 - Audio files served from `public/audio/{scenario}/`
 
-**Phase 1 (Foundation) — Partially Complete**
+**Phase 1 (Foundation) — Nearly Complete**
 - Supabase auth (email sign-in/sign-up) with `AuthProvider` + `useAuth()` hook
-- Tag-based data model: ragams, tracks (with `scenarios[]` and `tags[]`), rasika_preferences, listening_sessions, certifications
-- Data layer with Supabase-first + local seed fallback (`lib/data.ts`)
+- Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasika_preferences, listening_sessions, certifications
+- Data layer: Supabase only (`lib/data.ts`), no local seed fallback — Supabase is required
+- Seed data in `supabase/seed.sql` (7 ragams, 30 tracks) — `content/seed.ts` removed
 - RLS policies: ragams/tracks public; preferences/sessions/certifications owner-only
 - Favorites: toggle favorite tracks/ragams (heart icon on track cards and session player)
 - Defaults: set default track per scenario, one-tap quick play on homepage
 - Explore page: browse all tracks grouped by ragam with tag filtering
-- Session logging: start/end listening sessions with duration tracking
-- Profile page: account info, listening stats, default tracks, sign-out
+- Track list pages (focus/sleep/meditate): flat list sorted newest-first, ragam name on each card
+- Session logging: start/end listening sessions with duration, intended_duration_seconds, and completed flag
+- Certifications: per-ragam progress computed from session history, tier badges + progress bars on /profile, auto-upsert after each session
+- Profile page: account info, listening stats, certifications, default tracks, sign-out
 - User badge: top-right initial circle on homepage linking to /profile
+- Dev/staging environment separation: staging Supabase + Vercel preview env vars
 
 ### What Remains
 
-**Phase 1 — Still TODO**
-- Listening gate (10-hour cumulative → must subscribe to continue)
-- ~~Middleware → proxy migration~~ ✅ (Next.js 16 codemod: `middleware.ts` → `proxy.ts`)
+**Phase 1 — All core tasks complete.**
 
-**Phase 1 — Not Yet Started**
-- Google Drive content pipeline (Tasks 1.3–1.6)
-- Audio transcoding pipeline
-- Cloud storage + CDN (currently serving from `/public`)
-- Certifications UI (progress bars, badges)
+**Phase 1 — Deferred (known, not blocking)**
+- Google Drive content pipeline (Tasks 1.3–1.4) — manual content management is fine at current track count
+- Audio transcoding pipeline (Task 1.5) — manual conversion before upload is fine for now
+- Listening gate (Task 1.10) — deferred until Stripe/payments are ready (Phase 2 dependency)
+
+~~Middleware → proxy migration~~ ✅
 
 **Phase 2+ — Future**
 - Stripe payments + subscription tiers
@@ -98,11 +100,14 @@ rasikas (id, email, display_name, total_listening_seconds, subscription_status, 
 ragams (id, name, description, time_of_day)
 tracks (
   id,
-  title,
+  title text,              -- nullable; optional freeform name. If absent, date+location identify the track
   ragam_id,
   scenarios text[],        -- editorial: ["focus", "meditate"]
   tags text[],             -- editorial: ["grounding", "contemplative"]
-  description text,        -- artist narrative (scene, context, poetry)
+  description text,        -- brief editorial context (1–2 sentences, always visible on session player)
+  artist_note text,        -- Gautam's longer personal voice: scene, poetry, session context (expandable on session player)
+  recorded_date date,      -- actual recording date (nullable). Displayed as short date, used for sorting
+  location text,           -- evocative editorial text: where/how recorded (nullable, freeform)
   frequency (440, 432, 528, etc.),
   has_percussion (boolean),
   streaming_url,
@@ -120,7 +125,7 @@ rasika_preferences (
   default_sleep_track_id,
   default_meditate_track_id
 )
-listening_sessions (id, rasika_id, track_id, started_at, duration_seconds)
+listening_sessions (id, rasika_id, track_id, scenario, started_at, ended_at, duration_seconds, intended_duration_seconds, completed)
 certifications (id, rasika_id, ragam_id, total_hours, tier)
 ```
 
@@ -208,25 +213,30 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Tracks table: id, title, ragam_id, scenarios[], tags[], description, duration, audio_url, download_url, free, created_at
 - Rasika preferences: favorite_tracks[], favorite_ragams[], default track per scenario
 - Listening sessions + certifications tables with RLS
-- Supabase-first data layer with local seed fallback (`lib/data.ts`)
+- Supabase-only data layer (`lib/data.ts`) — no local seed fallback
 
-**Task 1.3: Google Drive Structure + Metadata Sheet**
+**Task 1.3: Google Drive Structure + Metadata Sheet** *(deferred)*
 - Set up folder structure on Drive (organized by ragam, not by mode)
 - Create metadata Google Sheet with track-level fields (ragam, scenarios, tags, artist description)
 - Upload initial content library (10+ tracks across multiple ragams)
+- *Deferred: manual content management is fine at current track count. Revisit when library exceeds ~50 tracks.*
 
-**Task 1.4: Drive → Database Sync**
+**Task 1.4: Drive → Database Sync** *(deferred)*
 - Sync script: scan Drive, parse filenames, upsert to Supabase
 - Replace hardcoded seed data with Supabase queries
+- *Deferred: depends on 1.3. Not needed until automated content pipeline becomes worthwhile.*
 
-**Task 1.5: Audio Transcoding Pipeline**
+**Task 1.5: Audio Transcoding Pipeline** *(deferred)*
 - FFmpeg: FLAC → Opus/AAC for streaming
-- Upload to Cloudflare R2
 - No pitch shifting — keep audio pure
+- *Deferred: manual conversion before upload is fine for now. Build this when content volume justifies it.*
 
-**Task 1.6: Cloud Storage + CDN**
-- Cloudflare R2 buckets: `streaming-audio`, `lossless-audio`
-- Public URLs for streaming, signed URLs for downloads
+**Task 1.6: Cloud Storage — Cloudflare R2** ✅
+- Audio moved from `/public/audio/` to Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`)
+- `audio_url` in Supabase stores full R2 URLs
+- Audio files removed from git repo and history; `public/audio/*.m4a` and `*.mp3` gitignored
+- One shared R2 bucket for staging and production
+- See `public/audio/README.md` for upload instructions
 
 **Task 1.7: Favorites, Defaults & Personalized Home** ✅
 - Heart icon on session player and track cards (favorite tracks and ragams)
@@ -237,15 +247,112 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - 4th entry point: browse all tracks grouped by ragam
 - Tag-based filtering
 
-**Task 1.9: Listening Progress & Certifications**
+**Task 1.9: Listening Progress & Certifications** ✅
 - Session tracking ✅ (start/end listening sessions with duration)
-- Certification calculation (Bronze → Platinum) — schema exists, UI not yet built
-- Progress bars, badges in UI — not yet built
+- Certification calculation (Bronze → Platinum) ✅ — `lib/certifications.ts` with tier logic, per-scenario counting rules, ragam progress aggregation, client-side upsert
+- Session player upserts certification after each session ✅ (timer completion + manual stop, applying counting rules)
+- Profile page shows certifications section ✅ — per-ragam cards with tier badge, progress bar, hours label
 
-**Task 1.10: Paywall Gate**
+**Task 1.9a: Listening Session Schema — Completion Tracking** ✅ *(schema layer — 2026-02-20, commit c8648e0)*
+- Add two fields to `listening_sessions`:
+  - `intended_duration_seconds integer` (nullable — null means open play, no timer)
+  - `completed boolean` (true only when the timer fires naturally; false if rasika stops early)
+- Migration: `supabase/migrations/003_session_completion.sql` ✅
+- Update `lib/types.ts` `ListeningSession` type ✅
+- Migration applied to production Supabase ✅
+- `lib/sessions.ts` wired: `startListeningSession` accepts `intendedDurationSeconds`, `endListeningSession` accepts `completed` ✅
+- Session player passes `duration * 60` on start, `completed=true` when timer fires, `completed=false` on manual stop ✅
+
+**Completion counting rules (what counts toward certification):**
+| Scenario | Rule |
+|----------|------|
+| Focus | Only completed sessions (completed=true). Bailing early = nothing counted. |
+| Sleep | All time always counted (falling asleep before timer = success state). |
+| Meditate | All time ≥ 5 minutes minimum. |
+| Explore / Open play | All time ≥ 5 minutes minimum (no timer to complete). |
+
+**Decided:** Completion threshold for Focus is 100% — timer must fire naturally. No partial credit.
+**Decided:** Certifications are additive-only. `total_seconds` never decrements. Tier earned = tier kept.
+
+**Manual QA — Certifications (Task 1.9)**
+
+Pre-requisite: sign in, have at least one track available per scenario.
+
+1. **Profile loads clean** — visit `/profile`. If no sessions yet, certifications section should not appear. No console errors.
+
+2. **Focus — completed session counts** — go to `/mode/focus`, pick a track, set 5m timer, let it complete naturally. Visit `/profile` — certifications section appears with that track's ragam, showing 5m progress toward Bronze (10h). Progress bar should be visible but small (~0.8%).
+
+3. **Focus — manual stop does NOT count** — start another Focus session, stop manually after ~30s. Visit `/profile` — the ragam's total should still show 5m (unchanged from test 2). Focus requires `completed=true`.
+
+4. **Sleep — manual stop DOES count** — go to `/mode/sleep`, pick a track, start a session, stop manually after ~30s. Visit `/profile` — the ragam for that sleep track should appear with ~30s of progress. Sleep always counts all time.
+
+5. **Meditate — short session does NOT count** — go to `/mode/meditate`, pick a track, start a session, stop manually after ~1 minute. Visit `/profile` — that ragam's total should be 0 (or absent). Meditate requires ≥5 minutes.
+
+6. **Meditate — long session counts** — start a Meditate session, set 5m timer, let it complete. Visit `/profile` — that ragam now shows 5m progress.
+
+7. **Cumulative progress** — play multiple sessions on the same ragam (across scenarios). Profile should show cumulative total for that ragam, not per-session.
+
+8. **Multiple ragams** — play sessions on tracks from different ragams. Profile should show separate cards for each ragam, sorted by total time descending.
+
+9. **Tier badge** — if you accumulate 10+ hours on a ragam (use Supabase SQL editor to manually set `certifications.total_seconds = 36000`), the profile should show "Bronze" instead of "—".
+
+10. **No regressions** — verify listening stats (total time, session count) still display correctly above certifications. Verify default tracks section still works below certifications.
+
+**Task 1.11: Session Player Redesign + artist_note Schema** ✅
+- Add `artist_note text` (nullable) to tracks table: migration SQL + `lib/types.ts` + `content/seed.ts`
+- Redesign `session-player.tsx` layout (top → bottom):
+  - Top: ragam name as primary title, heart/favorite top-right
+  - Below title: `description` (brief, always visible)
+  - Center: scenario color fill block (swappable `<div>` for future animation — no hardcoded shape)
+  - Above controls: `artist_note` collapsed by default, tap to expand/collapse
+  - Bottom third (~20% from bottom): play/pause + small timer (timer small, non-prominent)
+- Remove scenario name ("Deep Focus") as primary header — ragam name takes that role
+- Keep layout flexible: color block and control strip should be easy to swap/rearrange without restructuring
+- iOS pause button appearance fix (1.11-A) + circle button anchor fix (1.11-B) ✅
+
+**Task 1.13: Track List UI — Ragam Grouping + Recording Date/Location** ✅
+
+Two sub-tasks, both complete:
+
+**Task 1.13a: Schema — add `recorded_date` and `location` to tracks, make `title` nullable** ✅
+- Added `recorded_date date` (nullable) and `location text` (nullable) to tracks
+- Made `title` nullable — when absent, date + location identify the track
+- Migration: `supabase/migrations/004_track_date_location.sql`
+- Updated `lib/types.ts`, `supabase/seed.sql`
+- Dropped `content/seed.ts` — Supabase is now required (no local seed fallback)
+- Expanded seed data: 7 ragams, 30 tracks with varied dates, locations, and artist notes
+
+**Task 1.13b: UI — track list layout, compact cards** ✅
+- Scenario pages (focus/sleep/meditate): flat list sorted newest-first, ragam name on each card (no ragam grouping — optimized for fast play)
+- Explore page: groups tracks by ragam (ragam name + description as section header) — optimized for browsing/discovery
+- Tracks sorted newest-first by `recorded_date`
+- Compact card layout:
+  - Line 1: `"Jan 12 · Home studio, Portland"` — date + location (falls back to title)
+  - Line 2: `"45 min · grounding · warmth"` — duration + tags (inline with dots)
+  - Line 3: description (line-clamped to 2 lines)
+- Session player unchanged — ragam name + description only
+
+**Decisions captured:**
+- `recorded_date` is a `date` column (sortable, displayed as short date)
+- `location` is evocative editorial text, not just a city name
+- `title` is nullable — existing titles stay, new tracks may omit it
+- Tracks sorted newest-first within each ragam group
+- Description kept on card (line-clamped)
+- Session player unchanged
+
+**Task 1.10: Paywall Gate (moved to phase 2)**
 - Track cumulative listening time per rasika
 - After 10 hours: prompt to subscribe
 - Streaming free up to gate, downloads always paid
+
+**Task 1.12: Dev/Staging Environment Separation** ✅ *(completed 2026-02-20)*
+- Staging Supabase project created (`ragaflow-staging`)
+- All migrations (001–004) + seed data run on staging
+- `.env.local` points to staging Supabase
+- Vercel environment variables configured:
+  - **Preview** (all non-main branches) → staging Supabase
+  - **Production** (main) → production Supabase
+- Verified: dev branch preview deploys use staging DB, production unaffected
 
 ### Phase 2: Payments, Track Variants & Polish
 
@@ -254,6 +361,7 @@ certifications (id, rasika_id, ragam_id, total_hours, tier)
 - Checkout, webhooks, subscription status sync to Supabase
 
 **Task 2.2: Track Variant Switching**
+- needs more PM discussion to close. 
 - Percussion toggle, frequency selector
 - Seamless switching with position preservation
 
@@ -432,6 +540,7 @@ Since all variants of a Ragam are improvisation sessions recorded simultaneously
 7. Background audio on iOS native (deferred to Phase 3)
 
 ### Future Enhancements (Post-MVP)
+- **Track of the Day** — Daily curated track featured on homepage with artist-written blurb. Simple `track_of_the_day` table (date, track_id, blurb, selected_by). Reuses existing tracks — no new content format. See spec.md §5 for full details. Tasks: schema migration, data access function, homepage UI card, selection workflow (manual Supabase insert initially, Google Sheets integration later).
 - Apple Watch integration (show current Ragam, control playback)
 - Journal/mood tracking (correlate Ragams with mood improvements)
 - Adaptive playback based on user behavior (recommend Ragams based on time of day, past preferences)

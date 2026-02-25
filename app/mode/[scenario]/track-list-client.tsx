@@ -1,16 +1,18 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
-import type { Track, Scenario } from "@/lib/types";
+import { useEffect, useState, useCallback, useMemo } from "react";
+import type { Track, Ragam, Scenario } from "@/lib/types";
 import { TrackCard } from "@/components/track-card";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getPreferencesClient, toggleFavoriteTrackClient } from "@/lib/favorites";
 
 export function TrackListClient({
   tracks,
+  ragams,
   scenario,
 }: {
   tracks: Track[];
+  ragams: Ragam[];
   scenario: Scenario;
 }) {
   const { user } = useAuth();
@@ -32,18 +34,36 @@ export function TrackListClient({
     [user]
   );
 
+  const ragamMap = useMemo(() => {
+    const map = new Map<string, Ragam>();
+    ragams.forEach((r) => map.set(r.id, r));
+    return map;
+  }, [ragams]);
+
+  const sorted = useMemo(() => {
+    return [...tracks].sort((a, b) => {
+      if (!a.recorded_date && !b.recorded_date) return 0;
+      if (!a.recorded_date) return 1;
+      if (!b.recorded_date) return -1;
+      return b.recorded_date.localeCompare(a.recorded_date);
+    });
+  }, [tracks]);
+
   return (
     <>
-      {tracks.map((track) => (
-        <TrackCard
-          key={track.id}
-          track={track}
-          scenario={scenario}
-          favoriteTrackIds={favoriteIds}
-          onToggleFavorite={user ? handleToggleFavorite : undefined}
-        />
-      ))}
-      {tracks.length === 0 && (
+      <div className="flex flex-col gap-3">
+        {sorted.map((t) => (
+          <TrackCard
+            key={t.id}
+            track={t}
+            scenario={scenario}
+            ragamName={ragamMap.get(t.ragam_id)?.name}
+            favoriteTrackIds={favoriteIds}
+            onToggleFavorite={user ? handleToggleFavorite : undefined}
+          />
+        ))}
+      </div>
+      {sorted.length === 0 && (
         <p className="text-sm text-neutral-500">No tracks available yet.</p>
       )}
     </>

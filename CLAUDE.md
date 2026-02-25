@@ -15,11 +15,18 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 
 ## Supabase setup
 
-1. Create a Supabase project
-2. Copy `.env.example` → `.env.local` and fill in `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
-3. Run `supabase/migrations/001_initial_schema.sql` in SQL editor
-4. Run `supabase/seed.sql` to insert starter data
-5. Without env vars, app gracefully falls back to local seed data in `content/seed.ts`
+Two Supabase projects: **production** and **staging**.
+
+| Environment | Supabase project | How env vars are set |
+|---|---|---|
+| Local dev (`npm run dev`) | staging | `.env.local` |
+| Vercel preview (branch pushes) | staging | Vercel "Preview" env vars |
+| Vercel production (main) | production | Vercel "Production" env vars |
+
+1. Copy `.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
+2. Run all migrations in `supabase/migrations/` in order in the SQL editor
+3. Run `supabase/seed.sql` to insert starter data
+4. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
 
@@ -27,7 +34,7 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 - id, name, description, time_of_day
 
 **Track** — a recorded session, the atomic content unit:
-- id, title, ragam_id, scenarios[], tags[], description, duration, audio_url, download_url, free, created_at
+- id, title (nullable), ragam_id, scenarios[], tags[], description, artist_note, recorded_date, location, duration, audio_url, download_url, free, created_at
 
 **RasikaPreferences** — per-user favorites and defaults:
 - rasika_id, favorite_tracks[], favorite_ragams[], default_focus_track, default_sleep_track, default_meditate_track
@@ -38,16 +45,15 @@ See `docs/spec.md` and `docs/dev-design.md` for the full product specification a
 **Certification** — per ragam per rasika achievement:
 - rasika_id, ragam_id, level (1–4), total_seconds
 
-Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data access via `lib/data.ts` (Supabase-first, falls back to seed).
+Types defined in `lib/types.ts`. Seed data in `supabase/seed.sql`. Data access via `lib/data.ts` (Supabase only, returns empty arrays without connection).
 
 ## Key files
 
 ### Data layer
 - `lib/types.ts` — TypeScript types for all entities
-- `lib/data.ts` — async data access functions (Supabase → seed fallback)
-- `content/seed.ts` — local seed data (3 ragams + 3 tracks)
-- `supabase/migrations/001_initial_schema.sql` — DDL + RLS policies
-- `supabase/seed.sql` — insert statements for Supabase
+- `lib/data.ts` — async data access functions (Supabase only)
+- `supabase/migrations/` — DDL + RLS policies (run in order)
+- `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
 
 ### Supabase
 - `lib/supabase/client.ts` — browser client (returns null if env vars missing)
@@ -85,15 +91,11 @@ Types defined in `lib/types.ts`. Local seed data in `content/seed.ts`. Data acce
 ## Routing
 
 ```
-/                              → Home (personalized if rasika has defaults, otherwise scenario selection)
-/mode/focus                    → Focus tracks list
-/mode/sleep                    → Sleep tracks list
-/mode/meditate                 → Meditate tracks list
-/mode/[scenario]/[trackId]     → Session player (timer + audio + ♡ favorite + set-default)
-/explore                       → All tracks — browse by ragam, tag, or mood
-/profile                       → Profile (account info, stats, defaults, sign out)
-/auth                          → Sign in / sign up
-/auth/callback                 → Email confirmation redirect
+/                        → Mode selection (Focus, Sleep, Meditate)
+/mode/focus              → Focus ragams list
+/mode/sleep              → Sleep ragams list
+/mode/meditate           → Meditate ragams list
+/mode/[mode]/[ragamId]   → Session player (timer + audio)
 ```
 
 ## Scenarios
@@ -119,10 +121,11 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Ragam has no `tradition` column — intentionally removed. Don't re-add it.
 - Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
 - Pages use `force-dynamic` since data comes from Supabase (no `generateStaticParams`)
-- Audio files go in `public/audio/{scenario}/` matching `audio_url` paths in seed/database
+- Audio files hosted on Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`). `audio_url` in the database is a full R2 URL. See `public/audio/README.md` for upload instructions.
 - Session player is a server page wrapping a client `SessionPlayer` component (for interactivity)
 - Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
-- Supabase clients return `null` when env vars are missing — all code handles this gracefully
+- Supabase is required — without env vars the app renders empty (no local seed fallback)
+- Supabase clients return `null` when env vars are missing — data functions return empty arrays
 - RLS policies: ragams/tracks publicly readable; rasika_preferences/listening_sessions/certifications owner-only
 
 ## Monetization model
@@ -132,7 +135,17 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - 10-hour cumulative listening gate → must subscribe to continue
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
 
+## Gotchas
+
+- Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
+- `generateStaticParams` pre-renders mode routes at build time — add new entries when adding modes
+- Audio files go in `public/audio/{mode}/` matching `audioUrl` paths in ragams.json
+- Session player is a server page (for `generateStaticParams`) wrapping a client `SessionPlayer` component (for interactivity)
+- Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
+
 ## Process
 
-- Commit and push after every task
+- All dev work goes on the `dev` branch — never commit directly to `main`
+- PRs into `main` are handled by the human (production deploys from `main`)
+- Commit and push to `dev` after every task
 - Update this file each conversation with new context
