@@ -2,6 +2,14 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+
+## 2026-02-25
+-  We need to do a pass on the session timer complete screen. It looks okay for now but should be better. I need it to really show completion. Also when saving the default, the entire "session" should be captured (track and duration) so that it's easy from the home screen to start the default duration. 
+- In the profile screen, once someone has achieved a certification, I want to actually design real badges. So that's going to be work. The progress bar should change color to highlight the current tier. For example, Bronze should be bronze, Silver should be silver etc. 
+- Need a better word than Certifications
+- When we expand the artist note, the graphic resizes and looks weird (no longer blends properly with the surrounding frame). How can we fix that? 
+- Why is the password manager asking me to save new details every time I favorite a track? That seems like something we're doing ... 
+
 ## 2026-02-20
 
 ### Issue 1.13-A — Track list not grouped by ragam after session player redesign
