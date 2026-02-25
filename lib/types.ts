@@ -45,3 +45,11 @@ export type ListeningSession = {
   intended_duration_seconds: number | null;
   completed: boolean | null;
 };
+
+export type Certification = {
+  id: string;
+  rasika_id: string;
+  ragam_id: string;
+  level: 1 | 2 | 3 | 4;
+  total_seconds: number;
+};
