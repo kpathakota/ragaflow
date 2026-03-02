@@ -22,6 +22,7 @@ type CertProgress = {
   totalSeconds: number;
   currentLabel: string | null;
   nextLabel: string | null;
+  nextThreshold: number;
   progressPercent: number;
 };
 
@@ -129,6 +130,7 @@ export default function ProfilePage() {
           totalSeconds: secs,
           currentLabel: tier.currentLabel,
           nextLabel: tier.nextLabel,
+          nextThreshold: tier.nextThreshold,
           progressPercent: tier.progressPercent,
         });
       }
@@ -245,7 +247,9 @@ export default function ProfilePage() {
                     </div>
                     <p className="mt-2 text-xs text-neutral-600">
                       {formatDuration(c.totalSeconds)}
-                      {c.nextLabel && ` — next: ${c.nextLabel}`}
+                      {c.nextLabel
+                        ? ` — ${formatDuration(c.nextThreshold - c.totalSeconds)} to ${c.nextLabel}`
+                        : " — max tier reached"}
                     </p>
                   </div>
                 );
