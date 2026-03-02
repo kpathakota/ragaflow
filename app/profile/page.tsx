@@ -21,7 +21,6 @@ type CertProgress = {
   ragamName: string;
   totalSeconds: number;
   currentLabel: string | null;
-  currentLevel: 0 | 1 | 2 | 3 | 4;
   nextLabel: string | null;
   progressPercent: number;
 };
@@ -129,7 +128,6 @@ export default function ProfilePage() {
           ragamName: ragamNameMap.get(ragamId) ?? ragamId,
           totalSeconds: secs,
           currentLabel: tier.currentLabel,
-          currentLevel: tier.currentLevel,
           nextLabel: tier.nextLabel,
           progressPercent: tier.progressPercent,
         });
@@ -225,7 +223,7 @@ export default function ProfilePage() {
             </h2>
             <div className="flex flex-col gap-3">
               {certs.map((c) => {
-                const tierColor = getTierColor(c.currentLevel);
+                const tierColor = getTierColor(c.currentLabel);
                 return (
                   <div
                     key={c.ragamId}

@@ -10,19 +10,19 @@ const TIERS = [
   { level: 4 as const, label: "Platinum", threshold: 900_000 },
 ] as const;
 
-export function getTierColor(level: 0 | 1 | 2 | 3 | 4): {
+export function getTierColor(tierLabel: string | null): {
   bar: string;
   text: string;
   label: string;
 } {
-  switch (level) {
-    case 1:
+  switch (tierLabel) {
+    case "Bronze":
       return { bar: "bg-amber-700", text: "text-amber-600", label: "text-amber-500" };
-    case 2:
+    case "Silver":
       return { bar: "bg-slate-400", text: "text-slate-400", label: "text-slate-300" };
-    case 3:
+    case "Gold":
       return { bar: "bg-yellow-500", text: "text-yellow-500", label: "text-yellow-400" };
-    case 4:
+    case "Platinum":
       return { bar: "bg-purple-400", text: "text-purple-400", label: "text-purple-300" };
     default:
       return { bar: "bg-neutral-500", text: "text-neutral-500", label: "text-neutral-500" };
