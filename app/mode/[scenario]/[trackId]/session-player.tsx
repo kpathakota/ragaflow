@@ -267,8 +267,21 @@ export function SessionPlayer({
         )}
 
         {session === "complete" && (
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-lg font-medium text-neutral-200">Session complete</p>
+          <div className="flex flex-col items-center gap-6 text-center">
+            {/* Completion badge */}
+            <div className={`flex h-20 w-20 items-center justify-center rounded-full ${accent.bg} bg-opacity-20`}>
+              <span className="text-3xl">✓</span>
+            </div>
+
+            {/* Session summary */}
+            <div>
+              <p className={`text-lg font-semibold ${accent.text}`}>
+                {duration} minutes of {config.label.toLowerCase()}
+              </p>
+              <p className="mt-1 text-sm text-neutral-500">
+                {ragam?.name ?? track.title}
+              </p>
+            </div>
 
             {showDefaultPrompt && !defaultSet && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4">
