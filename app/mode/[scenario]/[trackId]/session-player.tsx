@@ -176,29 +176,29 @@ export function SessionPlayer({
         </p>
       </div>
 
-      {/* Visual zone — replace contents with animation when ready */}
-      <div className="flex flex-1 items-center justify-center overflow-hidden">
+      {/* Visual zone — fixed height so artist note doesn't resize it */}
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
         <div className={`h-56 w-56 rounded-full ${accent.bg} opacity-20 blur-3xl`} />
-      </div>
 
-      {/* Artist note — expandable, hidden if empty */}
-      {track.artist_note && session !== "complete" && (
-        <div className="mb-6">
-          <button
-            type="button"
-            onClick={() => setNoteExpanded((v) => !v)}
-            className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
-          >
-            <span>{noteExpanded ? "▴" : "▾"}</span>
-            <span>From the session</span>
-          </button>
-          {noteExpanded && (
-            <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
-              {track.artist_note}
-            </p>
-          )}
-        </div>
-      )}
+        {/* Artist note — overlays bottom of visual zone */}
+        {track.artist_note && session !== "complete" && (
+          <div className="absolute inset-x-0 bottom-0 px-1">
+            <button
+              type="button"
+              onClick={() => setNoteExpanded((v) => !v)}
+              className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
+            >
+              <span>{noteExpanded ? "▴" : "▾"}</span>
+              <span>From the session</span>
+            </button>
+            {noteExpanded && (
+              <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
+                {track.artist_note}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Controls — bottom third */}
       <div className="flex flex-col items-center gap-5">
