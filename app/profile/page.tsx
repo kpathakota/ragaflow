@@ -7,7 +7,7 @@ import { NavHeader } from "@/components/nav-header";
 import { createClient } from "@/lib/supabase/client";
 import { scenarios } from "@/components/scenario-config";
 import type { RasikaPreferences, Scenario, Track } from "@/lib/types";
-import { computeRagamProgress, getTierInfo } from "@/lib/certifications";
+import { computeRagamProgress, getTierInfo, getTierColor } from "@/lib/certifications";
 
 type Stats = {
   totalSeconds: number;
@@ -215,38 +215,41 @@ export default function ProfilePage() {
           </section>
         )}
 
-        {/* Certifications */}
+        {/* Listening Journey */}
         {certs.length > 0 && (
           <section>
             <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Certifications
+              Listening Journey
             </h2>
             <div className="flex flex-col gap-3">
-              {certs.map((c) => (
-                <div
-                  key={c.ragamId}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-neutral-200">
-                      {c.ragamName}
-                    </span>
-                    <span className="text-xs text-neutral-500">
-                      {c.currentLabel ?? "—"}
-                    </span>
+              {certs.map((c) => {
+                const tierColor = getTierColor(c.currentLabel);
+                return (
+                  <div
+                    key={c.ragamId}
+                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-neutral-200">
+                        {c.ragamName}
+                      </span>
+                      <span className={`text-xs font-medium ${c.currentLabel ? tierColor.label : "text-neutral-500"}`}>
+                        {c.currentLabel ?? "—"}
+                      </span>
+                    </div>
+                    <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
+                      <div
+                        className={`h-full rounded-full ${tierColor.bar} transition-all`}
+                        style={{ width: `${c.progressPercent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-neutral-600">
+                      {formatDuration(c.totalSeconds)}
+                      {c.nextLabel && ` — next: ${c.nextLabel}`}
+                    </p>
                   </div>
-                  <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
-                    <div
-                      className="h-full rounded-full bg-neutral-500 transition-all"
-                      style={{ width: `${c.progressPercent}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-xs text-neutral-600">
-                    {formatDuration(c.totalSeconds)}
-                    {c.nextLabel && ` — next: ${c.nextLabel}`}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
