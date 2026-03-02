@@ -91,11 +91,15 @@ Types defined in `lib/types.ts`. Seed data in `supabase/seed.sql`. Data access v
 ## Routing
 
 ```
-/                        → Mode selection (Focus, Sleep, Meditate)
-/mode/focus              → Focus ragams list
-/mode/sleep              → Sleep ragams list
-/mode/meditate           → Meditate ragams list
-/mode/[mode]/[ragamId]   → Session player (timer + audio)
+/                              → Home (personalized if rasika has defaults, otherwise scenario selection)
+/mode/focus                    → Focus tracks list
+/mode/sleep                    → Sleep tracks list
+/mode/meditate                 → Meditate tracks list
+/mode/[scenario]/[trackId]     → Session player (timer + audio + ♡ favorite + set-default)
+/explore                       → All tracks — browse by ragam, tag, or mood
+/profile                       → Profile (account info, stats, certifications, defaults, sign out)
+/auth                          → Sign in / sign up
+/auth/callback                 → Email confirmation redirect
 ```
 
 ## Scenarios
@@ -135,17 +139,13 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - 10-hour cumulative listening gate → must subscribe to continue
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
 
-## Gotchas
-
-- Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
-- `generateStaticParams` pre-renders mode routes at build time — add new entries when adding modes
-- Audio files go in `public/audio/{mode}/` matching `audioUrl` paths in ragams.json
-- Session player is a server page (for `generateStaticParams`) wrapping a client `SessionPlayer` component (for interactivity)
-- Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
-
 ## Process
 
 - All dev work goes on the `dev` branch — never commit directly to `main`
 - PRs into `main` are handled by the human (production deploys from `main`)
 - Commit and push to `dev` after every task
 - Update this file each conversation with new context
+- **Rebase frequently** — rebase `dev` onto `main` every few tasks, not in big batches. Small rebases are trivial; large ones bring back deleted files and create conflicts.
+- **Clean up large files at deletion time** — when removing binary files (audio, images, etc.) from the repo, run `git filter-repo` in the same task to purge them from history. Don't leave large blobs in history for later cleanup.
+- **Gitignore new tools immediately** — when introducing a new tool (wrangler, etc.), add its local state directories to `.gitignore` before the first commit. Don't let tool artifacts get committed.
+- **One PR per logical task** — prefer smaller, focused PRs over batching multiple features. Smaller PRs are easier to review and less likely to have merge conflicts.
