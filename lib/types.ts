@@ -32,6 +32,9 @@ export type RasikaPreferences = {
   default_focus_track: string | null;
   default_sleep_track: string | null;
   default_meditate_track: string | null;
+  default_focus_duration: number | null;
+  default_sleep_duration: number | null;
+  default_meditate_duration: number | null;
 };
 
 export type ListeningSession = {
