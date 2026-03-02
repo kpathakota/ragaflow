@@ -72,6 +72,7 @@ export function TrackCard({
 
       {user && onToggleFavorite && (
         <button
+          type="button"
           onClick={handleFavorite}
           className={`ml-4 shrink-0 text-xl transition-transform ${
             animating ? "scale-125" : ""
