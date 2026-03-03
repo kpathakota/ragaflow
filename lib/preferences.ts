@@ -1,15 +1,22 @@
 import { createClient } from "@/lib/supabase/client";
 import type { Scenario } from "@/lib/types";
 
-const scenarioToColumn: Record<Scenario, string> = {
+const scenarioToTrackColumn: Record<Scenario, string> = {
   focus: "default_focus_track",
   sleep: "default_sleep_track",
   meditate: "default_meditate_track",
 };
 
+const scenarioToDurationColumn: Record<Scenario, string> = {
+  focus: "default_focus_duration",
+  sleep: "default_sleep_duration",
+  meditate: "default_meditate_duration",
+};
+
 export async function setDefaultTrackClient(
   scenario: Scenario,
-  trackId: string
+  trackId: string,
+  durationSeconds?: number
 ): Promise<boolean> {
   const supabase = createClient();
   if (!supabase) return false;
@@ -19,7 +26,12 @@ export async function setDefaultTrackClient(
   } = await supabase.auth.getUser();
   if (!user) return false;
 
-  const column = scenarioToColumn[scenario];
+  const trackColumn = scenarioToTrackColumn[scenario];
+  const durationColumn = scenarioToDurationColumn[scenario];
+  const updateData: Record<string, string | number | null> = {
+    [trackColumn]: trackId,
+    [durationColumn]: durationSeconds ?? null,
+  };
 
   // Ensure preferences row exists
   const { data: existing } = await supabase
@@ -31,12 +43,12 @@ export async function setDefaultTrackClient(
   if (existing) {
     await supabase
       .from("rasika_preferences")
-      .update({ [column]: trackId })
+      .update(updateData)
       .eq("rasika_id", user.id);
   } else {
     await supabase
       .from("rasika_preferences")
-      .insert({ rasika_id: user.id, [column]: trackId });
+      .insert({ rasika_id: user.id, ...updateData });
   }
 
   return true;

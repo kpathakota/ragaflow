@@ -18,17 +18,19 @@ export function SessionPlayer({
   track,
   ragam,
   scenario,
+  initialDuration,
 }: {
   track: Track;
   ragam: Ragam | undefined;
   scenario: Scenario;
+  initialDuration?: number;
 }) {
   const config = scenarioMap[scenario];
   const accent = config.accent;
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
 
-  const [duration, setDuration] = useState(25);
+  const [duration, setDuration] = useState(initialDuration ?? 25);
   const [remaining, setRemaining] = useState(0);
   const [session, setSession] = useState<SessionState>("idle");
   const [isFavorite, setIsFavorite] = useState(false);
@@ -132,10 +134,10 @@ export function SessionPlayer({
 
   const handleSetDefault = useCallback(async () => {
     if (!user) return;
-    await setDefaultTrackClient(scenario, track.id);
+    await setDefaultTrackClient(scenario, track.id, duration * 60);
     setDefaultSet(true);
     setShowDefaultPrompt(false);
-  }, [user, scenario, track.id]);
+  }, [user, scenario, track.id, duration]);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;

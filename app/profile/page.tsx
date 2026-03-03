@@ -14,7 +14,7 @@ type Stats = {
   sessionCount: number;
 };
 
-type DefaultTrack = { scenario: Scenario; track: Track };
+type DefaultTrack = { scenario: Scenario; track: Track; durationSeconds: number | null };
 
 type CertProgress = {
   ragamId: string;
@@ -56,10 +56,10 @@ export default function ProfilePage() {
         if (!p) return;
 
         // Fetch default tracks
-        const mapping: [Scenario, string | null][] = [
-          ["focus", p.default_focus_track],
-          ["sleep", p.default_sleep_track],
-          ["meditate", p.default_meditate_track],
+        const mapping: [Scenario, string | null, number | null][] = [
+          ["focus", p.default_focus_track, p.default_focus_duration],
+          ["sleep", p.default_sleep_track, p.default_sleep_duration],
+          ["meditate", p.default_meditate_track, p.default_meditate_duration],
         ];
         const trackIds = mapping
           .filter(([, id]) => id)
@@ -74,9 +74,9 @@ export default function ProfilePage() {
           .then(({ data: tracks }) => {
             if (!tracks) return;
             const result: DefaultTrack[] = [];
-            for (const [scenario, trackId] of mapping) {
+            for (const [scenario, trackId, dur] of mapping) {
               const track = tracks.find((t: Track) => t.id === trackId);
-              if (track) result.push({ scenario, track: track as Track });
+              if (track) result.push({ scenario, track: track as Track, durationSeconds: dur });
             }
             setDefaults(result);
           });
@@ -261,15 +261,16 @@ export default function ProfilePage() {
               Default tracks
             </h2>
             <div className="flex flex-col gap-2">
-              {defaults.map(({ scenario, track }) => {
+              {defaults.map(({ scenario, track, durationSeconds }) => {
                 const cfg = scenarios.find((s) => s.key === scenario)!;
+                const durationMin = durationSeconds ? Math.round(durationSeconds / 60) : null;
                 return (
                   <div
                     key={scenario}
                     className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-3"
                   >
                     <span className={`text-sm font-medium ${cfg.accent.text}`}>
-                      {cfg.label}
+                      {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
                     </span>
                     <span className="text-sm text-neutral-400">
                       {track.title}
