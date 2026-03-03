@@ -323,16 +323,43 @@ Inspired by SLEEP by Max Richter's cosmic/celestial theme, but adapted for India
 
 ## Monetization
 
-**Primary model: Free streaming + paid downloads + listening gate**
+**Primary model: Free + Premium tracks with a 10-hour listening gate**
 
-- **Streaming is free** — any rasika can stream any track (after creating an account)
-- **Downloads are paid** — only subscribed rasikas can download tracks for offline use
-- **10-hour gate** — after 10 cumulative hours of streaming, a rasika must subscribe to continue. Tracked via `totalListeningSeconds` on the rasika record
-- Subscription pricing and billing provider TBD
+### Track access model
 
-Additional options to consider later:
+- **Free tracks** (`free: true`) — ~5–10 tracks, always playable by any rasika, no subscription required, no gate
+- **Premium tracks** (`free: false`) — the rest of the library. Playable by everyone for free until the 10-hour gate, then subscription-only
+- **Transparency principle:** rasikas always know what's free vs. premium before tapping. Premium tracks show a subtle "Premium" tag on track cards at all times — not just after the gate
+
+### The 10-hour gate
+
+- **Metric:** raw `totalListeningSeconds` — the sum of `duration_seconds` from all `listening_sessions`. Same number already displayed in profile stats. Not filtered through certification counting rules.
+- **Under 10 hours:** all tracks playable, premium tracks tagged but not blocked
+- **Over 10 hours + not subscribed:** premium tracks greyed out on track lists with a subscribe CTA. Free tracks always playable. Profile, listening journey, and favorites remain accessible.
+- **Subscribed rasikas:** all tracks playable regardless of hours
+
+### Subscription tiers
+
+| Tier | Price | Notes |
+|------|-------|-------|
+| Monthly | $5/mo | "Buy us a coffee" |
+| Yearly | $30/yr | "Buy an album from us" |
+| Lifetime | $100 | One-time, permanent access |
+| Sponsor | $300 | Investor tier — call with artists, raga requests. Handled outside the app as a relationship tier, no in-app differentiation from lifetime |
+
+### Subscribe visibility
+
+- Subscribe link visible in profile from day one for all non-subscribed rasikas
+- Subscribed rasikas see their plan status instead (e.g., "Premium · $30/yr")
+
+### Downloads (deferred)
+
+- Offline playback is a future PWA/iOS feature — not file downloads
+- `download_url` remains in the schema for future use
+- No download UI in Phase 2
+
+### Additional options (future)
 - Tip jar / patronage (support the artists directly)
-- One-time lifetime purchase tier
 
 ---
 
@@ -372,20 +399,30 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 - Certification system (Bronze → Platinum)
 - Google Drive sync for content management
 
-### Phase 2
-- iOS app with background audio
-- Drone tuning options (432Hz, 528Hz, custom)
-- Wake Up mode
-- Adaptive playback (learns preferences)
-- Payments
+### Phase 2 — Payments, Access Control & Polish
+- Subscription billing (Stripe / RevenueCat — TBD after research)
+- `subscription_status` on rasika record
+- Premium badge on track cards (transparency from day one)
+- Subscribe link in profile
+- 10-hour listening gate enforcement (premium tracks gated, free tracks always open)
+- Test mode for non-production environments (30s timer option for QA)
+- Track variant switching (percussion toggle, frequency selector) — *needs PM discussion*
 
-### Phase 3
+### Phase 3 — iOS App
+- Native SwiftUI + AVFoundation with background audio
+- Feature parity with web (scenarios, timers, favorites, progress)
+- RevenueCat for App Store billing (if chosen in Phase 2 research)
+- Offline playback via PWA or native caching
+
+### Phase 4 — Polish & Growth
 - Apple Watch integration
 - Journal / mood tracking
+- Adaptive playback (learns preferences)
 - Expanded library (50+ Ragams)
-- Offline mode
 - Social sharing of certifications
 - CarPlay support
+- Wake Up mode
+- Drone tuning options (432Hz, 528Hz, custom)
 
 ---
 
@@ -400,10 +437,18 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 - **Recording workflow:** Recordings will be a minimum 90mins long and be converted to FLAC/OPUS before uploading to google drive. 
 - **Subscription pricing:** I want this to be like buying an album from us yearly ($30) or buying a coffee monthly ($5), $100 lifetime access, $300 sponsor access (investor tier/call with artists/raga requests). We'll eventually figure out how much we need to make to make this worthwhile but that depends on other sources of income really. 
 
+### Resolved (monetization & access model — 2026-03-03)
+- **Access model:** Free tracks always playable, premium tracks gated after 10 hours of total listening
+- **Gate metric:** Raw `totalListeningSeconds` (sum of all session durations), not certification-filtered time
+- **UX:** Transparency — premium tracks always tagged, never a surprise. Soft gate — free tracks always accessible.
+- **Subscription tiers:** $5/mo, $30/yr, $100 lifetime, $300 sponsor (sponsor handled outside app)
+- **Downloads:** Deferred — offline playback is a future PWA/iOS feature, not file downloads
+- **Subscribe visibility:** Profile link from day one, not hidden behind the gate
+
 ### Open
 
 1. **Tag vocabulary:** Full initial curated list of emotion/mood tags
-2. **Billing provider:** Stripe, RevenueCat, etc.
+2. **Billing provider:** Stripe vs. RevenueCat vs. others — needs research (must support web + future iOS App Store billing)
 
 ### Resolved (listening time counting rules — 2026-02-18)
 - **Focus:** Only completed sessions count (timer must fire naturally — 100% threshold, no partial credit)

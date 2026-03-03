@@ -375,10 +375,7 @@ Two sub-tasks, both complete:
 - Description kept on card (line-clamped)
 - Session player unchanged
 
-**Task 1.10: Paywall Gate (moved to phase 2)**
-- Track cumulative listening time per rasika
-- After 10 hours: prompt to subscribe
-- Streaming free up to gate, downloads always paid
+**Task 1.10: Paywall Gate** *(moved to Phase 2 — see Tasks 2.2–2.6)*
 
 **Task 1.12: Dev/Staging Environment Separation** ✅ *(completed 2026-02-20)*
 - Staging Supabase project created (`ragaflow-staging`)
@@ -389,20 +386,92 @@ Two sub-tasks, both complete:
   - **Production** (main) → production Supabase
 - Verified: dev branch preview deploys use staging DB, production unaffected
 
-### Phase 2: Payments, Track Variants & Polish
+### Phase 2: Payments, Access Control & Polish
 
-**Task 2.1: Stripe Integration**
-- Subscription tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
-- Checkout, webhooks, subscription status sync to Supabase
+#### Decisions (captured 2026-03-03)
 
-**Task 2.2: Track Variant Switching**
-- needs more PM discussion to close. 
+- **Free tracks** (`free: true`): no badge, always playable, never gated
+- **Premium tracks** (`free: false`): subtle "Premium" tag on track cards, playable for free until the 10-hour gate
+- **After 10 hours**: premium tracks greyed out with Premium tag, tap shows subscribe CTA. Free tracks unchanged.
+- **Gate metric**: raw `totalListeningSeconds` (sum of `duration_seconds` from all sessions) — same number already shown in profile stats. NOT filtered through `computeCountableSeconds`.
+- **Subscribe visibility**: subscribe link in profile from day one, regardless of gate status
+- **No hard block**: rasikas can always access free tracks, their profile, and their listening journey
+- **Transparency principle**: rasikas should always know what's free vs. premium before tapping — no bait-and-switch
+- **Downloads deferred**: offline playback is a future PWA/iOS feature, not file downloads. `download_url` stays in schema but no UI yet.
+- **Sponsor tier ($300)**: relationship/investor tier handled outside the app — no in-app differentiation from lifetime
+- **Billing provider**: needs research (Stripe vs. RevenueCat vs. others) — must support web + future iOS App Store billing
+
+#### Tasks
+
+**Task 2.0: Test Mode (Non-Production Only)**
+- Add a 30-second timer option to the session player duration selector in non-production environments
+- Gate on `NEXT_PUBLIC_SUPABASE_URL` containing the staging project ID, or a dedicated `NEXT_PUBLIC_TEST_MODE` env var
+- In `session-player.tsx`, prepend `0.5` (30s) to `DURATION_OPTIONS` when test mode is active
+- Display as "30s" in the duration pill row; all existing logic (start session, end session, certification upsert) works unchanged since duration is already in seconds internally
+- **Why:** Testing the gate, certifications, and completion flows currently requires waiting 5+ real minutes per session. A 30s option makes manual QA and demos practical.
+- **Acceptance criteria:**
+  - 30s pill appears on staging/local but NOT on production
+  - Selecting 30s starts a real session, counts toward certifications per scenario rules
+  - Timer counts down from 0:30, triggers completion at 0:00
+  - No UI or logic changes in production builds
+
+**Task 2.1: Research — Billing Provider**
+- Research Stripe, RevenueCat, and alternatives for subscription billing
+- Requirements: web checkout, iOS App Store billing (future), webhook-based status sync to Supabase, support for monthly/yearly/lifetime tiers
+- Output: recommendation with trade-offs documented here in dev-design.md
+- *This is a research task — no code.*
+
+**Task 2.2: Schema — Subscription Status + Premium Tracks**
+- Add `subscription_status` to rasika record (e.g., `free`, `subscribed`, `lifetime`, `expired`)
+- Decide where this lives — new column on `rasika_preferences`, or a separate `subscriptions` table (depends on billing provider webhook shape)
+- Mark ~5–10 existing seed tracks as `free: true`, rest as `free: false`
+- Update seed SQL
+- Migration + RLS policies
+- **Acceptance criteria:**
+  - `subscription_status` queryable for the current rasika
+  - `free` boolean is set on all tracks in seed data
+
+**Task 2.3: UI — Premium Badge on Track Cards**
+- Show a subtle "Premium" tag on track cards where `free: false`
+- Visible always (not just after the gate) — transparency principle
+- Tag should be unobtrusive: small text, muted color, doesn't dominate the card
+- Appears on scenario track lists (`/mode/*`) and explore page
+- **Acceptance criteria:**
+  - Premium tag visible on non-free tracks
+  - Free tracks have no badge
+  - No change to session player (that's Task 2.5)
+
+**Task 2.4: UI — Subscribe Link in Profile**
+- Add a "Subscribe" or "Go Premium" card/link to the profile page
+- Visible from day one for all non-subscribed rasikas
+- Initially links to a placeholder (no checkout yet — that depends on Task 2.1 billing research)
+- For subscribed rasikas: show subscription status instead (e.g., "Premium · $30/yr")
+- **Acceptance criteria:**
+  - Non-subscribed rasikas see a subscribe CTA on profile
+  - Subscribed rasikas see their plan status
+  - Works with the `subscription_status` field from Task 2.2
+
+**Task 2.5: Access Control — 10-Hour Listening Gate**
+- Compute total listening seconds for the current rasika (raw sum of `duration_seconds` from `listening_sessions`)
+- If ≥ 36,000 seconds (10 hours) AND rasika is not subscribed:
+  - Premium tracks on track lists: greyed out, Premium tag, not tappable (or tap shows subscribe CTA)
+  - Free tracks: unchanged, always playable
+- Session player: if a premium track is somehow reached while gated, show subscribe CTA instead of play button
+- **Acceptance criteria:**
+  - Under 10 hours: all tracks playable, premium tagged but not blocked
+  - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected
+  - Subscribed rasikas: all tracks playable regardless of hours
+
+**Task 2.6: Billing Integration (depends on 2.1 research)**
+- Integrate chosen billing provider
+- Checkout flow for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
+- Webhook to update `subscription_status` in Supabase
+- **Blocked on Task 2.1 — scope will be refined after billing research**
+
+**Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector
 - Seamless switching with position preservation
-
-**Task 2.3: Access Control**
-- Enforce 10-hour gate for free rasikas
-- Paid downloads with signed URLs
+- *Deferred — not blocking payments/gating work*
 
 ### Phase 3: iOS App
 
