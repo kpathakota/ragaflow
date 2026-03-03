@@ -47,7 +47,42 @@
 
 ---
 
-## Core Philosophy: Pure, Unprocessed Audio
+## Git & Pull Request Workflow
+
+### Branches
+
+| Branch | Purpose | Who pushes |
+|--------|---------|------------|
+| `main` | Production — deploys to Vercel production | Human only (via PR merge) |
+| `dev` | Integration — deploys to Vercel preview | Human merges PRs here |
+| `fix/*`, `feat/*` | Feature/fix branches — one per task | Claude Code or human |
+
+### How a task flows
+
+1. **Start from `dev`** — pull latest `dev`, create a feature branch (`fix/foo` or `feat/bar`)
+2. **Do the work** — make commits on the feature branch
+3. **Push & open PR against `dev`** — one PR per logical task, keep it small and focused
+4. **Human reviews & merges** — squash-merge or regular merge into `dev`
+5. **GitHub deletes the remote branch** — remote branch is cleaned up on merge
+6. **Periodic cleanup** — fetch with prune, delete local branches whose remotes are gone (`git branch -d`)
+7. **Deploy to production** — human merges `dev` → `main` when ready (separate PR or fast-forward)
+
+### Conventions
+
+- **Never commit directly to `main`** — all changes go through PRs
+- **Never commit directly to `dev`** — use feature branches + PRs (exception: trivial doc-only changes)
+- **One PR per logical task** — smaller PRs are easier to review and less likely to conflict
+- **Rebase `dev` onto `main` frequently** — small rebases are trivial; large ones bring back deleted files
+- **Clean up stale branches** — after PRs are merged, run `git fetch --prune origin` and delete local branches marked `gone`
+
+### Branch naming
+
+- `fix/` — bug fixes and polish (e.g., `fix/tier-colors-and-rename`)
+- `feat/` — new features (e.g., `feat/default-duration`)
+
+---
+
+
 
 The entire system is built around delivering **pure, human-performed audio with zero computational processing**. No pitch shifting, no real-time mixing, no stems. Every variant (frequency, percussion) is recorded separately by the artists and stored as complete tracks.
 
