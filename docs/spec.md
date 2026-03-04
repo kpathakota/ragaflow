@@ -68,6 +68,11 @@ Tags are a curated editorial vocabulary. Examples: `grounding`, `elation`, `empa
 
 ### 1. Timer Modes
 
+#### Timer Duration (all scenarios)
+- 3-pill selector: **25 min** · **45 min** · **Custom** (1–120 min, persisted per rasika)
+- Custom pill shows last-used value; tapping opens inline input to change
+- Replaces the old 4-pill hardcoded options (5, 15, 25, 45)
+
 #### Focus Timer
 - Pomodoro-style or custom duration
 - Visual progress indicator
@@ -87,7 +92,6 @@ Tags are a curated editorial vocabulary. Examples: `grounding`, `elation`, `empa
 
 #### Meditation Timer
 - Interval bells (optional)
-- Session length presets (5, 10, 20, 30, 60 min)
 - Breath pacer overlay (optional)
 
 #### Open Play
@@ -405,7 +409,7 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 - Premium badge on track cards (transparency from day one)
 - Subscribe link in profile
 - 10-hour listening gate enforcement (premium tracks gated, free tracks always open)
-- Test mode for non-production environments (30s timer option for QA)
+- Flexible timer durations (25 · 45 · custom 1–120 min, replaces hardcoded options and test mode)
 - Track variant switching (percussion toggle, frequency selector) — *needs PM discussion*
 
 ### Phase 3 — iOS App

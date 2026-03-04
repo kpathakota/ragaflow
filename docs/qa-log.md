@@ -6,6 +6,22 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 2.0a — Schema: add custom_duration to rasika_preferences
+**Commit:** 3066d20
+**Date:** 2026-03-04
+**Status:** Pending verification
+
+### Manual checks
+- [ ] `custom_duration` column exists on `rasika_preferences` after running migration 006
+- [ ] Column is nullable integer, no default value
+- [ ] Existing rows unaffected (custom_duration is NULL)
+
+### Supabase / infra steps
+- [ ] Run `supabase/migrations/006_custom_duration.sql` in staging SQL editor
+- [ ] Run `supabase/migrations/006_custom_duration.sql` in production SQL editor
+
+---
+
 ## Task 1.6 — Cloud Storage: Cloudflare R2
 
 **Commit:** (pending)
