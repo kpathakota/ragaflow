@@ -6,11 +6,11 @@ import type { Track, Ragam, Scenario } from "@/lib/types";
 import { scenarioMap } from "@/components/scenario-config";
 import { useAuth } from "@/lib/auth/auth-context";
 import { toggleFavoriteTrackClient, getPreferencesClient } from "@/lib/favorites";
-import { setDefaultTrackClient } from "@/lib/preferences";
+import { setDefaultTrackClient, setCustomDurationClient } from "@/lib/preferences";
 import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
-const DURATION_OPTIONS = [5, 15, 25, 45];
+const FIXED_DURATIONS = [25, 45];
 
 type SessionState = "idle" | "running" | "paused" | "complete";
 
@@ -38,11 +38,19 @@ export function SessionPlayer({
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
+  const [customDuration, setCustomDuration] = useState<number | null>(
+    initialDuration && !FIXED_DURATIONS.includes(initialDuration) ? initialDuration : null
+  );
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customInputValue, setCustomInputValue] = useState("");
 
   useEffect(() => {
     if (!user) return;
     getPreferencesClient().then((prefs) => {
-      if (prefs) setIsFavorite(prefs.favorite_tracks.includes(track.id));
+      if (prefs) {
+        setIsFavorite(prefs.favorite_tracks.includes(track.id));
+        if (prefs.custom_duration) setCustomDuration(prefs.custom_duration);
+      }
     });
   }, [user, track.id]);
 
@@ -207,14 +215,14 @@ export function SessionPlayer({
 
         {session === "idle" && (
           <>
-            <div className="flex gap-2">
-              {DURATION_OPTIONS.map((d) => (
+            <div className="flex items-center gap-2">
+              {FIXED_DURATIONS.map((d) => (
                 <button
                   key={d}
                   type="button"
-                  onClick={() => setDuration(d)}
+                  onClick={() => { setDuration(d); setShowCustomInput(false); }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    duration === d
+                    duration === d && !showCustomInput
                       ? `${accent.bg} text-white`
                       : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                   }`}
@@ -222,6 +230,57 @@ export function SessionPlayer({
                   {d}m
                 </button>
               ))}
+              {!showCustomInput ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomInput(true);
+                    setCustomInputValue(customDuration?.toString() ?? "");
+                    if (customDuration) setDuration(customDuration);
+                  }}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    !FIXED_DURATIONS.includes(duration)
+                      ? `${accent.bg} text-white`
+                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                  }`}
+                >
+                  {customDuration ? `${customDuration}m` : "…"}
+                </button>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const val = parseInt(customInputValue, 10);
+                    if (val >= 1 && val <= 120) {
+                      setCustomDuration(val);
+                      setDuration(val);
+                      setShowCustomInput(false);
+                      if (user) setCustomDurationClient(val);
+                    }
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    autoFocus
+                    value={customInputValue}
+                    onChange={(e) => setCustomInputValue(e.target.value)}
+                    onBlur={() => {
+                      const val = parseInt(customInputValue, 10);
+                      if (val >= 1 && val <= 120) {
+                        setCustomDuration(val);
+                        setDuration(val);
+                        if (user) setCustomDurationClient(val);
+                      }
+                      setShowCustomInput(false);
+                    }}
+                    className="w-14 rounded-full bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-100 outline-none focus:ring-1 focus:ring-neutral-600"
+                    placeholder="min"
+                  />
+                </form>
+              )}
             </div>
             <button
               type="button"
