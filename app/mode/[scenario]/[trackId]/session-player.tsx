@@ -11,6 +11,18 @@ import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
 const FIXED_DURATIONS = [25, 45];
+const LAST_DURATION_KEY = "ragaflow:lastDuration";
+
+function getLastDuration(): number | null {
+  try {
+    const v = parseInt(localStorage.getItem(LAST_DURATION_KEY) ?? "", 10);
+    return v >= 1 && v <= 120 ? v : null;
+  } catch { return null; }
+}
+
+function saveLastDuration(minutes: number) {
+  try { localStorage.setItem(LAST_DURATION_KEY, String(minutes)); } catch {}
+}
 
 type SessionState = "idle" | "running" | "paused" | "complete";
 
@@ -30,7 +42,11 @@ export function SessionPlayer({
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
 
-  const [duration, setDuration] = useState(initialDuration ?? 25);
+  const [duration, setDurationRaw] = useState(() => initialDuration ?? getLastDuration() ?? 25);
+  const setDuration = useCallback((d: number) => {
+    setDurationRaw(d);
+    saveLastDuration(d);
+  }, []);
   const [remaining, setRemaining] = useState(0);
   const [session, setSession] = useState<SessionState>("idle");
   const [isFavorite, setIsFavorite] = useState(false);
@@ -38,9 +54,10 @@ export function SessionPlayer({
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
-  const [customDuration, setCustomDuration] = useState<number | null>(
-    initialDuration && !FIXED_DURATIONS.includes(initialDuration) ? initialDuration : null
-  );
+  const [customDuration, setCustomDuration] = useState<number | null>(() => {
+    const init = initialDuration ?? getLastDuration();
+    return init && !FIXED_DURATIONS.includes(init) ? init : null;
+  });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customInputValue, setCustomInputValue] = useState("");
 
@@ -49,7 +66,9 @@ export function SessionPlayer({
     getPreferencesClient().then((prefs) => {
       if (prefs) {
         setIsFavorite(prefs.favorite_tracks.includes(track.id));
-        if (prefs.custom_duration) setCustomDuration(prefs.custom_duration);
+        if (prefs.custom_duration) {
+          setCustomDuration(prefs.custom_duration);
+        }
       }
     });
   }, [user, track.id]);
