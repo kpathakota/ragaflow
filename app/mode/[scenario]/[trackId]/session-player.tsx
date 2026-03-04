@@ -6,11 +6,23 @@ import type { Track, Ragam, Scenario } from "@/lib/types";
 import { scenarioMap } from "@/components/scenario-config";
 import { useAuth } from "@/lib/auth/auth-context";
 import { toggleFavoriteTrackClient, getPreferencesClient } from "@/lib/favorites";
-import { setDefaultTrackClient } from "@/lib/preferences";
+import { setDefaultTrackClient, setCustomDurationClient } from "@/lib/preferences";
 import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
-const DURATION_OPTIONS = [5, 15, 25, 45];
+const FIXED_DURATIONS = [25, 45];
+const LAST_DURATION_KEY = "ragaflow:lastDuration";
+
+function getLastDuration(): number | null {
+  try {
+    const v = parseInt(localStorage.getItem(LAST_DURATION_KEY) ?? "", 10);
+    return v >= 1 && v <= 120 ? v : null;
+  } catch { return null; }
+}
+
+function saveLastDuration(minutes: number) {
+  try { localStorage.setItem(LAST_DURATION_KEY, String(minutes)); } catch {}
+}
 
 type SessionState = "idle" | "running" | "paused" | "complete";
 
@@ -18,17 +30,23 @@ export function SessionPlayer({
   track,
   ragam,
   scenario,
+  initialDuration,
 }: {
   track: Track;
   ragam: Ragam | undefined;
   scenario: Scenario;
+  initialDuration?: number;
 }) {
   const config = scenarioMap[scenario];
   const accent = config.accent;
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
 
-  const [duration, setDuration] = useState(25);
+  const [duration, setDurationRaw] = useState(() => initialDuration ?? getLastDuration() ?? 25);
+  const setDuration = useCallback((d: number) => {
+    setDurationRaw(d);
+    saveLastDuration(d);
+  }, []);
   const [remaining, setRemaining] = useState(0);
   const [session, setSession] = useState<SessionState>("idle");
   const [isFavorite, setIsFavorite] = useState(false);
@@ -36,11 +54,22 @@ export function SessionPlayer({
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
+  const [customDuration, setCustomDuration] = useState<number | null>(() => {
+    const init = initialDuration ?? getLastDuration();
+    return init && !FIXED_DURATIONS.includes(init) ? init : null;
+  });
+  const [showCustomInput, setShowCustomInput] = useState(false);
+  const [customInputValue, setCustomInputValue] = useState("");
 
   useEffect(() => {
     if (!user) return;
     getPreferencesClient().then((prefs) => {
-      if (prefs) setIsFavorite(prefs.favorite_tracks.includes(track.id));
+      if (prefs) {
+        setIsFavorite(prefs.favorite_tracks.includes(track.id));
+        if (prefs.custom_duration) {
+          setCustomDuration(prefs.custom_duration);
+        }
+      }
     });
   }, [user, track.id]);
 
@@ -132,10 +161,10 @@ export function SessionPlayer({
 
   const handleSetDefault = useCallback(async () => {
     if (!user) return;
-    await setDefaultTrackClient(scenario, track.id);
+    await setDefaultTrackClient(scenario, track.id, duration * 60);
     setDefaultSet(true);
     setShowDefaultPrompt(false);
-  }, [user, scenario, track.id]);
+  }, [user, scenario, track.id, duration]);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
@@ -176,43 +205,43 @@ export function SessionPlayer({
         </p>
       </div>
 
-      {/* Visual zone — replace contents with animation when ready */}
-      <div className="flex flex-1 items-center justify-center overflow-hidden">
+      {/* Visual zone — fixed height so artist note doesn't resize it */}
+      <div className="relative flex flex-1 items-center justify-center overflow-hidden">
         <div className={`h-56 w-56 rounded-full ${accent.bg} opacity-20 blur-3xl`} />
-      </div>
 
-      {/* Artist note — expandable, hidden if empty */}
-      {track.artist_note && session !== "complete" && (
-        <div className="mb-6">
-          <button
-            type="button"
-            onClick={() => setNoteExpanded((v) => !v)}
-            className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
-          >
-            <span>{noteExpanded ? "▴" : "▾"}</span>
-            <span>From the session</span>
-          </button>
-          {noteExpanded && (
-            <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
-              {track.artist_note}
-            </p>
-          )}
-        </div>
-      )}
+        {/* Artist note — overlays bottom of visual zone */}
+        {track.artist_note && session !== "complete" && (
+          <div className="absolute inset-x-0 bottom-0 px-1">
+            <button
+              type="button"
+              onClick={() => setNoteExpanded((v) => !v)}
+              className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
+            >
+              <span>{noteExpanded ? "▴" : "▾"}</span>
+              <span>From the session</span>
+            </button>
+            {noteExpanded && (
+              <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
+                {track.artist_note}
+              </p>
+            )}
+          </div>
+        )}
+      </div>
 
       {/* Controls — bottom third */}
       <div className="flex flex-col items-center gap-5">
 
         {session === "idle" && (
           <>
-            <div className="flex gap-2">
-              {DURATION_OPTIONS.map((d) => (
+            <div className="flex items-center gap-2">
+              {FIXED_DURATIONS.map((d) => (
                 <button
                   key={d}
                   type="button"
-                  onClick={() => setDuration(d)}
+                  onClick={() => { setDuration(d); setShowCustomInput(false); }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    duration === d
+                    duration === d && !showCustomInput
                       ? `${accent.bg} text-white`
                       : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
                   }`}
@@ -220,6 +249,57 @@ export function SessionPlayer({
                   {d}m
                 </button>
               ))}
+              {!showCustomInput ? (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCustomInput(true);
+                    setCustomInputValue(customDuration?.toString() ?? "");
+                    if (customDuration) setDuration(customDuration);
+                  }}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    !FIXED_DURATIONS.includes(duration)
+                      ? `${accent.bg} text-white`
+                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                  }`}
+                >
+                  {customDuration ? `${customDuration}m` : "…"}
+                </button>
+              ) : (
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    const val = parseInt(customInputValue, 10);
+                    if (val >= 1 && val <= 120) {
+                      setCustomDuration(val);
+                      setDuration(val);
+                      setShowCustomInput(false);
+                      if (user) setCustomDurationClient(val);
+                    }
+                  }}
+                  className="flex items-center gap-1"
+                >
+                  <input
+                    type="number"
+                    min={1}
+                    max={120}
+                    autoFocus
+                    value={customInputValue}
+                    onChange={(e) => setCustomInputValue(e.target.value)}
+                    onBlur={() => {
+                      const val = parseInt(customInputValue, 10);
+                      if (val >= 1 && val <= 120) {
+                        setCustomDuration(val);
+                        setDuration(val);
+                        if (user) setCustomDurationClient(val);
+                      }
+                      setShowCustomInput(false);
+                    }}
+                    className="w-14 rounded-full bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-100 outline-none focus:ring-1 focus:ring-neutral-600"
+                    placeholder="min"
+                  />
+                </form>
+              )}
             </div>
             <button
               type="button"
@@ -267,8 +347,21 @@ export function SessionPlayer({
         )}
 
         {session === "complete" && (
-          <div className="flex flex-col items-center gap-4 text-center">
-            <p className="text-lg font-medium text-neutral-200">Session complete</p>
+          <div className="flex flex-col items-center gap-6 text-center">
+            {/* Completion badge */}
+            <div className={`flex h-20 w-20 items-center justify-center rounded-full ${accent.bg} bg-opacity-20`}>
+              <span className="text-3xl">✓</span>
+            </div>
+
+            {/* Session summary */}
+            <div>
+              <p className={`text-lg font-semibold ${accent.text}`}>
+                {duration} minutes of {config.label.toLowerCase()}
+              </p>
+              <p className="mt-1 text-sm text-neutral-500">
+                {ragam?.name ?? track.title}
+              </p>
+            </div>
 
             {showDefaultPrompt && !defaultSet && (
               <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4">

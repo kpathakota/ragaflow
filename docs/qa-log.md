@@ -6,6 +6,43 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 2.0b+c — Flexible timer: data layer + UI
+**Commit:** (pending)
+**Date:** 2026-03-04
+**Status:** Pending verification
+
+### Manual checks
+- [ ] Session player shows 3 pills: 25m · 45m · … (when no custom value saved)
+- [ ] Tapping "…" opens an inline number input (auto-focused)
+- [ ] Entering a value (e.g. 90) and pressing Enter/blurring sets it as the duration and shows "90m" on the pill
+- [ ] Values outside 1–120 are rejected (input has min/max)
+- [ ] Custom value persists across page reloads (saved to Supabase)
+- [ ] When returning to the session player, the custom pill shows the saved value (e.g. "90m")
+- [ ] Selecting 25 or 45 after setting a custom value works — custom pill stays but isn't highlighted
+- [ ] Setting custom to 1 works (QA shortcut for fast session testing)
+- [ ] Starting a session with a custom duration works: timer counts down, completion fires, certification upserts
+- [ ] "Set as default" on completion captures the custom duration correctly
+- [ ] Homepage quick-play with a non-25/45 default pre-selects the custom pill on the session player
+- [ ] Non-authenticated rasikas see 25m · 45m · … (custom saves silently fail, no crash)
+
+---
+
+## Task 2.0a — Schema: add custom_duration to rasika_preferences
+**Commit:** 3066d20
+**Date:** 2026-03-04
+**Status:** Pending verification
+
+### Manual checks
+- [x] `custom_duration` column exists on `rasika_preferences` after running migration 006
+- [x] Column is nullable integer, no default value
+- [x] Existing rows unaffected (custom_duration is NULL)
+
+### Supabase / infra steps
+- [x] Run `supabase/migrations/006_custom_duration.sql` in staging SQL editor
+- [x] Run `supabase/migrations/006_custom_duration.sql` in production SQL editor
+
+---
+
 ## Task 1.6 — Cloud Storage: Cloudflare R2
 
 **Commit:** (pending)

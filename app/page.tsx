@@ -7,7 +7,7 @@ import type { RasikaPreferences, Track, Scenario } from "@/lib/types";
 
 async function getPreferencesAndFavorites(): Promise<{
   prefs: RasikaPreferences | null;
-  defaults: { scenario: Scenario; track: Track }[];
+  defaults: { scenario: Scenario; track: Track; durationSeconds: number | null }[];
   user: boolean;
 }> {
   const supabase = await createClient();
@@ -27,17 +27,17 @@ async function getPreferencesAndFavorites(): Promise<{
   const prefs = data as RasikaPreferences | null;
   if (!prefs) return { prefs: null, defaults: [], user: true };
 
-  const defaults: { scenario: Scenario; track: Track }[] = [];
-  const mapping: [Scenario, string | null][] = [
-    ["focus", prefs.default_focus_track],
-    ["sleep", prefs.default_sleep_track],
-    ["meditate", prefs.default_meditate_track],
+  const defaults: { scenario: Scenario; track: Track; durationSeconds: number | null }[] = [];
+  const mapping: [Scenario, string | null, number | null][] = [
+    ["focus", prefs.default_focus_track, prefs.default_focus_duration],
+    ["sleep", prefs.default_sleep_track, prefs.default_sleep_duration],
+    ["meditate", prefs.default_meditate_track, prefs.default_meditate_duration],
   ];
 
-  for (const [scenario, trackId] of mapping) {
+  for (const [scenario, trackId, dur] of mapping) {
     if (trackId) {
       const track = await getTrackById(trackId);
-      if (track) defaults.push({ scenario, track });
+      if (track) defaults.push({ scenario, track, durationSeconds: dur });
     }
   }
 
@@ -66,12 +66,16 @@ export default async function Home() {
             <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
               Quick play
             </h2>
-            {defaults.map(({ scenario, track }) => {
+            {defaults.map(({ scenario, track, durationSeconds }) => {
               const cfg = scenarios.find((s) => s.key === scenario)!;
+              const durationMin = durationSeconds ? Math.round(durationSeconds / 60) : null;
+              const href = durationMin
+                ? `/mode/${scenario}/${track.id}?d=${durationMin}`
+                : `/mode/${scenario}/${track.id}`;
               return (
                 <Link
                   key={scenario}
-                  href={`/mode/${scenario}/${track.id}`}
+                  href={href}
                   className={`flex items-center gap-3 rounded-xl border ${cfg.accent.border} bg-neutral-900/60 px-5 py-4 transition-colors ${cfg.accent.borderHover}`}
                 >
                   <span
@@ -81,7 +85,7 @@ export default async function Home() {
                   </span>
                   <div>
                     <p className={`text-sm font-medium ${cfg.accent.text}`}>
-                      {cfg.label}
+                      {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
                     </p>
                     <p className="text-xs text-neutral-400">{track.title}</p>
                   </div>

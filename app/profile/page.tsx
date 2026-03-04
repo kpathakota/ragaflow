@@ -7,14 +7,14 @@ import { NavHeader } from "@/components/nav-header";
 import { createClient } from "@/lib/supabase/client";
 import { scenarios } from "@/components/scenario-config";
 import type { RasikaPreferences, Scenario, Track } from "@/lib/types";
-import { computeRagamProgress, getTierInfo } from "@/lib/certifications";
+import { computeRagamProgress, getTierInfo, getTierColor } from "@/lib/certifications";
 
 type Stats = {
   totalSeconds: number;
   sessionCount: number;
 };
 
-type DefaultTrack = { scenario: Scenario; track: Track };
+type DefaultTrack = { scenario: Scenario; track: Track; durationSeconds: number | null };
 
 type CertProgress = {
   ragamId: string;
@@ -22,6 +22,7 @@ type CertProgress = {
   totalSeconds: number;
   currentLabel: string | null;
   nextLabel: string | null;
+  nextThreshold: number;
   progressPercent: number;
 };
 
@@ -56,10 +57,10 @@ export default function ProfilePage() {
         if (!p) return;
 
         // Fetch default tracks
-        const mapping: [Scenario, string | null][] = [
-          ["focus", p.default_focus_track],
-          ["sleep", p.default_sleep_track],
-          ["meditate", p.default_meditate_track],
+        const mapping: [Scenario, string | null, number | null][] = [
+          ["focus", p.default_focus_track, p.default_focus_duration],
+          ["sleep", p.default_sleep_track, p.default_sleep_duration],
+          ["meditate", p.default_meditate_track, p.default_meditate_duration],
         ];
         const trackIds = mapping
           .filter(([, id]) => id)
@@ -74,9 +75,9 @@ export default function ProfilePage() {
           .then(({ data: tracks }) => {
             if (!tracks) return;
             const result: DefaultTrack[] = [];
-            for (const [scenario, trackId] of mapping) {
+            for (const [scenario, trackId, dur] of mapping) {
               const track = tracks.find((t: Track) => t.id === trackId);
-              if (track) result.push({ scenario, track: track as Track });
+              if (track) result.push({ scenario, track: track as Track, durationSeconds: dur });
             }
             setDefaults(result);
           });
@@ -129,6 +130,7 @@ export default function ProfilePage() {
           totalSeconds: secs,
           currentLabel: tier.currentLabel,
           nextLabel: tier.nextLabel,
+          nextThreshold: tier.nextThreshold,
           progressPercent: tier.progressPercent,
         });
       }
@@ -215,38 +217,43 @@ export default function ProfilePage() {
           </section>
         )}
 
-        {/* Certifications */}
+        {/* Listening Journey */}
         {certs.length > 0 && (
           <section>
             <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
-              Certifications
+              Listening Journey
             </h2>
             <div className="flex flex-col gap-3">
-              {certs.map((c) => (
-                <div
-                  key={c.ragamId}
-                  className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
-                >
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-neutral-200">
-                      {c.ragamName}
-                    </span>
-                    <span className="text-xs text-neutral-500">
-                      {c.currentLabel ?? "—"}
-                    </span>
+              {certs.map((c) => {
+                const tierColor = getTierColor(c.currentLabel);
+                return (
+                  <div
+                    key={c.ragamId}
+                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-neutral-200">
+                        {c.ragamName}
+                      </span>
+                      <span className={`text-xs font-medium ${c.currentLabel ? tierColor.label : "text-neutral-500"}`}>
+                        {c.currentLabel ?? "—"}
+                      </span>
+                    </div>
+                    <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
+                      <div
+                        className={`h-full rounded-full ${tierColor.bar} transition-all`}
+                        style={{ width: `${c.progressPercent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-neutral-600">
+                      {formatDuration(c.totalSeconds)}
+                      {c.nextLabel
+                        ? ` — ${formatDuration(c.nextThreshold - c.totalSeconds)} to ${c.nextLabel}`
+                        : " — max tier reached"}
+                    </p>
                   </div>
-                  <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
-                    <div
-                      className="h-full rounded-full bg-neutral-500 transition-all"
-                      style={{ width: `${c.progressPercent}%` }}
-                    />
-                  </div>
-                  <p className="mt-2 text-xs text-neutral-600">
-                    {formatDuration(c.totalSeconds)}
-                    {c.nextLabel && ` — next: ${c.nextLabel}`}
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </section>
         )}
@@ -258,15 +265,16 @@ export default function ProfilePage() {
               Default tracks
             </h2>
             <div className="flex flex-col gap-2">
-              {defaults.map(({ scenario, track }) => {
+              {defaults.map(({ scenario, track, durationSeconds }) => {
                 const cfg = scenarios.find((s) => s.key === scenario)!;
+                const durationMin = durationSeconds ? Math.round(durationSeconds / 60) : null;
                 return (
                   <div
                     key={scenario}
                     className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-3"
                   >
                     <span className={`text-sm font-medium ${cfg.accent.text}`}>
-                      {cfg.label}
+                      {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
                     </span>
                     <span className="text-sm text-neutral-400">
                       {track.title}

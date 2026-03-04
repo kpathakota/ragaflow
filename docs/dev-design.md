@@ -12,7 +12,7 @@
 - Timer with `setInterval` in `useEffect`
 - Audio files served from `public/audio/{scenario}/`
 
-**Phase 1 (Foundation) — Nearly Complete**
+**Phase 1 (Foundation) — Complete**
 - Supabase auth (email sign-in/sign-up) with `AuthProvider` + `useAuth()` hook
 - Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasika_preferences, listening_sessions, certifications
 - Data layer: Supabase only (`lib/data.ts`), no local seed fallback — Supabase is required
@@ -41,13 +41,48 @@
 
 **Phase 2+ — Future**
 - Stripe payments + subscription tiers
-- Track variant switching (percussion toggle, frequency selector)
+- Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
 - Access control enforcement
 - iOS native app
 
 ---
 
-## Core Philosophy: Pure, Unprocessed Audio
+## Git & Pull Request Workflow
+
+### Branches
+
+| Branch | Purpose | Who pushes |
+|--------|---------|------------|
+| `main` | Production — deploys to Vercel production | Human only (via PR merge) |
+| `dev` | Integration — deploys to Vercel preview | Human merges PRs here |
+| `fix/*`, `feat/*` | Feature/fix branches — one per task | Claude Code or human |
+
+### How a task flows
+
+1. **Start from `dev`** — pull latest `dev`, create a feature branch (`fix/foo` or `feat/bar`)
+2. **Do the work** — make commits on the feature branch
+3. **Push & open PR against `dev`** — one PR per logical task, keep it small and focused
+4. **Human reviews & merges** — squash-merge or regular merge into `dev`
+5. **GitHub deletes the remote branch** — remote branch is cleaned up on merge
+6. **Periodic cleanup** — fetch with prune, delete local branches whose remotes are gone (`git branch -d`)
+7. **Deploy to production** — human merges `dev` → `main` when ready (separate PR or fast-forward)
+
+### Conventions
+
+- **Never commit directly to `main`** — all changes go through PRs
+- **Never commit directly to `dev`** — use feature branches + PRs (exception: trivial doc-only changes)
+- **One PR per logical task** — smaller PRs are easier to review and less likely to conflict
+- **Rebase `dev` onto `main` frequently** — small rebases are trivial; large ones bring back deleted files
+- **Clean up stale branches** — after PRs are merged, run `git fetch --prune origin` and delete local branches marked `gone`
+
+### Branch naming
+
+- `fix/` — bug fixes and polish (e.g., `fix/tier-colors-and-rename`)
+- `feat/` — new features (e.g., `feat/default-duration`)
+
+---
+
+
 
 The entire system is built around delivering **pure, human-performed audio with zero computational processing**. No pitch shifting, no real-time mixing, no stems. Every variant (frequency, percussion) is recorded separately by the artists and stored as complete tracks.
 
@@ -340,10 +375,7 @@ Two sub-tasks, both complete:
 - Description kept on card (line-clamped)
 - Session player unchanged
 
-**Task 1.10: Paywall Gate (moved to phase 2)**
-- Track cumulative listening time per rasika
-- After 10 hours: prompt to subscribe
-- Streaming free up to gate, downloads always paid
+**Task 1.10: Paywall Gate** *(moved to Phase 2 — see Tasks 2.2–2.6)*
 
 **Task 1.12: Dev/Staging Environment Separation** ✅ *(completed 2026-02-20)*
 - Staging Supabase project created (`ragaflow-staging`)
@@ -354,20 +386,125 @@ Two sub-tasks, both complete:
   - **Production** (main) → production Supabase
 - Verified: dev branch preview deploys use staging DB, production unaffected
 
-### Phase 2: Payments, Track Variants & Polish
+### Phase 2: Payments, Access Control & Polish
 
-**Task 2.1: Stripe Integration**
-- Subscription tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
-- Checkout, webhooks, subscription status sync to Supabase
+#### Decisions (captured 2026-03-03)
 
-**Task 2.2: Track Variant Switching**
-- needs more PM discussion to close. 
+- **Free tracks** (`free: true`): no badge, always playable, never gated
+- **Premium tracks** (`free: false`): subtle "Premium" tag on track cards, playable for free until the 10-hour gate
+- **After 10 hours**: premium tracks greyed out with Premium tag, tap shows subscribe CTA. Free tracks unchanged.
+- **Gate metric**: raw `totalListeningSeconds` (sum of `duration_seconds` from all sessions) — same number already shown in profile stats. NOT filtered through `computeCountableSeconds`.
+- **Subscribe visibility**: subscribe link in profile from day one, regardless of gate status
+- **No hard block**: rasikas can always access free tracks, their profile, and their listening journey
+- **Transparency principle**: rasikas should always know what's free vs. premium before tapping — no bait-and-switch
+- **Downloads deferred**: offline playback is a future PWA/iOS feature, not file downloads. `download_url` stays in schema but no UI yet.
+- **Sponsor tier ($300)**: relationship/investor tier handled outside the app — no in-app differentiation from lifetime
+- **Billing provider**: needs research (Stripe vs. RevenueCat vs. others) — must support web + future iOS App Store billing
+
+#### Tasks
+
+**Task 2.0: Flexible Timer Durations** *(replaces old "Test Mode" task)*
+
+Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pill layout:
+
+- **Pill 1:** 25 min (fixed default)
+- **Pill 2:** 45 min (fixed default)
+- **Pill 3:** Custom — shows last-used custom value (or "…" if none set). Tapping opens a small popover/inline input to set a new value (integer minutes).
+
+**Custom duration details:**
+- Range: 1–120 minutes (enforced in UI)
+- Persisted per-rasika in Supabase: new `custom_duration` column on `rasika_preferences` (nullable integer, stores minutes)
+- On first use (no saved value), pill 3 shows "…" or a placeholder; after setting, it shows the saved value (e.g., "90")
+- The custom value is shared across scenarios (one column, not per-scenario) — the per-scenario default duration (saved on session completion) already captures what each scenario uses
+- All existing logic (start session, end session, certification upsert, default duration save) works unchanged — `duration` is already handled in minutes internally
+
+**Why:** The old 4-pill system was rigid. Users doing 90-minute deep work sessions or 1-minute QA tests couldn't set their preferred duration. This also replaces the need for a separate "test mode" feature — set custom to 1 min for QA.
+
+**Sub-tasks:**
+
+**Task 2.0a: Schema — add `custom_duration` to rasika_preferences**
+- Migration: add `custom_duration integer` (nullable) to `rasika_preferences`
+- Update `lib/types.ts` `RasikaPreferences` type
+- **Acceptance criteria:** column exists, nullable, no default value
+
+**Task 2.0b: Data layer — read/write custom duration**
+- Add `getCustomDuration()` and `setCustomDuration(minutes: number)` to `lib/preferences.ts` (or extend existing functions)
+- Read custom_duration when loading preferences (already fetched in session player via `getPreferencesClient`)
+- **Acceptance criteria:** custom duration round-trips through Supabase
+
+**Task 2.0c: UI — 3-pill duration selector with custom input**
+- Replace `DURATION_OPTIONS = [5, 15, 25, 45]` in `session-player.tsx` with new 3-pill layout
+- Fixed pills: 25, 45
+- Third pill: shows saved `custom_duration` value or "…"
+- Tapping third pill: opens a small popover or inline number input (1–120 range, integer only)
+- On confirm: saves to Supabase via `setCustomDuration()`, selects that duration
+- If rasika has `initialDuration` (from default), pre-select the matching pill (or custom if it matches neither 25 nor 45)
+- **Acceptance criteria:**
+  - 3 pills render (25 · 45 · custom)
+  - Custom pill shows saved value after first use
+  - Setting custom to 1 works (useful for QA)
+  - Setting custom to 90 works (useful for deep work)
+  - Values outside 1–120 rejected
+  - Selected duration flows into session start, timer, and completion as before
+  - Existing "set as default" on session completion still captures the duration (25, 45, or custom value)
+
+**Task 2.1: Research — Billing Provider**
+- Research Stripe, RevenueCat, and alternatives for subscription billing
+- Requirements: web checkout, iOS App Store billing (future), webhook-based status sync to Supabase, support for monthly/yearly/lifetime tiers
+- Output: recommendation with trade-offs documented here in dev-design.md
+- *This is a research task — no code.*
+
+**Task 2.2: Schema — Subscription Status + Premium Tracks**
+- Add `subscription_status` to rasika record (e.g., `free`, `subscribed`, `lifetime`, `expired`)
+- Decide where this lives — new column on `rasika_preferences`, or a separate `subscriptions` table (depends on billing provider webhook shape)
+- Mark ~5–10 existing seed tracks as `free: true`, rest as `free: false`
+- Update seed SQL
+- Migration + RLS policies
+- **Acceptance criteria:**
+  - `subscription_status` queryable for the current rasika
+  - `free` boolean is set on all tracks in seed data
+
+**Task 2.3: UI — Premium Badge on Track Cards**
+- Show a subtle "Premium" tag on track cards where `free: false`
+- Visible always (not just after the gate) — transparency principle
+- Tag should be unobtrusive: small text, muted color, doesn't dominate the card
+- Appears on scenario track lists (`/mode/*`) and explore page
+- **Acceptance criteria:**
+  - Premium tag visible on non-free tracks
+  - Free tracks have no badge
+  - No change to session player (that's Task 2.5)
+
+**Task 2.4: UI — Subscribe Link in Profile**
+- Add a "Subscribe" or "Go Premium" card/link to the profile page
+- Visible from day one for all non-subscribed rasikas
+- Initially links to a placeholder (no checkout yet — that depends on Task 2.1 billing research)
+- For subscribed rasikas: show subscription status instead (e.g., "Premium · $30/yr")
+- **Acceptance criteria:**
+  - Non-subscribed rasikas see a subscribe CTA on profile
+  - Subscribed rasikas see their plan status
+  - Works with the `subscription_status` field from Task 2.2
+
+**Task 2.5: Access Control — 10-Hour Listening Gate**
+- Compute total listening seconds for the current rasika (raw sum of `duration_seconds` from `listening_sessions`)
+- If ≥ 36,000 seconds (10 hours) AND rasika is not subscribed:
+  - Premium tracks on track lists: greyed out, Premium tag, not tappable (or tap shows subscribe CTA)
+  - Free tracks: unchanged, always playable
+- Session player: if a premium track is somehow reached while gated, show subscribe CTA instead of play button
+- **Acceptance criteria:**
+  - Under 10 hours: all tracks playable, premium tagged but not blocked
+  - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected
+  - Subscribed rasikas: all tracks playable regardless of hours
+
+**Task 2.6: Billing Integration (depends on 2.1 research)**
+- Integrate chosen billing provider
+- Checkout flow for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
+- Webhook to update `subscription_status` in Supabase
+- **Blocked on Task 2.1 — scope will be refined after billing research**
+
+**Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector
 - Seamless switching with position preservation
-
-**Task 2.3: Access Control**
-- Enforce 10-hour gate for free rasikas
-- Paid downloads with signed URLs
+- *Deferred — not blocking payments/gating work*
 
 ### Phase 3: iOS App
 

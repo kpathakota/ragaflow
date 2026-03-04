@@ -141,11 +141,15 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 
 ## Process
 
-- All dev work goes on the `dev` branch — never commit directly to `main`
-- PRs into `main` are handled by the human (production deploys from `main`)
-- Commit and push to `dev` after every task
+See `docs/dev-design.md` § "Git & Pull Request Workflow" for the full branch/PR workflow.
+
+- **Feature branches off `dev`** — create `fix/*` or `feat/*` branches, open PRs against `dev`
+- **Never commit directly to `main` or `dev`** — all changes go through PRs (exception: trivial doc-only changes to `dev`)
+- **One PR per logical task** — smaller PRs are easier to review and less likely to conflict
+- **Human merges PRs** — Claude Code pushes branches and opens PRs; human reviews and merges
+- **Production deploys from `main`** — human merges `dev` → `main` when ready
+- **Clean up branches after merge** — `git fetch --prune origin`, then delete local branches marked `gone`
+- **Rebase frequently** — rebase `dev` onto `main` every few tasks, not in big batches
+- **Clean up large files at deletion time** — when removing binary files from the repo, run `git filter-repo` in the same task
+- **Gitignore new tools immediately** — add local state directories to `.gitignore` before the first commit
 - Update this file each conversation with new context
-- **Rebase frequently** — rebase `dev` onto `main` every few tasks, not in big batches. Small rebases are trivial; large ones bring back deleted files and create conflicts.
-- **Clean up large files at deletion time** — when removing binary files (audio, images, etc.) from the repo, run `git filter-repo` in the same task to purge them from history. Don't leave large blobs in history for later cleanup.
-- **Gitignore new tools immediately** — when introducing a new tool (wrangler, etc.), add its local state directories to `.gitignore` before the first commit. Don't let tool artifacts get committed.
-- **One PR per logical task** — prefer smaller, focused PRs over batching multiple features. Smaller PRs are easier to review and less likely to have merge conflicts.
