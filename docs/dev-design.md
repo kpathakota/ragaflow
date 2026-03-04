@@ -12,7 +12,7 @@
 - Timer with `setInterval` in `useEffect`
 - Audio files served from `public/audio/{scenario}/`
 
-**Phase 1 (Foundation) — Nearly Complete**
+**Phase 1 (Foundation) — Complete**
 - Supabase auth (email sign-in/sign-up) with `AuthProvider` + `useAuth()` hook
 - Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasika_preferences, listening_sessions, certifications
 - Data layer: Supabase only (`lib/data.ts`), no local seed fallback — Supabase is required
@@ -41,7 +41,7 @@
 
 **Phase 2+ — Future**
 - Stripe payments + subscription tiers
-- Track variant switching (percussion toggle, frequency selector)
+- Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
 - Access control enforcement
 - iOS native app
 
@@ -403,17 +403,50 @@ Two sub-tasks, both complete:
 
 #### Tasks
 
-**Task 2.0: Test Mode (Non-Production Only)**
-- Add a 30-second timer option to the session player duration selector in non-production environments
-- Gate on `NEXT_PUBLIC_SUPABASE_URL` containing the staging project ID, or a dedicated `NEXT_PUBLIC_TEST_MODE` env var
-- In `session-player.tsx`, prepend `0.5` (30s) to `DURATION_OPTIONS` when test mode is active
-- Display as "30s" in the duration pill row; all existing logic (start session, end session, certification upsert) works unchanged since duration is already in seconds internally
-- **Why:** Testing the gate, certifications, and completion flows currently requires waiting 5+ real minutes per session. A 30s option makes manual QA and demos practical.
+**Task 2.0: Flexible Timer Durations** *(replaces old "Test Mode" task)*
+
+Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pill layout:
+
+- **Pill 1:** 25 min (fixed default)
+- **Pill 2:** 45 min (fixed default)
+- **Pill 3:** Custom — shows last-used custom value (or "…" if none set). Tapping opens a small popover/inline input to set a new value (integer minutes).
+
+**Custom duration details:**
+- Range: 1–120 minutes (enforced in UI)
+- Persisted per-rasika in Supabase: new `custom_duration` column on `rasika_preferences` (nullable integer, stores minutes)
+- On first use (no saved value), pill 3 shows "…" or a placeholder; after setting, it shows the saved value (e.g., "90")
+- The custom value is shared across scenarios (one column, not per-scenario) — the per-scenario default duration (saved on session completion) already captures what each scenario uses
+- All existing logic (start session, end session, certification upsert, default duration save) works unchanged — `duration` is already handled in minutes internally
+
+**Why:** The old 4-pill system was rigid. Users doing 90-minute deep work sessions or 1-minute QA tests couldn't set their preferred duration. This also replaces the need for a separate "test mode" feature — set custom to 1 min for QA.
+
+**Sub-tasks:**
+
+**Task 2.0a: Schema — add `custom_duration` to rasika_preferences**
+- Migration: add `custom_duration integer` (nullable) to `rasika_preferences`
+- Update `lib/types.ts` `RasikaPreferences` type
+- **Acceptance criteria:** column exists, nullable, no default value
+
+**Task 2.0b: Data layer — read/write custom duration**
+- Add `getCustomDuration()` and `setCustomDuration(minutes: number)` to `lib/preferences.ts` (or extend existing functions)
+- Read custom_duration when loading preferences (already fetched in session player via `getPreferencesClient`)
+- **Acceptance criteria:** custom duration round-trips through Supabase
+
+**Task 2.0c: UI — 3-pill duration selector with custom input**
+- Replace `DURATION_OPTIONS = [5, 15, 25, 45]` in `session-player.tsx` with new 3-pill layout
+- Fixed pills: 25, 45
+- Third pill: shows saved `custom_duration` value or "…"
+- Tapping third pill: opens a small popover or inline number input (1–120 range, integer only)
+- On confirm: saves to Supabase via `setCustomDuration()`, selects that duration
+- If rasika has `initialDuration` (from default), pre-select the matching pill (or custom if it matches neither 25 nor 45)
 - **Acceptance criteria:**
-  - 30s pill appears on staging/local but NOT on production
-  - Selecting 30s starts a real session, counts toward certifications per scenario rules
-  - Timer counts down from 0:30, triggers completion at 0:00
-  - No UI or logic changes in production builds
+  - 3 pills render (25 · 45 · custom)
+  - Custom pill shows saved value after first use
+  - Setting custom to 1 works (useful for QA)
+  - Setting custom to 90 works (useful for deep work)
+  - Values outside 1–120 rejected
+  - Selected duration flows into session start, timer, and completion as before
+  - Existing "set as default" on session completion still captures the duration (25, 45, or custom value)
 
 **Task 2.1: Research — Billing Provider**
 - Research Stripe, RevenueCat, and alternatives for subscription billing

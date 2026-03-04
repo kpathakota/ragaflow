@@ -53,3 +53,34 @@ export async function setDefaultTrackClient(
 
   return true;
 }
+
+export async function setCustomDurationClient(
+  minutes: number
+): Promise<boolean> {
+  const supabase = createClient();
+  if (!supabase) return false;
+
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return false;
+
+  const { data: existing } = await supabase
+    .from("rasika_preferences")
+    .select("id")
+    .eq("rasika_id", user.id)
+    .single();
+
+  if (existing) {
+    await supabase
+      .from("rasika_preferences")
+      .update({ custom_duration: minutes })
+      .eq("rasika_id", user.id);
+  } else {
+    await supabase
+      .from("rasika_preferences")
+      .insert({ rasika_id: user.id, custom_duration: minutes });
+  }
+
+  return true;
+}
