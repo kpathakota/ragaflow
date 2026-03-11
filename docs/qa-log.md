@@ -17,7 +17,6 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 - [ ] Free rasika sees "Go Premium" card with amber border and "Coming soon" placeholder
 - [ ] Subscribed rasika sees "Premium" card with emerald border (test by setting `subscription_status = 'subscribed'` in Supabase)
 - [ ] Lifetime rasika sees "Lifetime" card with emerald border and lifetime-specific copy
-- [ ] Expired rasika sees "Subscription expired" card with red border
 - [ ] Plan section appears between Default tracks and Sign out button
 - [ ] No visual regressions on other profile sections (account, stats, journey, defaults)
 
