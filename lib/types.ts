@@ -24,7 +24,7 @@ export type Track = {
   created_at: string;
 };
 
-export type RasikaPreferences = {
+export type Rasika = {
   id: string;
   rasika_id: string;
   favorite_tracks: string[];
@@ -36,6 +36,8 @@ export type RasikaPreferences = {
   default_sleep_duration: number | null;
   default_meditate_duration: number | null;
   custom_duration: number | null;
+  subscription_status: "free" | "subscribed" | "lifetime" | "expired";
+  polar_customer_id: string | null;
 };
 
 export type ListeningSession = {

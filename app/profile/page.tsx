@@ -6,7 +6,7 @@ import { useAuth } from "@/lib/auth/auth-context";
 import { NavHeader } from "@/components/nav-header";
 import { createClient } from "@/lib/supabase/client";
 import { scenarios } from "@/components/scenario-config";
-import type { RasikaPreferences, Scenario, Track } from "@/lib/types";
+import type { Rasika, Scenario, Track } from "@/lib/types";
 import { computeRagamProgress, getTierInfo, getTierColor } from "@/lib/certifications";
 
 type Stats = {
@@ -29,7 +29,7 @@ type CertProgress = {
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const [prefs, setPrefs] = useState<RasikaPreferences | null>(null);
+  const [prefs, setPrefs] = useState<Rasika | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [defaults, setDefaults] = useState<DefaultTrack[]>([]);
   const [signingOut, setSigningOut] = useState(false);
@@ -47,12 +47,12 @@ export default function ProfilePage() {
 
     // Fetch preferences
     supabase
-      .from("rasika_preferences")
+      .from("rasikas")
       .select("*")
       .eq("rasika_id", user.id)
       .single()
       .then(({ data }) => {
-        const p = data as RasikaPreferences | null;
+        const p = data as Rasika | null;
         setPrefs(p);
         if (!p) return;
 
