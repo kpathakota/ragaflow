@@ -64,6 +64,11 @@ export function TrackCard({
           {track.tags.slice(0, 3).map((tag) => (
             <span key={tag}> · {tag}</span>
           ))}
+          {!track.free && (
+            <span className="ml-2 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400/80">
+              Premium
+            </span>
+          )}
         </p>
         <p className="mt-1 text-xs text-neutral-500 line-clamp-2">
           {track.description}

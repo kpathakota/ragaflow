@@ -6,6 +6,23 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 2.3 — Premium badge on track cards
+**Commit:** (see below)
+**Date:** 2026-03-11
+**Status:** Pending verification
+
+### Manual checks
+- [ ] App builds without errors (`npx tsc --noEmit`)
+- [ ] Tracks with `free: false` show a subtle "Premium" badge on track cards (amber pill)
+- [ ] Tracks with `free: true` show no badge
+- [ ] Badge appears on scenario track list pages (`/mode/focus`, `/mode/sleep`, `/mode/meditate`)
+- [ ] Badge appears on explore page (`/explore`)
+- [ ] Badge doesn't clash with heart/favorite icon (positioned inline with metadata)
+- [ ] Badge is visible when not logged in (no auth required)
+- [ ] Tapping a premium track still opens the session player (no access gating yet)
+
+---
+
 ## Task 2.2 — Rename rasika_preferences → rasikas + subscription columns
 **Commit:** (see below)
 **Date:** 2026-03-11
