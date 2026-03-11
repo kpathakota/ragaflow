@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
 import { NavHeader } from "@/components/nav-header";
 import { createClient } from "@/lib/supabase/client";
@@ -26,9 +26,22 @@ type CertProgress = {
   progressPercent: number;
 };
 
+const polarServer = process.env.NEXT_PUBLIC_POLAR_SERVER;
+const polarOrgSlug = process.env.NEXT_PUBLIC_POLAR_ORG_SLUG;
+
+function buildCheckoutUrl(userId: string) {
+  const base =
+    polarServer === "sandbox"
+      ? "https://sandbox.polar.sh"
+      : "https://polar.sh";
+  return `${base}/${polarOrgSlug}/checkout?customerExternalId=${userId}`;
+}
+
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const checkoutSuccess = searchParams.get("checkout") === "success";
   const [prefs, setPrefs] = useState<Rasika | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [defaults, setDefaults] = useState<DefaultTrack[]>([]);
@@ -292,7 +305,19 @@ export default function ProfilePage() {
             <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
               Plan
             </h2>
-            {prefs.subscription_status === "subscribed" || prefs.subscription_status === "lifetime" ? (
+
+            {checkoutSuccess && (
+              <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
+                <p className="text-sm text-emerald-400">
+                  Payment received — your plan will update shortly.
+                </p>
+              </div>
+            )}
+
+            {prefs.subscription_status === "active" ||
+            prefs.subscription_status === "canceled" ||
+            prefs.subscription_status === "past_due" ||
+            prefs.subscription_status === "lifetime" ? (
               <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4">
                 <p className="text-sm font-medium text-emerald-400">
                   {prefs.subscription_status === "lifetime" ? "Lifetime" : "Premium"}
@@ -300,8 +325,20 @@ export default function ProfilePage() {
                 <p className="mt-1 text-xs text-neutral-400">
                   {prefs.subscription_status === "lifetime"
                     ? "You have lifetime access to all tracks"
+                    : prefs.subscription_status === "canceled"
+                    ? "Access continues until your billing period ends"
+                    : prefs.subscription_status === "past_due"
+                    ? "Payment failed — please update your payment method"
                     : "All tracks unlocked"}
                 </p>
+                {prefs.subscription_status !== "lifetime" && (
+                  <a
+                    href="/api/portal"
+                    className="mt-3 inline-block text-xs text-neutral-400 underline underline-offset-2 hover:text-neutral-200"
+                  >
+                    Manage subscription
+                  </a>
+                )}
               </div>
             ) : (
               <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
@@ -309,9 +346,15 @@ export default function ProfilePage() {
                 <p className="mt-1 text-xs text-neutral-400">
                   Unlock all tracks with a subscription
                 </p>
-                <p className="mt-3 text-xs text-neutral-500">
-                  Coming soon
+                <p className="mt-2 text-xs text-neutral-500">
+                  $5/mo · $30/yr · $100 lifetime
                 </p>
+                <a
+                  href={buildCheckoutUrl(user.id)}
+                  className="mt-3 inline-block rounded-lg bg-amber-500 px-4 py-2 text-xs font-medium text-black hover:bg-amber-400"
+                >
+                  Subscribe
+                </a>
               </div>
             )}
           </section>
