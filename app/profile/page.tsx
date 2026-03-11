@@ -286,6 +286,47 @@ export default function ProfilePage() {
           </section>
         )}
 
+        {/* Subscription */}
+        {prefs && (
+          <section>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Plan
+            </h2>
+            {prefs.subscription_status === "free" ? (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
+                <p className="text-sm font-medium text-amber-400">Go Premium</p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  Unlock all tracks with a subscription
+                </p>
+                <p className="mt-3 text-xs text-neutral-500">
+                  Coming soon
+                </p>
+              </div>
+            ) : prefs.subscription_status === "expired" ? (
+              <div className="rounded-xl border border-red-500/30 bg-red-500/5 px-5 py-4">
+                <p className="text-sm font-medium text-red-400">Subscription expired</p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  Renew to keep access to all premium tracks
+                </p>
+                <p className="mt-3 text-xs text-neutral-500">
+                  Coming soon
+                </p>
+              </div>
+            ) : (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4">
+                <p className="text-sm font-medium text-emerald-400">
+                  {prefs.subscription_status === "lifetime" ? "Lifetime" : "Premium"}
+                </p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  {prefs.subscription_status === "lifetime"
+                    ? "You have lifetime access to all tracks"
+                    : "All tracks unlocked"}
+                </p>
+              </div>
+            )}
+          </section>
+        )}
+
         {/* Sign out */}
         <button
           onClick={handleSignOut}

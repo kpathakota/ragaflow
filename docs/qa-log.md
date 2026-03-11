@@ -6,6 +6,23 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 2.4 — Subscribe link in profile
+**Commit:** (see below)
+**Date:** 2026-03-11
+**Status:** Pending verification
+
+### Manual checks
+- [ ] App builds without errors (`npx tsc --noEmit`)
+- [ ] Profile page loads for logged-in rasika
+- [ ] Free rasika sees "Go Premium" card with amber border and "Coming soon" placeholder
+- [ ] Subscribed rasika sees "Premium" card with emerald border (test by setting `subscription_status = 'subscribed'` in Supabase)
+- [ ] Lifetime rasika sees "Lifetime" card with emerald border and lifetime-specific copy
+- [ ] Expired rasika sees "Subscription expired" card with red border
+- [ ] Plan section appears between Default tracks and Sign out button
+- [ ] No visual regressions on other profile sections (account, stats, journey, defaults)
+
+---
+
 ## Task 2.3 — Premium badge on track cards
 **Commit:** (see below)
 **Date:** 2026-03-11
