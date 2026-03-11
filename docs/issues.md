@@ -3,6 +3,32 @@
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
 
+## 2026-03-11
+
+### Issue — Session player top bar clipped on smaller viewports / browser chrome
+
+**File:** `app/mode/[scenario]/[trackId]/session-player.tsx` line 174
+
+**What's wrong:** The session player's root container uses `min-h-screen` (`100vh`) with `pt-6` top padding. On viewports where browser chrome (address bar, tab bar) is visible, `100vh` includes the area behind the chrome, so the top of the layout is pushed above the visible area. The "← Back" link and the ♡ favorites icon are partially or fully cut off.
+
+**Reproduction:**
+1. Open any track in the session player (e.g. `/mode/focus/<any-track-id>`)
+2. Use a browser window that is not full-height, or a mobile browser with visible address bar
+3. Observe the top bar — "Back" link and heart icon are clipped
+
+**Screenshot:** `Screenshot 2026-03-11 at 7.24.47 AM.png` — "Back" is barely visible, heart icon is cut off entirely.
+
+**User impact:** Rasikas cannot navigate back or toggle favorites without scrolling up first. On mobile Safari (the primary device), this is the default state since the address bar is always visible on initial load.
+
+**Fix options:**
+- Replace `min-h-screen` with `min-h-dvh` (dynamic viewport height, Tailwind v4) which accounts for browser chrome
+- Alternatively use `min-h-[100dvh]` if `min-h-dvh` isn't available in the current Tailwind version
+- Ensure `pt-6` provides enough clearance, or add `pt-safe` / `padding-top: env(safe-area-inset-top)` for notched devices
+
+**Status:** Open
+
+---
+
 ## 2026-02-25
 -  We need to do a pass on the session timer complete screen. It looks okay for now but should be better. I need it to really show completion. Also when saving the default, the entire "session" should be captured (track and duration) so that it's easy from the home screen to start the default duration. 
 - In the profile screen, once someone has achieved a certification, I want to actually design real badges. So that's going to be work. The progress bar should change color to highlight the current tier. For example, Bronze should be bronze, Silver should be silver etc. 

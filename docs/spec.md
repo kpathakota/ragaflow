@@ -404,7 +404,7 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 - Google Drive sync for content management
 
 ### Phase 2 — Payments, Access Control & Polish
-- Subscription billing (Stripe / RevenueCat — TBD after research)
+- Subscription billing via Polar.sh (merchant of record)
 - `subscription_status` on rasika record
 - Premium badge on track cards (transparency from day one)
 - Subscribe link in profile
@@ -415,7 +415,7 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 ### Phase 3 — iOS App
 - Native SwiftUI + AVFoundation with background audio
 - Feature parity with web (scenarios, timers, favorites, progress)
-- RevenueCat for App Store billing (if chosen in Phase 2 research)
+- Native Apple IAP via StoreKit for App Store billing (Polar does not handle Apple IAP)
 - Offline playback via PWA or native caching
 
 ### Phase 4 — Polish & Growth
@@ -449,10 +449,14 @@ The goal is a **deployable front-end you can hand someone a URL to**. Everything
 - **Downloads:** Deferred — offline playback is a future PWA/iOS feature, not file downloads
 - **Subscribe visibility:** Profile link from day one, not hidden behind the gate
 
+### Resolved (billing provider — 2026-03-04)
+- **Billing provider:** Polar.sh — merchant of record. Handles web checkout, subscription management, sales tax/VAT remittance.
+- **iOS billing:** Polar does not handle Apple IAP. Phase 3 iOS app will use native StoreKit for App Store billing.
+- **Tiers:** $5/mo, $30/yr, $100 lifetime via Polar. $300 sponsor handled outside the app.
+
 ### Open
 
 1. **Tag vocabulary:** Full initial curated list of emotion/mood tags
-2. **Billing provider:** Stripe vs. RevenueCat vs. others — needs research (must support web + future iOS App Store billing)
 
 ### Resolved (listening time counting rules — 2026-02-18)
 - **Focus:** Only completed sessions count (timer must fire naturally — 100% threshold, no partial credit)

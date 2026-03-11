@@ -40,7 +40,7 @@
 ~~Middleware → proxy migration~~ ✅
 
 **Phase 2+ — Future**
-- Stripe payments + subscription tiers
+- Polar.sh payments + subscription tiers
 - Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
 - Access control enforcement
 - iOS native app
@@ -91,7 +91,7 @@ The entire system is built around delivering **pure, human-performed audio with 
 ### Backend Stack
 - **API & Database & Auth**: Supabase (PostgreSQL, auth with email/Google/Apple, Row Level Security)
 - **Audio Storage**: Google Drive (source) → Cloud Storage (processed files)
-- **Payment**: Stripe (for paid downloads/subscriptions)
+- **Payment**: Polar.sh (merchant of record — web checkout, subscription management, tax remittance)
 
 ### Content Management Flow
 ```
@@ -399,7 +399,7 @@ Two sub-tasks, both complete:
 - **Transparency principle**: rasikas should always know what's free vs. premium before tapping — no bait-and-switch
 - **Downloads deferred**: offline playback is a future PWA/iOS feature, not file downloads. `download_url` stays in schema but no UI yet.
 - **Sponsor tier ($300)**: relationship/investor tier handled outside the app — no in-app differentiation from lifetime
-- **Billing provider**: needs research (Stripe vs. RevenueCat vs. others) — must support web + future iOS App Store billing
+- **Billing provider**: Polar.sh — chosen as merchant of record. Handles web checkout, subscription management, tax remittance, and webhook-based status sync to Supabase. Future iOS App Store billing will need a separate integration path (Polar does not handle Apple IAP directly).
 
 #### Tasks
 
@@ -448,11 +448,16 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Selected duration flows into session start, timer, and completion as before
   - Existing "set as default" on session completion still captures the duration (25, 45, or custom value)
 
-**Task 2.1: Research — Billing Provider**
-- Research Stripe, RevenueCat, and alternatives for subscription billing
-- Requirements: web checkout, iOS App Store billing (future), webhook-based status sync to Supabase, support for monthly/yearly/lifetime tiers
-- Output: recommendation with trade-offs documented here in dev-design.md
-- *This is a research task — no code.*
+**Task 2.1: Research — Billing Provider** ✅ *(completed 2026-03-04)*
+- Researched Stripe, RevenueCat, Paddle, Lemon Squeezy, and Polar.sh
+- **Decision: Polar.sh** — merchant of record (MoR)
+- **Why Polar:** MoR handles sales tax/VAT remittance (solo dev doesn't want tax compliance burden), clean checkout UI, webhook events for subscription lifecycle, supports one-time payments (lifetime tier), reasonable fees, good DX
+- **Trade-offs:**
+  - Polar does not handle Apple IAP — iOS App Store billing will use native StoreKit in Phase 3
+  - Newer platform vs. Stripe's maturity — acceptable risk at current scale
+  - MoR takes a larger cut than pure payment processor, but eliminates tax filing complexity
+- **Webhook plan:** Polar sends subscription events → Supabase edge function (or Next.js API route) → update `subscription_status` in rasika_preferences
+- **Tiers to configure:** $5/mo, $30/yr, $100 lifetime (one-time). $300 sponsor handled outside Polar as a relationship tier.
 
 **Task 2.2: Schema — Subscription Status + Premium Tracks**
 - Add `subscription_status` to rasika record (e.g., `free`, `subscribed`, `lifetime`, `expired`)
@@ -495,11 +500,13 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected
   - Subscribed rasikas: all tracks playable regardless of hours
 
-**Task 2.6: Billing Integration (depends on 2.1 research)**
-- Integrate chosen billing provider
-- Checkout flow for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
-- Webhook to update `subscription_status` in Supabase
-- **Blocked on Task 2.1 — scope will be refined after billing research**
+**Task 2.6: Billing Integration — Polar.sh** *(unblocked by Task 2.1)*
+- Integrate Polar.sh checkout for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
+- Create Polar products + pricing for each tier
+- Implement checkout flow: profile subscribe CTA → Polar hosted checkout → redirect back to app
+- Webhook endpoint (Next.js API route or Supabase edge function): listen for Polar subscription events → update `subscription_status` in `rasika_preferences`
+- Handle subscription states: `active`, `past_due`, `canceled`, `expired`
+- Test end-to-end with Polar sandbox/test mode
 
 **Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector
@@ -527,7 +534,7 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
 2. **Next.js API routes**: Start monolithic, can split later if needed
 3. **Track variants (not stems)**: Store complete tracks for each variant (percussion on/off × multiple frequencies)
 4. **Pure audio**: No pitch shifting or audio processing - each frequency is recorded separately by artists
-5. **Monetization**: Free streaming (account required) + paid downloads + 10-hour listening gate. Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
+5. **Monetization**: Free streaming (account required) + paid downloads + 10-hour listening gate. Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor. **Billing via Polar.sh** (merchant of record)
 6. **Google Sheets for metadata**: Simple CSV-like structure artists can edit
 7. **3 primary scenarios + Explore**: Focus, Sleep, Meditate as entry points; Explore as catch-all. Tracks tagged with scenarios[] and tags[] — no mode binding on ragams
 8. **Auth via Supabase**: Email, Google, Apple Sign-In with Row Level Security
@@ -597,7 +604,7 @@ This plan assumes leveraging Claude Code for implementation guidance, code gener
 - **Cloudflare R2**: Simple S3-compatible API, great pricing
 - **Next.js**: Single framework for web frontend + API routes
 - **Supabase**: Auth + database + RLS in one service
-- **Stripe**: Payment infrastructure handled
+- **Polar.sh**: Payment infrastructure handled (merchant of record)
 - **No audio processing complexity**: Simple file storage and playback, no mixing engine needed
 
 ### Why Track Variants > Stems
