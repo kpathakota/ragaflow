@@ -3,10 +3,10 @@ import { scenarios } from "@/components/scenario-config";
 import { createClient } from "@/lib/supabase/server";
 import { getTrackById } from "@/lib/data";
 import { UserBadge } from "@/components/user-badge";
-import type { RasikaPreferences, Track, Scenario } from "@/lib/types";
+import type { Rasika, Track, Scenario } from "@/lib/types";
 
 async function getPreferencesAndFavorites(): Promise<{
-  prefs: RasikaPreferences | null;
+  prefs: Rasika | null;
   defaults: { scenario: Scenario; track: Track; durationSeconds: number | null }[];
   user: boolean;
 }> {
@@ -19,12 +19,12 @@ async function getPreferencesAndFavorites(): Promise<{
   if (!user) return { prefs: null, defaults: [], user: false };
 
   const { data } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("*")
     .eq("rasika_id", user.id)
     .single();
 
-  const prefs = data as RasikaPreferences | null;
+  const prefs = data as Rasika | null;
   if (!prefs) return { prefs: null, defaults: [], user: true };
 
   const defaults: { scenario: Scenario; track: Track; durationSeconds: number | null }[] = [];

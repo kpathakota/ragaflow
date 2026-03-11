@@ -6,6 +6,29 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Task 2.2 — Rename rasika_preferences → rasikas + subscription columns
+**Commit:** (see below)
+**Date:** 2026-03-11
+**Status:** Pending verification
+
+### Manual checks
+- [ ] App builds without errors (`npx tsc --noEmit`)
+- [ ] Homepage loads and shows quick play defaults (if any exist)
+- [ ] Profile page loads and shows preferences, stats, listening journey
+- [ ] Favoriting a track works (heart toggle on track card and session player)
+- [ ] Setting a default track works (session player → set as default)
+- [ ] Custom duration persists across reloads
+- [ ] New rasika sign-up creates a row in `rasikas` table (not `rasika_preferences`)
+
+### Supabase / infra steps
+- [ ] Run `supabase/migrations/007_rename_rasikas_add_subscription.sql` on **staging** Supabase
+- [ ] Run `supabase/migrations/007_rename_rasikas_add_subscription.sql` on **production** Supabase
+- [ ] Verify `rasikas` table exists with `subscription_status` and `polar_customer_id` columns
+- [ ] Verify old `rasika_preferences` table no longer exists
+- [ ] Verify RLS policy "rasikas manage own record" is active
+
+---
+
 ## Task 2.0b+c — Flexible timer: data layer + UI
 **Commit:** (pending)
 **Date:** 2026-03-04

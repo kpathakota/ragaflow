@@ -1,7 +1,7 @@
 import { createClient } from "@/lib/supabase/client";
-import type { RasikaPreferences } from "@/lib/types";
+import type { Rasika } from "@/lib/types";
 
-export async function getPreferencesClient(): Promise<RasikaPreferences | null> {
+export async function getPreferencesClient(): Promise<Rasika | null> {
   const supabase = createClient();
   if (!supabase) return null;
 
@@ -11,33 +11,33 @@ export async function getPreferencesClient(): Promise<RasikaPreferences | null> 
   if (!user) return null;
 
   const { data } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("*")
     .eq("rasika_id", user.id)
     .single();
 
-  return (data as RasikaPreferences) ?? null;
+  return (data as Rasika) ?? null;
 }
 
 async function ensurePreferences(
   supabase: NonNullable<ReturnType<typeof createClient>>,
   userId: string
-): Promise<RasikaPreferences> {
+): Promise<Rasika> {
   const { data: existing } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("*")
     .eq("rasika_id", userId)
     .single();
 
-  if (existing) return existing as RasikaPreferences;
+  if (existing) return existing as Rasika;
 
   const { data: created } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .insert({ rasika_id: userId })
     .select()
     .single();
 
-  return created as RasikaPreferences;
+  return created as Rasika;
 }
 
 export async function toggleFavoriteTrackClient(
@@ -58,7 +58,7 @@ export async function toggleFavoriteTrackClient(
     : [...current, trackId];
 
   await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .update({ favorite_tracks: updated })
     .eq("rasika_id", user.id);
 
@@ -83,7 +83,7 @@ export async function toggleFavoriteRagamClient(
     : [...current, ragamId];
 
   await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .update({ favorite_ragams: updated })
     .eq("rasika_id", user.id);
 
