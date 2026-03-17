@@ -11,7 +11,7 @@ Ragaflow uses **Polar.sh** as its merchant of record for subscriptions. Polar ha
 | Monthly | $5/mo | Recurring subscription | `active` |
 | Yearly | $30/yr | Recurring subscription | `active` |
 | Lifetime | $100 one-time | One-time purchase | `lifetime` |
-| Sponsor ($300) | Outside app | N/A — manual | `lifetime` |
+| Sponsor | $300 one-time | One-time purchase | `lifetime` |
 
 ## Approach: Hosted Checkout (decided)
 
@@ -31,14 +31,16 @@ Ragaflow uses **Polar.sh** as its merchant of record for subscriptions. Polar ha
 
 **How it works:**
 - Profile "Go Premium" CTA links to Polar's hosted checkout URL
-- The link includes `?metadata[supabase_uid]={uid}` so the webhook can map the Polar customer back to the rasika
+- The link includes `?customerExternalId={uid}` (Supabase UID) so the webhook can map the Polar customer back to the rasika
 - Polar handles tier selection, payment form, receipts, and tax
 
 **Checkout URL pattern:**
 ```
-https://sandbox.polar.sh/{org-slug}/checkout?metadata[supabase_uid]={uid}
+https://sandbox.polar.sh/{org-slug}/checkout?customerExternalId={uid}
 ```
-(Production: `https://polar.sh/{org-slug}/checkout`)
+(Production: `https://polar.sh/{org-slug}/checkout?customerExternalId={uid}`)
+
+The org slug and server environment come from `NEXT_PUBLIC_POLAR_ORG_SLUG` and `NEXT_PUBLIC_POLAR_SERVER`.
 
 **Success redirect:** Configure in Polar dashboard to redirect to `{app_url}/profile?checkout=success`
 
@@ -76,20 +78,27 @@ Polar uses a fully isolated sandbox (not a toggle):
 
 ```bash
 # .env.local
-POLAR_ACCESS_TOKEN=polar_oat_...        # Organization Access Token (sandbox)
-POLAR_ORGANIZATION_ID=org_...           # Polar org ID
-POLAR_WEBHOOK_SECRET=whsec_...          # Webhook signing secret
-POLAR_SERVER=sandbox                    # "sandbox" or "production"
-SUPABASE_SERVICE_ROLE_KEY=eyJ...        # Server-side only, bypasses RLS for webhook writes
+POLAR_ACCESS_TOKEN=polar_oat_...              # Server-only — Organization Access Token (sandbox)
+POLAR_ORGANIZATION_ID=org_...                 # Server-only — Polar org ID
+POLAR_WEBHOOK_SECRET=whsec_...                # Server-only — Webhook signing secret
+NEXT_PUBLIC_POLAR_SERVER=sandbox              # "sandbox" or "production" — client-visible, used to build checkout URL
+NEXT_PUBLIC_POLAR_ORG_SLUG=your-org-slug      # Client-visible — used to build checkout URL
+SUPABASE_SERVICE_ROLE_KEY=eyJ...              # Server-only — bypasses RLS for webhook writes
 ```
 
+**`NEXT_PUBLIC_POLAR_SERVER` and `NEXT_PUBLIC_POLAR_ORG_SLUG` are intentionally public** — the profile page is a client component and needs them to construct the checkout URL. They contain no secrets.
+
 Production env vars go in Vercel "Production" environment. Preview deploys use sandbox values.
+
+**Webhook URL for local dev:** Don't configure a public URL in Polar dashboard for local testing. Use `polar listen http://localhost:3000/api/webhooks/polar` instead — it proxies events to localhost directly.
+
+**Webhook URL for Vercel preview:** Use the stable branch alias URL (e.g. `ragaflow-git-dev-yourteam.vercel.app`), not the per-commit hash URL which changes every push.
 
 ## Implementation
 
 ### 1. Webhook Handler — `app/api/webhooks/polar/route.ts`
 
-The only API route needed. Uses `@polar-sh/nextjs` for signature verification.
+Uses `@polar-sh/nextjs` `Webhooks()` helper for HMAC signature verification. Named event handlers used where available; `subscription.past_due` handled via `onPayload` fallback.
 
 **Events handled:**
 
@@ -98,10 +107,12 @@ The only API route needed. Uses `@polar-sh/nextjs` for signature verification.
 | `subscription.active` | Set `subscription_status = 'active'`, store `polar_customer_id` |
 | `subscription.canceled` | Set `subscription_status = 'canceled'` |
 | `subscription.revoked` | Set `subscription_status = 'expired'` |
-| `subscription.past_due` | Set `subscription_status = 'past_due'` |
+| `subscription.past_due` | Set `subscription_status = 'past_due'` (via `onPayload` — not a named handler in the SDK) |
 | `order.created` (billing_reason = `purchase`) | Lifetime purchase → set `subscription_status = 'lifetime'` |
 
-**Customer resolution:** The webhook payload includes `customerExternalId` (Supabase uid, passed at checkout). The handler looks up the rasika by `rasika_id = customerExternalId` and updates their record. It also stores `polar_customer_id` for future portal lookups.
+**Webhook events to subscribe to in Polar dashboard:** `subscription.active`, `subscription.canceled`, `subscription.revoked`, `order.created`. Do not subscribe to `subscription.created` (fires before payment clears) or `checkout.*` events.
+
+**Customer resolution:** The webhook payload includes `data.customer.externalId` (Supabase UID, passed at checkout as `customerExternalId`). The handler looks up the rasika by `rasika_id = data.customer.externalId` and updates their record. It also stores `polar_customer_id` for future portal lookups.
 
 **Auth:** Uses a Supabase **service role client** (server-side only) to bypass RLS when writing to `rasikas`.
 
@@ -122,9 +133,9 @@ Uses `@polar-sh/nextjs` `CustomerPortal` handler. Resolves `polar_customer_id` f
 - "Go Premium" card links to Polar checkout URL
 - Tier options shown as text: "$5/mo · $30/yr · $100 lifetime"
 
-**Active subscriber:**
-- Emerald "Premium" card (existing)
-- Add "Manage subscription" link → `/api/portal`
+**Active / canceled / past_due subscriber:**
+- Emerald "Premium" card
+- "Manage subscription" link → `/api/portal` (shown for `active`, `canceled`, `past_due` — not `lifetime`)
 
 **Lifetime:**
 - Emerald "Lifetime" card (existing)
@@ -157,27 +168,47 @@ npm install @polar-sh/nextjs @polar-sh/sdk
 
 | File | Action | Purpose |
 |---|---|---|
-| `app/api/webhooks/polar/route.ts` | New | Webhook handler (subscription events → Supabase) |
-| `app/api/portal/route.ts` | New | Customer portal redirect |
-| `lib/supabase/admin.ts` | New | Service role Supabase client |
-| `app/profile/page.tsx` | Edit | Wire checkout link + manage subscription |
-| `.env.local` | Edit | Add Polar + service role env vars |
+| `app/api/webhooks/polar/route.ts` | New ✅ | Webhook handler (subscription events → Supabase) |
+| `app/api/portal/route.ts` | New ✅ | Customer portal redirect |
+| `lib/supabase/admin.ts` | New ✅ | Service role Supabase client |
+| `app/profile/page.tsx` | Edit ✅ | Wire checkout link + manage subscription + success banner |
+| `lib/types.ts` | Edit ✅ | Expanded `subscription_status` union to all valid states |
+| `.env.local` | Edit ✅ | Added all Polar + service role env vars |
+
+## Implementation Status
+
+**Task 2.6 — implemented in PR #15 (`feat/polar-billing`), pending merge to `dev`.**
+
+All sub-tasks complete. Pending: human review + merge, then end-to-end testing with `polar listen`.
 
 ## Testing Checklist
 
-1. [ ] Create sandbox account + org at sandbox.polar.sh
-2. [ ] Create 3 products (monthly, yearly, lifetime)
-3. [ ] Configure webhook endpoint in Polar dashboard
-4. [ ] Install `polar` CLI, run `polar listen` for local webhook forwarding
-5. [ ] Test monthly subscription with `4242 4242 4242 4242`
-6. [ ] Verify `subscription_status` updates to `active` in Supabase
-7. [ ] Verify profile shows "Premium" card after webhook fires
-8. [ ] Test cancel via portal → verify status updates
-9. [ ] Test lifetime purchase → verify `subscription_status = 'lifetime'`
-10. [ ] Test with expired/past_due states
-11. [ ] Deploy to Vercel preview, test with sandbox webhook pointed at preview URL
+Pre-work (human, done before Dev builds):
+- [x] Create sandbox account + org at sandbox.polar.sh
+- [x] Create 3 products (monthly, yearly, lifetime)
+- [x] Add all env vars to `.env.local`
+- [x] Note: webhook URL for local dev uses `polar listen`, not a dashboard URL
 
-## Open Questions
+End-to-end testing (after PR #15 merged):
+1. [ ] Merge PR #15 to `dev`
+2. [ ] Run `polar listen http://localhost:3000/api/webhooks/polar` for local webhook forwarding
+3. [ ] Open profile → click "Go Premium" → complete checkout with test card `4242 4242 4242 4242`
+4. [ ] Verify `subscription_status` updates to `active` in Supabase
+5. [ ] Verify profile shows "Premium" card + "Manage subscription" link
+6. [ ] Test cancel via portal → verify `canceled` status in Supabase
+7. [ ] Test lifetime purchase → verify `subscription_status = 'lifetime'`
+8. [ ] Verify `?checkout=success` banner appears after redirect
+9. [ ] Deploy to Vercel preview, configure sandbox webhook to stable branch alias URL, retest
 
-- **Canceled + period end:** Polar fires `subscription.canceled` when the user cancels, but access continues until period end. Should we keep showing "Premium" until `subscription.revoked` fires? (Recommendation: yes — treat `canceled` as "active until period end" in the access control logic.)
-- **Webhook retry:** Polar retries failed webhooks. The handler should be idempotent (updating to the same status twice is fine with a simple UPDATE).
+## Decisions Made
+
+- **Canceled + period end:** `canceled` rasikas keep full access until `subscription.revoked` fires (sets `expired`). Profile shows "Manage subscription" link while `canceled` — they can resubscribe via portal.
+- **Webhook idempotency:** Handler uses a simple UPDATE — writing the same status twice is safe.
+- **`subscription.past_due`:** Not a named event in `@polar-sh/nextjs` SDK; handled via `onPayload` catch-all.
+- **`customerExternalId` vs `metadata`:** Checkout URL uses `?customerExternalId={uid}` (not `metadata[supabase_uid]`). Webhook payload exposes it at `data.customer.externalId`.
+- **Manage subscription visibility:** Shown for `active`, `canceled`, `past_due`. Hidden for `lifetime` (no subscription to manage).
+
+## Next Steps
+
+After Task 2.6 is tested and stable:
+- **Task 2.5** — Access control: 10-hour listening gate. Premium tracks locked for non-subscribers after 10h. Depends on working subscription status from Task 2.6.
