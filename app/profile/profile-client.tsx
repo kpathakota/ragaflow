@@ -338,7 +338,7 @@ export function ProfileClient({ user }: { user: User }) {
                   Unlock all tracks with a subscription
                 </p>
                 <p className="mt-2 text-xs text-neutral-500">
-                  $5/mo · $30/yr · $100 lifetime
+                  $5/mo · $30/yr · $100 lifetime · $300 sponsor
                 </p>
                 <a
                   href={buildCheckoutUrl(user.id)}

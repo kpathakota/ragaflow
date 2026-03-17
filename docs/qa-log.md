@@ -37,18 +37,18 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 - `app/profile/profile-client.tsx` → New client component. Contains all profile rendering (extracted from old page). Receives `user` as prop instead of reading from `useAuth()`. Still uses `useAuth()` for `signOut`.
 
 ### Manual checks
-- [ ] **Auth redirect (logged in):** Sign in, then navigate to `/auth` directly — should redirect to `/` instantly with no flash of the sign-in form
-- [ ] **Auth redirect (logged out):** Sign out, navigate to `/auth` — should show the sign-in form
-- [ ] **Auth form works:** Sign in with valid credentials — should redirect to `/`
-- [ ] **Auth sign-up works:** Sign up with new email — should show confirmation message
-- [ ] **Auth error handling:** Sign in with wrong password — should show error message
-- [ ] **Profile redirect (logged out):** Sign out, navigate to `/profile` directly — should redirect to `/auth` instantly with no flash of profile content
-- [ ] **Profile redirect (logged in):** Sign in, navigate to `/profile` — should show full profile with stats, defaults, journey
-- [ ] **Profile sign-out:** Click "Sign out" on profile — should redirect to `/`
-- [ ] **Profile checkout banner:** Navigate to `/profile?checkout=success` while logged in — should show the green "Payment received" banner
-- [ ] **Profile subscription card:** Verify the Plan section renders correctly (Go Premium for free users, Premium for active subscribers)
-- [ ] **Vercel build:** Push to branch, verify Vercel preview build succeeds (no more `useSearchParams` prerender error)
-- [ ] **No visual changes:** Both pages should look identical to before — same layout, same colors, same content
+- [x] **Auth redirect (logged in):** Sign in, then navigate to `/auth` directly — should redirect to `/` instantly with no flash of the sign-in form
+- [x] **Auth redirect (logged out):** Sign out, navigate to `/auth` — should show the sign-in form
+- [x] **Auth form works:** Sign in with valid credentials — should redirect to `/`
+- [x] **Auth sign-up works:** Sign up with new email — should show confirmation message
+- [x] **Auth error handling:** Sign in with wrong password — should show error message
+- [x] **Profile redirect (logged out):** Sign out, navigate to `/profile` directly — should redirect to `/auth` instantly with no flash of profile content
+- [x] **Profile redirect (logged in):** Sign in, navigate to `/profile` — should show full profile with stats, defaults, journey
+- [x] **Profile sign-out:** Click "Sign out" on profile — should redirect to `/`
+- [x] **Profile checkout banner:** Navigate to `/profile?checkout=success` while logged in — should show the green "Payment received" banner
+- [x] **Profile subscription card:** Verify the Plan section renders correctly (Go Premium for free users, Premium for active subscribers)
+- [x] **Vercel build:** Push to branch, verify Vercel preview build succeeds (no more `useSearchParams` prerender error)
+- [x] **No visual changes:** Both pages should look identical to before — same layout, same colors, same content
 
 ---
 
