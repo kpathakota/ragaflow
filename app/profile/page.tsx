@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/lib/auth/auth-context";
 import { NavHeader } from "@/components/nav-header";
@@ -37,11 +37,21 @@ function buildCheckoutUrl(userId: string) {
   return `${base}/${polarOrgSlug}/checkout?customerExternalId=${userId}`;
 }
 
+function CheckoutSuccessBanner() {
+  const searchParams = useSearchParams();
+  if (searchParams.get("checkout") !== "success") return null;
+  return (
+    <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
+      <p className="text-sm text-emerald-400">
+        Payment received — your plan will update shortly.
+      </p>
+    </div>
+  );
+}
+
 export default function ProfilePage() {
   const { user, loading, signOut } = useAuth();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const checkoutSuccess = searchParams.get("checkout") === "success";
   const [prefs, setPrefs] = useState<Rasika | null>(null);
   const [stats, setStats] = useState<Stats | null>(null);
   const [defaults, setDefaults] = useState<DefaultTrack[]>([]);
@@ -306,13 +316,9 @@ export default function ProfilePage() {
               Plan
             </h2>
 
-            {checkoutSuccess && (
-              <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
-                <p className="text-sm text-emerald-400">
-                  Payment received — your plan will update shortly.
-                </p>
-              </div>
-            )}
+            <Suspense fallback={null}>
+              <CheckoutSuccessBanner />
+            </Suspense>
 
             {prefs.subscription_status === "active" ||
             prefs.subscription_status === "canceled" ||

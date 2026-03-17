@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/lib/auth/auth-context";
 
@@ -17,10 +17,12 @@ export default function AuthPage() {
   const [submitting, setSubmitting] = useState(false);
 
   // If already signed in, redirect home
-  if (user) {
-    router.replace("/");
-    return null;
-  }
+  useEffect(() => {
+    if (user) router.replace("/");
+  }, [user, router]);
+
+  // Prevent sign-in form flash while redirect is pending
+  if (user) return null;
 
   const supabase = createClient();
   if (!supabase) {
