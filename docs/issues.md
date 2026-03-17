@@ -2,6 +2,73 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-03-17
+
+### Issue — Auth redirect called during render causes React error (HIGH PRIORITY)
+
+**File:** `app/auth/page.tsx` lines 20–23
+
+**What's wrong:** `router.replace("/")` is called synchronously in the render body of `AuthPage` — not inside a `useEffect`. React prohibits side effects (including navigation) during the render phase. This triggers the error:
+
+```
+Cannot update a component (`Router`) while rendering a different component (`AuthPage`).
+```
+
+This is a React rules violation that fires whenever a logged-in user lands on `/auth` — including after sign-in and on any navigation that hits the auth page with an active session.
+
+**Why it's high priority:** This error is surfacing in production (Vercel deployment) and on the profile screen (likely because the profile page routes through auth context updates that hit this code path). React may suppress the render entirely, leaving the user stuck.
+
+**Root cause:**
+```tsx
+// app/auth/page.tsx — lines 20–23 (current broken code)
+if (user) {
+  router.replace("/");   // ← side effect during render
+  return null;
+}
+```
+
+Calling `router.replace()` during render is invalid. It must be moved into a `useEffect` that runs after the component mounts (or use Next.js `redirect()` server-side, but this is a client component).
+
+**Fix needed:** Wrap the redirect in `useEffect`:
+```tsx
+useEffect(() => {
+  if (user) router.replace("/");
+}, [user, router]);
+
+if (user) return null;
+```
+
+This defers the navigation call to after render, satisfying React's rules while preserving the same behavior.
+
+**Status:** Fixed — `router.replace` moved into `useEffect`; `useSearchParams` extracted to `CheckoutSuccessBanner` child component wrapped in `<Suspense>` in `app/profile/page.tsx`
+
+---
+
+### Issue — Audio does not resume position when timer preset is changed (low priority)
+
+**File:** `app/mode/[scenario]/[trackId]/session-player.tsx`
+
+**What's wrong:** When a rasika changes the timer preset mid-session (e.g., from 20 min to 45 min), the audio restarts from the beginning instead of continuing from the current playback position. The request is for a "circular buffer" behavior — audio state should be preserved across timer changes.
+
+**User impact:** Disrupts flow for rasikas who want to extend a session. Restarting a raga from the beginning breaks the listening experience.
+
+**Status:** Open — needs clarification (see questions below)
+
+---
+
+### Issue — Explore screen only supports single tag selection (low priority)
+
+**File:** `app/explore/explore-client.tsx`
+
+**What's wrong:** The tag filter on the explore screen allows selecting only one tag at a time. Clicking a second tag deselects the first. Rasikas cannot filter by multiple attributes simultaneously (e.g., "sleep" + "no-percussion").
+
+**User impact:** Limited filtering power as the track library grows. A rasika looking for a specific combination of qualities has no way to express that query.
+
+**Status:** Open — needs clarification (see questions below)
+
+---
+
+
 
 ## 2026-03-11
 
