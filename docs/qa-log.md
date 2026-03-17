@@ -26,6 +26,32 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Server-side auth guards for /auth and /profile
+**Date:** 2026-03-17
+**Status:** Pending verification
+
+### What changed
+- `app/auth/page.tsx` → Server Component. Checks session via server Supabase client, redirects to `/` if logged in. Renders `<AuthForm />` if not.
+- `app/auth/auth-form.tsx` → New client component. Contains the sign-in/sign-up form (extracted from old page). No auth checking.
+- `app/profile/page.tsx` → Server Component. Checks session, redirects to `/auth` if not logged in. Renders `<ProfileClient user={user} />` if logged in.
+- `app/profile/profile-client.tsx` → New client component. Contains all profile rendering (extracted from old page). Receives `user` as prop instead of reading from `useAuth()`. Still uses `useAuth()` for `signOut`.
+
+### Manual checks
+- [ ] **Auth redirect (logged in):** Sign in, then navigate to `/auth` directly — should redirect to `/` instantly with no flash of the sign-in form
+- [ ] **Auth redirect (logged out):** Sign out, navigate to `/auth` — should show the sign-in form
+- [ ] **Auth form works:** Sign in with valid credentials — should redirect to `/`
+- [ ] **Auth sign-up works:** Sign up with new email — should show confirmation message
+- [ ] **Auth error handling:** Sign in with wrong password — should show error message
+- [ ] **Profile redirect (logged out):** Sign out, navigate to `/profile` directly — should redirect to `/auth` instantly with no flash of profile content
+- [ ] **Profile redirect (logged in):** Sign in, navigate to `/profile` — should show full profile with stats, defaults, journey
+- [ ] **Profile sign-out:** Click "Sign out" on profile — should redirect to `/`
+- [ ] **Profile checkout banner:** Navigate to `/profile?checkout=success` while logged in — should show the green "Payment received" banner
+- [ ] **Profile subscription card:** Verify the Plan section renders correctly (Go Premium for free users, Premium for active subscribers)
+- [ ] **Vercel build:** Push to branch, verify Vercel preview build succeeds (no more `useSearchParams` prerender error)
+- [ ] **No visual changes:** Both pages should look identical to before — same layout, same colors, same content
+
+---
+
 ## Task 2.4 — Subscribe link in profile
 **Commit:** (see below)
 **Date:** 2026-03-11
