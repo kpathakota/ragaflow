@@ -30,10 +30,11 @@ async function updateRasika(
     return;
   }
 
-  const { error } = await admin
-    .from("rasikas")
-    .update({ subscription_status: status, polar_customer_id: polarCustomerId })
-    .eq("rasika_id", externalId);
+  const { error } = await admin.rpc("update_rasika_subscription", {
+    p_rasika_id: externalId,
+    p_polar_customer_id: polarCustomerId,
+    p_subscription_status: status,
+  });
 
   if (error) {
     console.error("[polar/webhook] Supabase update failed:", error.message);

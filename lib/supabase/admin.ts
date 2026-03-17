@@ -1,17 +1,17 @@
 import { createClient as createSupabaseClient } from "@supabase/supabase-js";
 
 /**
- * Server-only Supabase client using the service role key.
+ * Server-only Supabase client using the secret key (service role).
  * Bypasses RLS — use exclusively in server-side API routes (e.g. webhook handler).
  * Never import this from client components.
  */
 export function createAdminClient() {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  const secretKey = process.env.SUPABASE_SECRET_KEY;
 
-  if (!url || !serviceRoleKey) return null;
+  if (!url || !secretKey) return null;
 
-  return createSupabaseClient(url, serviceRoleKey, {
+  return createSupabaseClient(url, secretKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false,
