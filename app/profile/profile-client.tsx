@@ -27,15 +27,14 @@ type CertProgress = {
   progressPercent: number;
 };
 
-const polarServer = process.env.NEXT_PUBLIC_POLAR_SERVER;
-const polarOrgSlug = process.env.NEXT_PUBLIC_POLAR_ORG_SLUG;
+// Polar checkout link IDs — sandbox now, production TBD
+const POLAR_CHECKOUT_LINK =
+  process.env.NEXT_PUBLIC_POLAR_SERVER === "sandbox"
+    ? "https://sandbox.polar.sh/checkout/polar_c_FEBI9a9gEeCMUgd4RPgo1s5h8tachGt0t8rtg0FPwpJ"
+    : "https://buy.polar.sh/polar_cl_MOogV7jhwJif9qfSJKvCrGbuZOzfSbxrA4vaW2sDHJu";
 
 function buildCheckoutUrl(userId: string) {
-  const base =
-    polarServer === "sandbox"
-      ? "https://sandbox.polar.sh"
-      : "https://polar.sh";
-  return `${base}/${polarOrgSlug}/checkout?customerExternalId=${userId}`;
+  return `${POLAR_CHECKOUT_LINK}?customer_external_id=${userId}`;
 }
 
 function CheckoutSuccessBanner() {
