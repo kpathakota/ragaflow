@@ -2,6 +2,22 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-03-23
+
+### Issue — Subscribe button on profile doesn't render until rasika interacts (e.g., favorites a track) (low priority)
+
+**File:** `app/profile/profile-client.tsx`
+
+**What's wrong:** On the profile page, the "Go Premium" subscribe card (with the Subscribe button) does not appear on initial load. It only becomes visible after the rasika performs an interaction elsewhere — e.g., favoriting a track — and then returns to the profile page.
+
+**Likely cause:** The subscription status or rasika data may not be loaded/available on initial render, causing the plan section to be conditionally hidden. A state update triggered by favoriting (which refreshes the rasika record) may be unblocking the render.
+
+**User impact:** New rasikas visiting their profile for the first time won't see the subscribe option until they've interacted with the app in a way that triggers a rasika data refresh.
+
+**Status:** Open — needs investigation
+
+---
+
 ## 2026-03-17
 
 ### Issue — Auth redirect called during render causes React error (HIGH PRIORITY)
