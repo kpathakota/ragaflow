@@ -27,16 +27,6 @@ type CertProgress = {
   progressPercent: number;
 };
 
-// Polar checkout link IDs — sandbox now, production TBD
-const POLAR_CHECKOUT_LINK =
-  process.env.NEXT_PUBLIC_POLAR_SERVER === "sandbox"
-    ? "https://sandbox.polar.sh/checkout/polar_c_FEBI9a9gEeCMUgd4RPgo1s5h8tachGt0t8rtg0FPwpJ"
-    : "https://buy.polar.sh/polar_cl_MOogV7jhwJif9qfSJKvCrGbuZOzfSbxrA4vaW2sDHJu";
-
-function buildCheckoutUrl(userId: string) {
-  return `${POLAR_CHECKOUT_LINK}?customer_external_id=${userId}`;
-}
-
 function CheckoutSuccessBanner() {
   const searchParams = useSearchParams();
   if (searchParams.get("checkout") !== "success") return null;
@@ -340,7 +330,7 @@ export function ProfileClient({ user }: { user: User }) {
                   $5/mo · $30/yr · $100 lifetime · $300 sponsor
                 </p>
                 <a
-                  href={buildCheckoutUrl(user.id)}
+                  href="/api/checkout"
                   className="mt-3 inline-block rounded-lg bg-amber-500 px-4 py-2 text-xs font-medium text-black hover:bg-amber-400"
                 >
                   Subscribe

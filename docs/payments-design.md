@@ -30,25 +30,25 @@ Ragaflow uses **Polar.sh** as its merchant of record for subscriptions. Polar ha
 - 3 simple tiers don't need a custom selection UI
 
 **How it works:**
-- Profile "Go Premium" CTA links to Polar's hosted checkout URL
-- The link includes `?customerExternalId={uid}` (Supabase UID) so the webhook can map the Polar customer back to the rasika
-- Polar handles tier selection, payment form, receipts, and tax
+- Profile "Go Premium" CTA links to `/api/checkout` (server-side API route)
+- The route authenticates the user, then creates a Polar checkout session via the SDK (`polar.checkouts.create()`) with `externalCustomerId` set to the Supabase UID
+- Polar creates/links a Customer record with the external ID, so webhooks can map back to the rasika
+- The route redirects to the Polar-hosted checkout URL returned by the API
+- After payment, Polar redirects back to `/profile?checkout=success`
 
-**Checkout URL pattern:**
-```
-https://sandbox.polar.sh/{org-slug}/checkout?customerExternalId={uid}
-```
-(Production: `https://polar.sh/{org-slug}/checkout?customerExternalId={uid}`)
-
-The org slug and server environment come from `NEXT_PUBLIC_POLAR_ORG_SLUG` and `NEXT_PUBLIC_POLAR_SERVER`.
-
-**Success redirect:** Configure in Polar dashboard to redirect to `{app_url}/profile?checkout=success`
+**Why server-side sessions instead of checkout links:**
+- Checkout links (shareable URLs) don't support `customer_external_id` as a query parameter — it's not a documented param
+- The Checkout Sessions API officially supports `externalCustomerId`, guaranteeing the external ID reaches the Polar Customer record
+- Same hosted checkout UX — the rasika still sees Polar's page, picks a plan, and pays
 
 ## Architecture
 
 ```
 Profile "Go Premium" CTA
-  → Polar hosted checkout (user picks tier, pays with card)
+  → GET /api/checkout (server authenticates user)
+  → Server creates Polar checkout session (externalCustomerId = Supabase UID)
+  → Server redirects to Polar-hosted checkout URL
+  → User picks tier, pays with card
   → Polar redirects back to /profile?checkout=success
   → Polar sends webhook to /api/webhooks/polar (async)
   → Webhook handler updates rasikas.subscription_status in Supabase
@@ -81,12 +81,12 @@ Polar uses a fully isolated sandbox (not a toggle):
 POLAR_ACCESS_TOKEN=polar_oat_...              # Server-only — Organization Access Token (sandbox)
 POLAR_ORGANIZATION_ID=org_...                 # Server-only — Polar org ID
 POLAR_WEBHOOK_SECRET=whsec_...                # Server-only — Webhook signing secret
-NEXT_PUBLIC_POLAR_SERVER=sandbox              # "sandbox" or "production" — client-visible, used to build checkout URL
-NEXT_PUBLIC_POLAR_ORG_SLUG=your-org-slug      # Client-visible — used to build checkout URL
+POLAR_PRODUCT_IDS=id1,id2,id3                 # Server-only — Comma-separated Polar product IDs for checkout
+NEXT_PUBLIC_POLAR_SERVER=sandbox              # "sandbox" or "production" — controls SDK server target
 SUPABASE_SERVICE_ROLE_KEY=eyJ...              # Server-only — bypasses RLS for webhook writes
 ```
 
-**`NEXT_PUBLIC_POLAR_SERVER` and `NEXT_PUBLIC_POLAR_ORG_SLUG` are intentionally public** — the profile page is a client component and needs them to construct the checkout URL. They contain no secrets.
+**`NEXT_PUBLIC_POLAR_SERVER` is intentionally public** — controls which Polar environment the SDK targets. `NEXT_PUBLIC_POLAR_ORG_SLUG` is no longer needed (checkout is server-side now).
 
 Production env vars go in Vercel "Production" environment. Preview deploys use sandbox values.
 
@@ -168,12 +168,14 @@ npm install @polar-sh/nextjs @polar-sh/sdk
 
 | File | Action | Purpose |
 |---|---|---|
+| `app/api/checkout/route.ts` | New ✅ | Server-side checkout session (creates Polar session + redirects) |
 | `app/api/webhooks/polar/route.ts` | New ✅ | Webhook handler (subscription events → Supabase) |
 | `app/api/portal/route.ts` | New ✅ | Customer portal redirect |
+| `lib/polar/client.ts` | New ✅ | Shared Polar SDK client factory |
 | `lib/supabase/admin.ts` | New ✅ | Service role Supabase client |
-| `app/profile/page.tsx` | Edit ✅ | Wire checkout link + manage subscription + success banner |
+| `app/profile/profile-client.tsx` | Edit ✅ | Subscribe button points to `/api/checkout` (no more static URLs) |
 | `lib/types.ts` | Edit ✅ | Expanded `subscription_status` union to all valid states |
-| `.env.local` | Edit ✅ | Added all Polar + service role env vars |
+| `.env.local` | Edit ✅ | Added all Polar + service role env vars + `POLAR_PRODUCT_IDS` |
 
 ## Implementation Status
 
@@ -205,7 +207,7 @@ End-to-end testing (after PR #15 merged):
 - **Canceled + period end:** `canceled` rasikas keep full access until `subscription.revoked` fires (sets `expired`). Profile shows "Manage subscription" link while `canceled` — they can resubscribe via portal.
 - **Webhook idempotency:** Handler uses a simple UPDATE — writing the same status twice is safe.
 - **`subscription.past_due`:** Not a named event in `@polar-sh/nextjs` SDK; handled via `onPayload` catch-all.
-- **`customerExternalId` vs `metadata`:** Checkout URL uses `?customerExternalId={uid}` (not `metadata[supabase_uid]`). Webhook payload exposes it at `data.customer.externalId`.
+- **`externalCustomerId` via Checkout Sessions API:** Server-side `polar.checkouts.create({ externalCustomerId: uid })` is the official way to link a Polar Customer to our Supabase UID. Static checkout links don't support this as a query parameter. Webhook payload exposes it at `data.customer.externalId`.
 - **Manage subscription visibility:** Shown for `active`, `canceled`, `past_due`. Hidden for `lifetime` (no subscription to manage).
 
 ## Next Steps

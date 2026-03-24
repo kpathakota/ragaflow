@@ -8,41 +8,44 @@ Quick reference for the Polar billing integration. Based on https://polar.sh/doc
 
 | Var | Where | Purpose |
 |-----|-------|---------|
-| `NEXT_PUBLIC_POLAR_SERVER` | Client + server | `"sandbox"` or `"production"` — controls checkout link + portal server |
+| `NEXT_PUBLIC_POLAR_SERVER` | Client + server | `"sandbox"` or `"production"` — controls SDK server target |
+| `POLAR_ACCESS_TOKEN` | Server only | Organization access token — used by checkout session + portal APIs |
+| `POLAR_PRODUCT_IDS` | Server only | Comma-separated Polar product IDs for checkout (differ per environment) |
 | `POLAR_WEBHOOK_SECRET` | Server only | HMAC secret for verifying webhook signatures |
-| `POLAR_ACCESS_TOKEN` | Server only | Organization access token — used by customer portal API |
 | `SUPABASE_SECRET_KEY` | Server only | Service-role key — webhook handler uses this to bypass RLS |
 
 ---
 
-## Checkout Links
+## Checkout Sessions (Server-Side)
 
-**Docs:** Checkout links are reusable, shareable URLs that create a checkout session when opened. Best for website/social embeds (as opposed to Checkout Sessions API, which is for single-use in-product flows).
+**Docs:** Checkout sessions are single-use, server-created checkout URLs. Created via the Polar SDK (`polar.checkouts.create()`). This is how we pass `externalCustomerId` to link the Polar Customer to our Supabase rasika.
 
-**Our links:**
+**Our endpoint:** `app/api/checkout/route.ts`
 
-| Environment | URL |
-|---|---|
-| Sandbox | `https://sandbox.polar.sh/checkout/polar_c_FEBI9a9gEeCMUgd4RPgo1s5h8tachGt0t8rtg0FPwpJ` |
-| Production | `https://buy.polar.sh/polar_cl_MOogV7jhwJif9qfSJKvCrGbuZOzfSbxrA4vaW2sDHJu` |
+### Flow
 
-**Query parameters:**
-
-| Param | Purpose |
-|---|---|
-| `customer_external_id` | Links checkout to our Supabase `rasika_id`. Set on the Polar Customer after purchase. |
-| `metadata` | Custom key-value pairs stored on the checkout |
-| `utm_source`, `utm_medium`, `utm_campaign`, `utm_content`, `utm_term` | Attribution tracking |
-| `reference_id` | Custom attribution ID |
-
-**Our usage** (`profile-client.tsx`):
 ```
-{CHECKOUT_LINK}?customer_external_id={user.id}
+User clicks "Subscribe" on /profile
+  → GET /api/checkout
+  → Server authenticates user via Supabase
+  → Server calls polar.checkouts.create({
+      products: POLAR_PRODUCT_IDS,
+      externalCustomerId: user.id,    ← links Polar Customer to our rasika
+      customerEmail: user.email,
+      successUrl: "{APP_URL}/profile?checkout=success"
+    })
+  → Server redirects to checkout.url (Polar-hosted page)
+  → User picks tier, pays
+  → Polar redirects back to /profile?checkout=success
 ```
 
-After successful checkout, Polar creates/links a Customer record with `external_id` = our `rasika_id`. This is how webhooks tie back to our user.
+### Why sessions instead of checkout links
 
-**Important:** `customerExternalId` (camelCase) does NOT work — must use `customer_external_id` (snake_case).
+Static checkout links (shareable URLs) don't support `customer_external_id` as a query parameter — it's not a documented param. The Checkout Sessions API officially supports `externalCustomerId`, guaranteeing the external ID reaches the Polar Customer record and flows through to webhooks as `data.customer.externalId`.
+
+### Product IDs
+
+Set `POLAR_PRODUCT_IDS` env var (comma-separated). These differ between sandbox and production — look them up in the Polar dashboard under Products.
 
 ---
 
@@ -145,18 +148,21 @@ update_rasika_subscription(p_rasika_id uuid, p_polar_customer_id text, p_subscri
 
 | | Checkout Links | Checkout Sessions |
 |---|---|---|
-| **Use case** | Shareable, reusable URLs | Single-use, server-created |
-| **Created via** | Dashboard or API | API only (`POST /v1/checkouts/`) |
-| **Our usage** | Profile page "Subscribe" button | Not used |
-| **When to switch** | If we need dynamic pricing, trials, or per-user discounts, switch to Checkout Sessions |
+| **Use case** | Shareable, reusable URLs (social/marketing) | Single-use, server-created (in-app) |
+| **Created via** | Dashboard or API | API only (`polar.checkouts.create()`) |
+| **Supports externalCustomerId** | No (not a valid query param) | Yes (official SDK field) |
+| **Our usage** | Not used | Profile "Subscribe" button → `/api/checkout` |
 
 ---
 
 ## Testing Checklist
 
-- [ ] Sandbox checkout: click Subscribe on profile → complete Polar checkout → verify `subscription_status` = `active` in Supabase
+- [ ] Sandbox checkout: click Subscribe on profile → redirected through `/api/checkout` → complete Polar checkout → verify `subscription_status` = `active` in Supabase
+- [ ] Verify Polar Customer has `externalId` = your Supabase UID (check Polar dashboard → Customers)
 - [ ] Portal: click "Manage subscription" → verify redirect to Polar portal → return to /profile
 - [ ] Cancel via portal → verify `subscription_status` = `canceled`
-- [ ] Verify `customer_external_id` is set correctly on the Polar Customer (check Polar dashboard)
+- [ ] Test lifetime purchase → verify `subscription_status` = `lifetime`
+- [ ] Verify `?checkout=success` banner appears after redirect
+- [ ] Unauthenticated visit to `/api/checkout` → redirected to `/auth`
 - [ ] Verify calling `update_rasika_subscription` from browser console returns permission denied
 - [ ] Verify invalid status values are rejected by the DB function
