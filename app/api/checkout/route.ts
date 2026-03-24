@@ -41,8 +41,15 @@ export async function GET(req: NextRequest) {
     });
 
     return NextResponse.redirect(checkout.url);
-  } catch (err) {
+  } catch (err: unknown) {
     console.error("[checkout] Failed to create session:", err);
+
+    // Log Polar API error details if available
+    if (err instanceof Error) {
+      console.error("[checkout] Error message:", err.message);
+      console.error("[checkout] Error details:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+    }
+
     return NextResponse.redirect(new URL("/profile?checkout=error", req.url));
   }
 }
