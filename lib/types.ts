@@ -36,7 +36,7 @@ export type Rasika = {
   default_sleep_duration: number | null;
   default_meditate_duration: number | null;
   custom_duration: number | null;
-  subscription_status: "free" | "subscribed" | "lifetime" | "expired";
+  subscription_status: "free" | "active" | "canceled" | "past_due" | "expired" | "lifetime";
   polar_customer_id: string | null;
 };
 
