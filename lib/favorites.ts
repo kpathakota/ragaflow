@@ -1,4 +1,5 @@
 import { createClient } from "@/lib/supabase/client";
+import { ensureRasika } from "@/lib/ensure-rasika";
 import type { Rasika } from "@/lib/types";
 
 export async function getPreferencesClient(): Promise<Rasika | null> {
@@ -19,27 +20,6 @@ export async function getPreferencesClient(): Promise<Rasika | null> {
   return (data as Rasika) ?? null;
 }
 
-async function ensurePreferences(
-  supabase: NonNullable<ReturnType<typeof createClient>>,
-  userId: string
-): Promise<Rasika> {
-  const { data: existing } = await supabase
-    .from("rasikas")
-    .select("*")
-    .eq("rasika_id", userId)
-    .single();
-
-  if (existing) return existing as Rasika;
-
-  const { data: created } = await supabase
-    .from("rasikas")
-    .insert({ rasika_id: userId })
-    .select()
-    .single();
-
-  return created as Rasika;
-}
-
 export async function toggleFavoriteTrackClient(
   trackId: string
 ): Promise<string[] | null> {
@@ -51,7 +31,7 @@ export async function toggleFavoriteTrackClient(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const prefs = await ensurePreferences(supabase, user.id);
+  const prefs = await ensureRasika(supabase, user.id);
   const current = prefs.favorite_tracks ?? [];
   const updated = current.includes(trackId)
     ? current.filter((id) => id !== trackId)
@@ -76,7 +56,7 @@ export async function toggleFavoriteRagamClient(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const prefs = await ensurePreferences(supabase, user.id);
+  const prefs = await ensureRasika(supabase, user.id);
   const current = prefs.favorite_ragams ?? [];
   const updated = current.includes(ragamId)
     ? current.filter((id) => id !== ragamId)

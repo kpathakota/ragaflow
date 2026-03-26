@@ -6,6 +6,26 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Fix — Create rasika row on sign-in
+**Commit:** f78a0b7
+**Date:** 2026-03-26
+**Status:** Pending verification
+
+### What changed
+- Extracted `ensureRasika` from `lib/favorites.ts` into `lib/ensure-rasika.ts` (shared utility)
+- `AuthProvider` calls `ensureRasika` on initial load (if user exists) and on `SIGNED_IN` events
+- `lib/favorites.ts` imports from the shared utility instead of its own copy
+
+### Manual checks
+- [ ] Sign up with a new email — verify a `rasikas` row is created immediately in Supabase (check the table)
+- [ ] Sign in with an existing account that already has a `rasikas` row — no duplicate row created, no errors
+- [ ] Visit `/profile` immediately after sign-in (without favoriting anything first) — Plan section with "Go Premium" card should be visible
+- [ ] Favorite a track — still works (no regression from extracting `ensureRasika`)
+- [ ] Sign out and visit `/profile` — should redirect to `/auth` (no crash from `ensureRasika` running without a user)
+- [ ] Open app without Supabase env vars — no crash, loading completes normally
+
+---
+
 ## Task 2.4 — Subscribe link in profile
 **Commit:** (see below)
 **Date:** 2026-03-11
