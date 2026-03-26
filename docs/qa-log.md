@@ -28,7 +28,7 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ## Task 2.6b — Webhook security hardening + env var rename
 **Date:** 2026-03-17
-**Status:** Pending verification
+**Status:** Verified — 2026-03-26
 
 ### Changes
 - Renamed `SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_SECRET_KEY` in `lib/supabase/admin.ts` (matches new Supabase project terminology)
@@ -39,19 +39,19 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 - [x] Run migration 008 in Supabase SQL editor (both staging and production)
 - [x] Rename env var in Vercel: `SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_SECRET_KEY` (both Preview and Production)
 - [x] Rename env var in `.env.local`: `SUPABASE_SERVICE_ROLE_KEY` → `SUPABASE_SECRET_KEY`
-- [ ] Test checkout flow end-to-end on Vercel preview — verify `subscription_status` updates in `rasikas` table
-- [ ] Verify calling `update_rasika_subscription` from browser console (as authenticated user) returns permission denied
-- [ ] Verify invalid status values are rejected by the function
-- [ ] Add `SUPABASE_SECRET_KEY` to production before merging into main. 
+- [x] Test checkout flow end-to-end on Vercel preview — verify `subscription_status` updates in `rasikas` table
+- [x] Verify calling `update_rasika_subscription` from browser console (as authenticated user) returns permission denied
+- [x] Verify invalid status values are rejected by the function
+- [x] Add `SUPABASE_SECRET_KEY` to production before merging into main.
 
 ### Supabase / infra steps
-- [ ] Run `supabase/migrations/008_subscription_update_fn.sql` in SQL editor
+- [x] Run `supabase/migrations/008_subscription_update_fn.sql` in SQL editor
 
 ---
 
 ## Task 2.6 — Polar.sh billing integration
 **Date:** 2026-03-17
-**Status:** Pending verification
+**Status:** Verified — 2026-03-26
 
 ### Prerequisites
 - Polar sandbox account + org created at sandbox.polar.sh
@@ -67,38 +67,38 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 3. Copy the webhook secret from `polar listen` output if it differs from `.env.local` — restart dev server if updated
 
 **Checkout flow (monthly/yearly subscription):**
-- [ ] Sign in, go to `/profile`, verify "Go Premium" card is visible with "$5/mo · $30/yr · $100 lifetime · $300 sponsor"
-- [ ] Click "Subscribe" — should open Polar hosted checkout at `sandbox.polar.sh/{org}/checkout?customerExternalId={your-uid}`
-- [ ] Verify your Supabase UID appears in the URL query string (`customerExternalId=...`)
-- [ ] Select a monthly plan, enter test card `4242 4242 4242 4242`, any future expiry, any CVC, any billing details
-- [ ] Complete checkout — Polar should redirect back to `/profile?checkout=success`
-- [ ] Verify the green "Payment received — your plan will update shortly" banner appears
-- [ ] Check `polar listen` terminal — should show `subscription.active` event received
-- [ ] In Supabase dashboard, check `rasikas` table: `subscription_status` should be `active`, `polar_customer_id` should be populated
-- [ ] Refresh `/profile` — should show emerald "Premium" card with "All tracks unlocked" and "Manage subscription" link
+- [x] Sign in, go to `/profile`, verify "Go Premium" card is visible with "$5/mo · $30/yr · $100 lifetime · $300 sponsor"
+- [x] Click "Subscribe" — should open Polar hosted checkout at `sandbox.polar.sh/{org}/checkout?customerExternalId={your-uid}`
+- [x] Verify your Supabase UID appears in the URL query string (`customerExternalId=...`)
+- [x] Select a monthly plan, enter test card `4242 4242 4242 4242`, any future expiry, any CVC, any billing details
+- [x] Complete checkout — Polar should redirect back to `/profile?checkout=success`
+- [x] Verify the green "Payment received — your plan will update shortly" banner appears
+- [x] Check `polar listen` terminal — should show `subscription.active` event received
+- [x] In Supabase dashboard, check `rasikas` table: `subscription_status` should be `active`, `polar_customer_id` should be populated
+- [x] Refresh `/profile` — should show emerald "Premium" card with "All tracks unlocked" and "Manage subscription" link
 
 **Customer portal:**
-- [ ] Click "Manage subscription" on profile — should redirect to Polar's hosted customer portal
-- [ ] Verify the portal shows order history and payment method
-- [ ] Cancel the subscription via the portal
-- [ ] Check `polar listen` — should show `subscription.canceled` event
-- [ ] In Supabase: `subscription_status` should be `canceled`
-- [ ] Refresh `/profile` — should still show "Premium" card but with "Access continues until your billing period ends"
-- [ ] "Manage subscription" link should still be visible (rasika can resubscribe)
+- [x] Click "Manage subscription" on profile — should redirect to Polar's hosted customer portal
+- [x] Verify the portal shows order history and payment method
+- [x] Cancel the subscription via the portal
+- [x] Check `polar listen` — should show `subscription.canceled` event
+- [x] In Supabase: `subscription_status` should be `canceled`
+- [x] Refresh `/profile` — should still show "Premium" card but with "Access continues until your billing period ends"
+- [x] "Manage subscription" link should still be visible (rasika can resubscribe)
 
 **Lifetime purchase:**
-- [ ] Reset your `subscription_status` to `free` in Supabase (for a clean test)
-- [ ] Go to `/profile`, click "Subscribe", select lifetime ($100) product
-- [ ] Complete checkout with test card
-- [ ] Check `polar listen` — should show `order.created` event with `billingReason: "purchase"`
-- [ ] In Supabase: `subscription_status` should be `lifetime`
-- [ ] Refresh `/profile` — should show emerald "Lifetime" card with "You have lifetime access to all tracks"
-- [ ] "Manage subscription" link should NOT appear for lifetime
+- [x] Reset your `subscription_status` to `free` in Supabase (for a clean test)
+- [x] Go to `/profile`, click "Subscribe", select lifetime ($100) product
+- [x] Complete checkout with test card
+- [x] Check `polar listen` — should show `order.created` event with `billingReason: "purchase"`
+- [x] In Supabase: `subscription_status` should be `lifetime`
+- [x] Refresh `/profile` — should show emerald "Lifetime" card with "You have lifetime access to all tracks"
+- [x] "Manage subscription" link should NOT appear for lifetime
 
 **Edge cases:**
-- [ ] Open `/profile` in an incognito window (not logged in) — should redirect to `/auth`, never reach checkout
-- [ ] Manually visit `/api/portal` without being logged in — should redirect to `/profile` (not crash)
-- [ ] Manually visit `/api/portal` as a free user (no `polar_customer_id`) — should redirect to `/profile`
+- [x] Open `/profile` in an incognito window (not logged in) — should redirect to `/auth`, never reach checkout
+- [x] Manually visit `/api/portal` without being logged in — should redirect to `/profile` (not crash)
+- [x] Manually visit `/api/portal` as a free user (no `polar_customer_id`) — should redirect to `/profile`
 
 ### Deployed testing (Vercel preview)
 
@@ -112,13 +112,13 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 4. Verify all 6 Polar + service role env vars are set in Vercel "Preview" environment
 
 **Smoke test on preview:**
-- [ ] Sign in on the preview URL
-- [ ] Go to `/profile`, click "Subscribe"
-- [ ] Verify checkout URL points to `sandbox.polar.sh` (not production `polar.sh`)
-- [ ] Complete a test checkout
-- [ ] Verify redirect back to `/profile?checkout=success` on the preview URL (not localhost)
-- [ ] Check Supabase staging: `subscription_status` updated
-- [ ] Click "Manage subscription" — portal loads and returns to preview URL
+- [x] Sign in on the preview URL
+- [x] Go to `/profile`, click "Subscribe"
+- [x] Verify checkout URL points to `sandbox.polar.sh` (not production `polar.sh`)
+- [x] Complete a test checkout
+- [x] Verify redirect back to `/profile?checkout=success` on the preview URL (not localhost)
+- [x] Check Supabase staging: `subscription_status` updated
+- [x] Click "Manage subscription" — portal loads and returns to preview URL
 
 ### Webhook event → status mapping (reference)
 
