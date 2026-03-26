@@ -1,0 +1,366 @@
+"use client";
+
+import { useEffect, useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useAuth } from "@/lib/auth/auth-context";
+import { NavHeader } from "@/components/nav-header";
+import { createClient } from "@/lib/supabase/client";
+import { scenarios } from "@/components/scenario-config";
+import type { Rasika, Scenario, Track } from "@/lib/types";
+import { computeRagamProgress, getTierInfo, getTierColor } from "@/lib/certifications";
+import type { User } from "@supabase/supabase-js";
+
+type Stats = {
+  totalSeconds: number;
+  sessionCount: number;
+};
+
+type DefaultTrack = { scenario: Scenario; track: Track; durationSeconds: number | null };
+
+type CertProgress = {
+  ragamId: string;
+  ragamName: string;
+  totalSeconds: number;
+  currentLabel: string | null;
+  nextLabel: string | null;
+  nextThreshold: number;
+  progressPercent: number;
+};
+
+function CheckoutBanner() {
+  const searchParams = useSearchParams();
+  const status = searchParams.get("checkout");
+  if (status === "success") {
+    return (
+      <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
+        <p className="text-sm text-emerald-400">
+          Payment received — your plan will update shortly.
+        </p>
+      </div>
+    );
+  }
+  if (status === "error") {
+    return (
+      <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3">
+        <p className="text-sm text-red-400">
+          Something went wrong with checkout. Please try again.
+        </p>
+      </div>
+    );
+  }
+  return null;
+}
+
+export function ProfileClient({ user }: { user: User }) {
+  const { signOut } = useAuth();
+  const router = useRouter();
+  const [prefs, setPrefs] = useState<Rasika | null>(null);
+  const [stats, setStats] = useState<Stats | null>(null);
+  const [defaults, setDefaults] = useState<DefaultTrack[]>([]);
+  const [signingOut, setSigningOut] = useState(false);
+  const [certs, setCerts] = useState<CertProgress[]>([]);
+
+  useEffect(() => {
+    const supabase = createClient();
+    if (!supabase) return;
+
+    // Fetch preferences
+    supabase
+      .from("rasikas")
+      .select("*")
+      .eq("rasika_id", user.id)
+      .single()
+      .then(({ data }) => {
+        const p = data as Rasika | null;
+        setPrefs(p);
+        if (!p) return;
+
+        // Fetch default tracks
+        const mapping: [Scenario, string | null, number | null][] = [
+          ["focus", p.default_focus_track, p.default_focus_duration],
+          ["sleep", p.default_sleep_track, p.default_sleep_duration],
+          ["meditate", p.default_meditate_track, p.default_meditate_duration],
+        ];
+        const trackIds = mapping
+          .filter(([, id]) => id)
+          .map(([, id]) => id as string);
+
+        if (trackIds.length === 0) return;
+
+        supabase
+          .from("tracks")
+          .select("*")
+          .in("id", trackIds)
+          .then(({ data: tracks }) => {
+            if (!tracks) return;
+            const result: DefaultTrack[] = [];
+            for (const [scenario, trackId, dur] of mapping) {
+              const track = tracks.find((t: Track) => t.id === trackId);
+              if (track) result.push({ scenario, track: track as Track, durationSeconds: dur });
+            }
+            setDefaults(result);
+          });
+      });
+
+    // Fetch listening stats + certifications
+    (async () => {
+      const { data: sessions } = await supabase
+        .from("listening_sessions")
+        .select("track_id, scenario, duration_seconds, completed")
+        .eq("rasika_id", user.id);
+
+      if (!sessions) {
+        setStats({ totalSeconds: 0, sessionCount: 0 });
+        return;
+      }
+
+      const totalSeconds = sessions.reduce(
+        (sum: number, s: { duration_seconds: number }) =>
+          sum + (s.duration_seconds || 0),
+        0
+      );
+      setStats({ totalSeconds, sessionCount: sessions.length });
+
+      // Compute certification progress
+      const { data: allTracks } = await supabase
+        .from("tracks")
+        .select("id, ragam_id");
+      const { data: ragams } = await supabase
+        .from("ragams")
+        .select("id, name");
+
+      if (!allTracks || !ragams) return;
+
+      const progress = computeRagamProgress(
+        sessions as { track_id: string; scenario: string; duration_seconds: number; completed: boolean | null }[],
+        allTracks as { id: string; ragam_id: string }[]
+      );
+
+      const ragamNameMap = new Map<string, string>();
+      for (const r of ragams) ragamNameMap.set(r.id, r.name);
+
+      const certList: CertProgress[] = [];
+      for (const [ragamId, secs] of progress) {
+        if (secs <= 0) continue;
+        const tier = getTierInfo(secs);
+        certList.push({
+          ragamId,
+          ragamName: ragamNameMap.get(ragamId) ?? ragamId,
+          totalSeconds: secs,
+          currentLabel: tier.currentLabel,
+          nextLabel: tier.nextLabel,
+          nextThreshold: tier.nextThreshold,
+          progressPercent: tier.progressPercent,
+        });
+      }
+      certList.sort((a, b) => b.totalSeconds - a.totalSeconds);
+      setCerts(certList);
+    })();
+  }, [user.id]);
+
+  const memberSince = new Date(user.created_at).toLocaleDateString("en-US", {
+    month: "long",
+    year: "numeric",
+  });
+
+  function formatDuration(seconds: number): string {
+    if (seconds < 60) return `${seconds}s`;
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    if (hours === 0) return `${mins}m`;
+    return `${hours}h ${mins}m`;
+  }
+
+  async function handleSignOut() {
+    setSigningOut(true);
+    await signOut();
+    router.push("/");
+  }
+
+  return (
+    <div className="flex min-h-screen flex-col items-center px-6 py-16">
+      <NavHeader backHref="/" title="Profile" />
+
+      <div className="flex w-full max-w-sm flex-col gap-8">
+        {/* Account */}
+        <section>
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            Account
+          </h2>
+          <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
+            <p className="text-sm text-neutral-200">{user.email}</p>
+            <p className="mt-1 text-xs text-neutral-500">
+              Member since {memberSince}
+            </p>
+          </div>
+        </section>
+
+        {/* Stats */}
+        {stats && (
+          <section>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Listening
+            </h2>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
+                <p className="text-2xl font-semibold text-neutral-100">
+                  {formatDuration(stats.totalSeconds)}
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">Total time</p>
+              </div>
+              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
+                <p className="text-2xl font-semibold text-neutral-100">
+                  {stats.sessionCount}
+                </p>
+                <p className="mt-1 text-xs text-neutral-500">Sessions</p>
+              </div>
+              {prefs && (
+                <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
+                  <p className="text-2xl font-semibold text-neutral-100">
+                    {prefs.favorite_tracks.length}
+                  </p>
+                  <p className="mt-1 text-xs text-neutral-500">Favorites</p>
+                </div>
+              )}
+            </div>
+          </section>
+        )}
+
+        {/* Listening Journey */}
+        {certs.length > 0 && (
+          <section>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Listening Journey
+            </h2>
+            <div className="flex flex-col gap-3">
+              {certs.map((c) => {
+                const tierColor = getTierColor(c.currentLabel);
+                return (
+                  <div
+                    key={c.ragamId}
+                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-neutral-200">
+                        {c.ragamName}
+                      </span>
+                      <span className={`text-xs font-medium ${c.currentLabel ? tierColor.label : "text-neutral-500"}`}>
+                        {c.currentLabel ?? "—"}
+                      </span>
+                    </div>
+                    <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
+                      <div
+                        className={`h-full rounded-full ${tierColor.bar} transition-all`}
+                        style={{ width: `${c.progressPercent}%` }}
+                      />
+                    </div>
+                    <p className="mt-2 text-xs text-neutral-600">
+                      {formatDuration(c.totalSeconds)}
+                      {c.nextLabel
+                        ? ` — ${formatDuration(c.nextThreshold - c.totalSeconds)} to ${c.nextLabel}`
+                        : " — max tier reached"}
+                    </p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Defaults */}
+        {defaults.length > 0 && (
+          <section>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Default tracks
+            </h2>
+            <div className="flex flex-col gap-2">
+              {defaults.map(({ scenario, track, durationSeconds }) => {
+                const cfg = scenarios.find((s) => s.key === scenario)!;
+                const durationMin = durationSeconds ? Math.round(durationSeconds / 60) : null;
+                return (
+                  <div
+                    key={scenario}
+                    className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-3"
+                  >
+                    <span className={`text-sm font-medium ${cfg.accent.text}`}>
+                      {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
+                    </span>
+                    <span className="text-sm text-neutral-400">
+                      {track.title}
+                    </span>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        )}
+
+        {/* Subscription */}
+        {prefs && (
+          <section>
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+              Plan
+            </h2>
+
+            <Suspense fallback={null}>
+              <CheckoutBanner />
+            </Suspense>
+
+            {prefs.subscription_status === "active" ||
+            prefs.subscription_status === "canceled" ||
+            prefs.subscription_status === "past_due" ||
+            prefs.subscription_status === "lifetime" ? (
+              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4">
+                <p className="text-sm font-medium text-emerald-400">
+                  {prefs.subscription_status === "lifetime" ? "Lifetime" : "Premium"}
+                </p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  {prefs.subscription_status === "lifetime"
+                    ? "You have lifetime access to all tracks"
+                    : prefs.subscription_status === "canceled"
+                    ? "Access continues until your billing period ends"
+                    : prefs.subscription_status === "past_due"
+                    ? "Payment failed — please update your payment method"
+                    : "All tracks unlocked"}
+                </p>
+                {prefs.subscription_status !== "lifetime" && (
+                  <a
+                    href="/api/portal"
+                    className="mt-3 inline-block text-xs text-neutral-400 underline underline-offset-2 hover:text-neutral-200"
+                  >
+                    Manage subscription
+                  </a>
+                )}
+              </div>
+            ) : (
+              <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
+                <p className="text-sm font-medium text-amber-400">Go Premium</p>
+                <p className="mt-1 text-xs text-neutral-400">
+                  Unlock all tracks with a subscription
+                </p>
+                <p className="mt-2 text-xs text-neutral-500">
+                  $5/mo · $30/yr · $100 lifetime · $300 sponsor
+                </p>
+                <a
+                  href="/api/checkout"
+                  className="mt-3 inline-block rounded-lg bg-amber-500 px-4 py-2 text-xs font-medium text-black hover:bg-amber-400"
+                >
+                  Subscribe
+                </a>
+              </div>
+            )}
+          </section>
+        )}
+
+        {/* Sign out */}
+        <button
+          onClick={handleSignOut}
+          disabled={signingOut}
+          className="mt-4 rounded-xl border border-neutral-700 bg-neutral-900/60 px-5 py-3 text-sm text-neutral-300 transition-colors hover:border-neutral-600 hover:text-white disabled:opacity-50"
+        >
+          {signingOut ? "Signing out..." : "Sign out"}
+        </button>
+      </div>
+    </div>
+  );
+}

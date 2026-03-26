@@ -14,7 +14,7 @@
 
 **Phase 1 (Foundation) — Complete**
 - Supabase auth (email sign-in/sign-up) with `AuthProvider` + `useAuth()` hook
-- Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasika_preferences, listening_sessions, certifications
+- Tag-based data model: ragams, tracks (with `scenarios[]`, `tags[]`, `recorded_date`, `location`), rasikas, listening_sessions, certifications
 - Data layer: Supabase only (`lib/data.ts`), no local seed fallback — Supabase is required
 - Seed data in `supabase/seed.sql` (7 ragams, 30 tracks) — `content/seed.ts` removed
 - RLS policies: ragams/tracks public; preferences/sessions/certifications owner-only
@@ -35,12 +35,12 @@
 **Phase 1 — Deferred (known, not blocking)**
 - Google Drive content pipeline (Tasks 1.3–1.4) — manual content management is fine at current track count
 - Audio transcoding pipeline (Task 1.5) — manual conversion before upload is fine for now
-- Listening gate (Task 1.10) — deferred until Stripe/payments are ready (Phase 2 dependency)
+- Listening gate (Task 1.10 → now Task 2.5) — deferred until Polar.sh payments are ready
 
 ~~Middleware → proxy migration~~ ✅
 
 **Phase 2+ — Future**
-- Stripe payments + subscription tiers
+- Polar.sh payments + subscription tiers
 - Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
 - Access control enforcement
 - iOS native app
@@ -91,7 +91,7 @@ The entire system is built around delivering **pure, human-performed audio with 
 ### Backend Stack
 - **API & Database & Auth**: Supabase (PostgreSQL, auth with email/Google/Apple, Row Level Security)
 - **Audio Storage**: Google Drive (source) → Cloud Storage (processed files)
-- **Payment**: Stripe (for paid downloads/subscriptions)
+- **Payment**: Polar.sh (merchant of record — web checkout, subscription management, tax remittance)
 
 ### Content Management Flow
 ```
@@ -152,13 +152,19 @@ tracks (
   drive_file_id,
   created_at
 )
-rasika_preferences (
+rasikas (
   rasika_id,
   favorite_tracks text[],
   favorite_ragams text[],
   default_focus_track_id,
   default_sleep_track_id,
-  default_meditate_track_id
+  default_meditate_track_id,
+  default_focus_duration,
+  default_sleep_duration,
+  default_meditate_duration,
+  custom_duration integer,
+  subscription_status text DEFAULT 'free',
+  polar_customer_id text
 )
 listening_sessions (id, rasika_id, track_id, scenario, started_at, ended_at, duration_seconds, intended_duration_seconds, completed)
 certifications (id, rasika_id, ragam_id, total_hours, tier)
@@ -399,7 +405,7 @@ Two sub-tasks, both complete:
 - **Transparency principle**: rasikas should always know what's free vs. premium before tapping — no bait-and-switch
 - **Downloads deferred**: offline playback is a future PWA/iOS feature, not file downloads. `download_url` stays in schema but no UI yet.
 - **Sponsor tier ($300)**: relationship/investor tier handled outside the app — no in-app differentiation from lifetime
-- **Billing provider**: needs research (Stripe vs. RevenueCat vs. others) — must support web + future iOS App Store billing
+- **Billing provider**: Polar.sh — chosen as merchant of record. Handles web checkout, subscription management, tax remittance, and webhook-based status sync to Supabase. Future iOS App Store billing will need a separate integration path (Polar does not handle Apple IAP directly).
 
 #### Tasks
 
@@ -413,7 +419,7 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
 
 **Custom duration details:**
 - Range: 1–120 minutes (enforced in UI)
-- Persisted per-rasika in Supabase: new `custom_duration` column on `rasika_preferences` (nullable integer, stores minutes)
+- Persisted per-rasika in Supabase: `custom_duration` column on `rasikas` (nullable integer, stores minutes)
 - On first use (no saved value), pill 3 shows "…" or a placeholder; after setting, it shows the saved value (e.g., "90")
 - The custom value is shared across scenarios (one column, not per-scenario) — the per-scenario default duration (saved on session completion) already captures what each scenario uses
 - All existing logic (start session, end session, certification upsert, default duration save) works unchanged — `duration` is already handled in minutes internally
@@ -422,17 +428,17 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
 
 **Sub-tasks:**
 
-**Task 2.0a: Schema — add `custom_duration` to rasika_preferences**
-- Migration: add `custom_duration integer` (nullable) to `rasika_preferences`
-- Update `lib/types.ts` `RasikaPreferences` type
+**Task 2.0a: Schema — add `custom_duration` to rasikas** ✅
+- Migration 006: added `custom_duration integer` (nullable) to rasikas table
+- Updated `lib/types.ts` `Rasika` type
 - **Acceptance criteria:** column exists, nullable, no default value
 
-**Task 2.0b: Data layer — read/write custom duration**
-- Add `getCustomDuration()` and `setCustomDuration(minutes: number)` to `lib/preferences.ts` (or extend existing functions)
-- Read custom_duration when loading preferences (already fetched in session player via `getPreferencesClient`)
+**Task 2.0b: Data layer — read/write custom duration** ✅
+- Added `setCustomDurationClient(minutes)` to `lib/preferences.ts`
+- Custom duration read via existing `getPreferencesClient()` (returns full Rasika record)
 - **Acceptance criteria:** custom duration round-trips through Supabase
 
-**Task 2.0c: UI — 3-pill duration selector with custom input**
+**Task 2.0c: UI — 3-pill duration selector with custom input** ✅
 - Replace `DURATION_OPTIONS = [5, 15, 25, 45]` in `session-player.tsx` with new 3-pill layout
 - Fixed pills: 25, 45
 - Third pill: shows saved `custom_duration` value or "…"
@@ -448,41 +454,47 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Selected duration flows into session start, timer, and completion as before
   - Existing "set as default" on session completion still captures the duration (25, 45, or custom value)
 
-**Task 2.1: Research — Billing Provider**
-- Research Stripe, RevenueCat, and alternatives for subscription billing
-- Requirements: web checkout, iOS App Store billing (future), webhook-based status sync to Supabase, support for monthly/yearly/lifetime tiers
-- Output: recommendation with trade-offs documented here in dev-design.md
-- *This is a research task — no code.*
+**Task 2.1: Research — Billing Provider** ✅ *(completed 2026-03-04)*
+- Researched Stripe, RevenueCat, Paddle, Lemon Squeezy, and Polar.sh
+- **Decision: Polar.sh** — merchant of record (MoR)
+- **Why Polar:** MoR handles sales tax/VAT remittance (solo dev doesn't want tax compliance burden), clean checkout UI, webhook events for subscription lifecycle, supports one-time payments (lifetime tier), reasonable fees, good DX
+- **Trade-offs:**
+  - Polar does not handle Apple IAP — iOS App Store billing will use native StoreKit in Phase 3
+  - Newer platform vs. Stripe's maturity — acceptable risk at current scale
+  - MoR takes a larger cut than pure payment processor, but eliminates tax filing complexity
+- **Webhook plan:** Polar sends subscription events → Supabase edge function (or Next.js API route) → update `subscription_status` in `rasikas`
+- **Tiers to configure:** $5/mo, $30/yr, $100 lifetime (one-time). $300 sponsor handled outside Polar as a relationship tier.
 
-**Task 2.2: Schema — Subscription Status + Premium Tracks**
-- Add `subscription_status` to rasika record (e.g., `free`, `subscribed`, `lifetime`, `expired`)
-- Decide where this lives — new column on `rasika_preferences`, or a separate `subscriptions` table (depends on billing provider webhook shape)
-- Mark ~5–10 existing seed tracks as `free: true`, rest as `free: false`
-- Update seed SQL
-- Migration + RLS policies
+**Task 2.2: Schema — Subscription Status + Table Rename** ✅
+- Renamed `rasika_preferences` → `rasikas` (migration 007)
+- Added `subscription_status text NOT NULL DEFAULT 'free'` and `polar_customer_id text` to `rasikas`
+- Updated RLS policies for new table name
+- Renamed `RasikaPreferences` → `Rasika` type in `lib/types.ts`
+- Updated all `.from("rasika_preferences")` → `.from("rasikas")` across app code
+- Seed data already had `free` boolean set on all 30 tracks (22 free, 8 premium)
 - **Acceptance criteria:**
-  - `subscription_status` queryable for the current rasika
-  - `free` boolean is set on all tracks in seed data
+  - `subscription_status` queryable for the current rasika ✅
+  - `free` boolean is set on all tracks in seed data ✅
 
-**Task 2.3: UI — Premium Badge on Track Cards**
-- Show a subtle "Premium" tag on track cards where `free: false`
+**Task 2.3: UI — Premium Badge on Track Cards** ✅
+- Subtle amber "Premium" pill badge inline with track metadata (duration/tags) in `components/track-card.tsx`
 - Visible always (not just after the gate) — transparency principle
-- Tag should be unobtrusive: small text, muted color, doesn't dominate the card
 - Appears on scenario track lists (`/mode/*`) and explore page
 - **Acceptance criteria:**
-  - Premium tag visible on non-free tracks
-  - Free tracks have no badge
-  - No change to session player (that's Task 2.5)
+  - Premium tag visible on non-free tracks ✅
+  - Free tracks have no badge ✅
+  - No change to session player ✅
 
-**Task 2.4: UI — Subscribe Link in Profile**
-- Add a "Subscribe" or "Go Premium" card/link to the profile page
-- Visible from day one for all non-subscribed rasikas
-- Initially links to a placeholder (no checkout yet — that depends on Task 2.1 billing research)
-- For subscribed rasikas: show subscription status instead (e.g., "Premium · $30/yr")
+**Task 2.4: UI — Subscribe Link in Profile** ✅
+- "Plan" section added to profile page between Default tracks and Sign out
+- Free/expired rasikas: amber "Go Premium" card with "Coming soon" placeholder (checkout link will come from Task 2.6)
+- Subscribed rasikas: emerald "Premium" card
+- Lifetime rasikas: emerald "Lifetime" card with dedicated copy
+- Expired state deferred — shows same "Go Premium" card as free. Will design proper expired UX in Task 2.6 when we know what Polar sends.
 - **Acceptance criteria:**
-  - Non-subscribed rasikas see a subscribe CTA on profile
-  - Subscribed rasikas see their plan status
-  - Works with the `subscription_status` field from Task 2.2
+  - Non-subscribed rasikas see a subscribe CTA on profile ✅
+  - Subscribed rasikas see their plan status ✅
+  - Works with the `subscription_status` field from Task 2.2 ✅
 
 **Task 2.5: Access Control — 10-Hour Listening Gate**
 - Compute total listening seconds for the current rasika (raw sum of `duration_seconds` from `listening_sessions`)
@@ -495,11 +507,13 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected
   - Subscribed rasikas: all tracks playable regardless of hours
 
-**Task 2.6: Billing Integration (depends on 2.1 research)**
-- Integrate chosen billing provider
-- Checkout flow for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
-- Webhook to update `subscription_status` in Supabase
-- **Blocked on Task 2.1 — scope will be refined after billing research**
+**Task 2.6: Billing Integration — Polar.sh** *(unblocked by Task 2.1)*
+- Integrate Polar.sh checkout for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
+- Create Polar products + pricing for each tier
+- Implement checkout flow: profile subscribe CTA → Polar hosted checkout → redirect back to app
+- Webhook endpoint (Next.js API route or Supabase edge function): listen for Polar subscription events → update `subscription_status` in `rasikas`
+- Handle subscription states: `active`, `past_due`, `canceled`, `expired`
+- Test end-to-end with Polar sandbox/test mode
 
 **Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector
@@ -527,7 +541,7 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
 2. **Next.js API routes**: Start monolithic, can split later if needed
 3. **Track variants (not stems)**: Store complete tracks for each variant (percussion on/off × multiple frequencies)
 4. **Pure audio**: No pitch shifting or audio processing - each frequency is recorded separately by artists
-5. **Monetization**: Free streaming (account required) + paid downloads + 10-hour listening gate. Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
+5. **Monetization**: Free streaming (account required) + paid downloads + 10-hour listening gate. Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor. **Billing via Polar.sh** (merchant of record)
 6. **Google Sheets for metadata**: Simple CSV-like structure artists can edit
 7. **3 primary scenarios + Explore**: Focus, Sleep, Meditate as entry points; Explore as catch-all. Tracks tagged with scenarios[] and tags[] — no mode binding on ragams
 8. **Auth via Supabase**: Email, Google, Apple Sign-In with Row Level Security
@@ -597,7 +611,7 @@ This plan assumes leveraging Claude Code for implementation guidance, code gener
 - **Cloudflare R2**: Simple S3-compatible API, great pricing
 - **Next.js**: Single framework for web frontend + API routes
 - **Supabase**: Auth + database + RLS in one service
-- **Stripe**: Payment infrastructure handled
+- **Polar.sh**: Payment infrastructure handled (merchant of record)
 - **No audio processing complexity**: Simple file storage and playback, no mixing engine needed
 
 ### Why Track Variants > Stems

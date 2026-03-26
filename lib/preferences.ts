@@ -35,19 +35,19 @@ export async function setDefaultTrackClient(
 
   // Ensure preferences row exists
   const { data: existing } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("id")
     .eq("rasika_id", user.id)
     .single();
 
   if (existing) {
     await supabase
-      .from("rasika_preferences")
+      .from("rasikas")
       .update(updateData)
       .eq("rasika_id", user.id);
   } else {
     await supabase
-      .from("rasika_preferences")
+      .from("rasikas")
       .insert({ rasika_id: user.id, ...updateData });
   }
 
@@ -66,19 +66,19 @@ export async function setCustomDurationClient(
   if (!user) return false;
 
   const { data: existing } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("id")
     .eq("rasika_id", user.id)
     .single();
 
   if (existing) {
     await supabase
-      .from("rasika_preferences")
+      .from("rasikas")
       .update({ custom_duration: minutes })
       .eq("rasika_id", user.id);
   } else {
     await supabase
-      .from("rasika_preferences")
+      .from("rasikas")
       .insert({ rasika_id: user.id, custom_duration: minutes });
   }
 

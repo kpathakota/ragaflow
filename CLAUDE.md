@@ -36,8 +36,8 @@ Two Supabase projects: **production** and **staging**.
 **Track** — a recorded session, the atomic content unit:
 - id, title (nullable), ragam_id, scenarios[], tags[], description, artist_note, recorded_date, location, duration, audio_url, download_url, free, created_at
 
-**RasikaPreferences** — per-user favorites and defaults:
-- rasika_id, favorite_tracks[], favorite_ragams[], default_focus_track, default_sleep_track, default_meditate_track
+**Rasika** (table: `rasikas`) — per-user record with favorites, defaults, and subscription:
+- rasika_id, favorite_tracks[], favorite_ragams[], default_focus_track, default_sleep_track, default_meditate_track, subscription_status, polar_customer_id
 
 **ListeningSession** — per-play log:
 - rasika_id, track_id, scenario, started_at, ended_at, duration_seconds
@@ -130,7 +130,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
 - Supabase is required — without env vars the app renders empty (no local seed fallback)
 - Supabase clients return `null` when env vars are missing — data functions return empty arrays
-- RLS policies: ragams/tracks publicly readable; rasika_preferences/listening_sessions/certifications owner-only
+- RLS policies: ragams/tracks publicly readable; rasikas/listening_sessions/certifications owner-only
 
 ## Monetization model
 

@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
-import type { RasikaPreferences } from "@/lib/types";
+import { ensureRasika } from "@/lib/ensure-rasika";
+import type { Rasika } from "@/lib/types";
 
-export async function getPreferencesClient(): Promise<RasikaPreferences | null> {
+export async function getPreferencesClient(): Promise<Rasika | null> {
   const supabase = createClient();
   if (!supabase) return null;
 
@@ -11,33 +12,12 @@ export async function getPreferencesClient(): Promise<RasikaPreferences | null> 
   if (!user) return null;
 
   const { data } = await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .select("*")
     .eq("rasika_id", user.id)
     .single();
 
-  return (data as RasikaPreferences) ?? null;
-}
-
-async function ensurePreferences(
-  supabase: NonNullable<ReturnType<typeof createClient>>,
-  userId: string
-): Promise<RasikaPreferences> {
-  const { data: existing } = await supabase
-    .from("rasika_preferences")
-    .select("*")
-    .eq("rasika_id", userId)
-    .single();
-
-  if (existing) return existing as RasikaPreferences;
-
-  const { data: created } = await supabase
-    .from("rasika_preferences")
-    .insert({ rasika_id: userId })
-    .select()
-    .single();
-
-  return created as RasikaPreferences;
+  return (data as Rasika) ?? null;
 }
 
 export async function toggleFavoriteTrackClient(
@@ -51,14 +31,14 @@ export async function toggleFavoriteTrackClient(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const prefs = await ensurePreferences(supabase, user.id);
+  const prefs = await ensureRasika(supabase, user.id);
   const current = prefs.favorite_tracks ?? [];
   const updated = current.includes(trackId)
     ? current.filter((id) => id !== trackId)
     : [...current, trackId];
 
   await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .update({ favorite_tracks: updated })
     .eq("rasika_id", user.id);
 
@@ -76,14 +56,14 @@ export async function toggleFavoriteRagamClient(
   } = await supabase.auth.getUser();
   if (!user) return null;
 
-  const prefs = await ensurePreferences(supabase, user.id);
+  const prefs = await ensureRasika(supabase, user.id);
   const current = prefs.favorite_ragams ?? [];
   const updated = current.includes(ragamId)
     ? current.filter((id) => id !== ragamId)
     : [...current, ragamId];
 
   await supabase
-    .from("rasika_preferences")
+    .from("rasikas")
     .update({ favorite_ragams: updated })
     .eq("rasika_id", user.id);
 

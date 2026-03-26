@@ -2,6 +2,115 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-03-23
+
+### Issue — Subscribe button on profile doesn't render until rasika interacts (e.g., favorites a track) (low priority)
+
+**File:** `app/profile/profile-client.tsx`
+
+**What's wrong:** On the profile page, the "Go Premium" subscribe card (with the Subscribe button) does not appear on initial load. It only becomes visible after the rasika performs an interaction elsewhere — e.g., favoriting a track — and then returns to the profile page.
+
+**Likely cause:** The subscription status or rasika data may not be loaded/available on initial render, causing the plan section to be conditionally hidden. A state update triggered by favoriting (which refreshes the rasika record) may be unblocking the render.
+
+**User impact:** New rasikas visiting their profile for the first time won't see the subscribe option until they've interacted with the app in a way that triggers a rasika data refresh.
+
+**Status:** Open — needs investigation
+
+---
+
+## 2026-03-17
+
+### Issue — Auth redirect called during render causes React error (HIGH PRIORITY)
+
+**File:** `app/auth/page.tsx` lines 20–23
+
+**What's wrong:** `router.replace("/")` is called synchronously in the render body of `AuthPage` — not inside a `useEffect`. React prohibits side effects (including navigation) during the render phase. This triggers the error:
+
+```
+Cannot update a component (`Router`) while rendering a different component (`AuthPage`).
+```
+
+This is a React rules violation that fires whenever a logged-in user lands on `/auth` — including after sign-in and on any navigation that hits the auth page with an active session.
+
+**Why it's high priority:** This error is surfacing in production (Vercel deployment) and on the profile screen (likely because the profile page routes through auth context updates that hit this code path). React may suppress the render entirely, leaving the user stuck.
+
+**Root cause:**
+```tsx
+// app/auth/page.tsx — lines 20–23 (current broken code)
+if (user) {
+  router.replace("/");   // ← side effect during render
+  return null;
+}
+```
+
+Calling `router.replace()` during render is invalid. It must be moved into a `useEffect` that runs after the component mounts (or use Next.js `redirect()` server-side, but this is a client component).
+
+**Fix needed:** Wrap the redirect in `useEffect`:
+```tsx
+useEffect(() => {
+  if (user) router.replace("/");
+}, [user, router]);
+
+if (user) return null;
+```
+
+This defers the navigation call to after render, satisfying React's rules while preserving the same behavior.
+
+**Status:** Fixed — `router.replace` moved into `useEffect`; `useSearchParams` extracted to `CheckoutSuccessBanner` child component wrapped in `<Suspense>` in `app/profile/page.tsx`
+
+---
+
+### Issue — Audio does not resume position when timer preset is changed (low priority)
+
+**File:** `app/mode/[scenario]/[trackId]/session-player.tsx`
+
+**What's wrong:** When a rasika changes the timer preset mid-session (e.g., from 20 min to 45 min), the audio restarts from the beginning instead of continuing from the current playback position. The request is for a "circular buffer" behavior — audio state should be preserved across timer changes.
+
+**User impact:** Disrupts flow for rasikas who want to extend a session. Restarting a raga from the beginning breaks the listening experience.
+
+**Status:** Open — needs clarification (see questions below)
+
+---
+
+### Issue — Explore screen only supports single tag selection (low priority)
+
+**File:** `app/explore/explore-client.tsx`
+
+**What's wrong:** The tag filter on the explore screen allows selecting only one tag at a time. Clicking a second tag deselects the first. Rasikas cannot filter by multiple attributes simultaneously (e.g., "sleep" + "no-percussion").
+
+**User impact:** Limited filtering power as the track library grows. A rasika looking for a specific combination of qualities has no way to express that query.
+
+**Status:** Open — needs clarification (see questions below)
+
+---
+
+
+
+## 2026-03-11
+
+### Issue — Session player top bar clipped on smaller viewports / browser chrome
+
+**File:** `app/mode/[scenario]/[trackId]/session-player.tsx` line 174
+
+**What's wrong:** The session player's root container uses `min-h-screen` (`100vh`) with `pt-6` top padding. On viewports where browser chrome (address bar, tab bar) is visible, `100vh` includes the area behind the chrome, so the top of the layout is pushed above the visible area. The "← Back" link and the ♡ favorites icon are partially or fully cut off.
+
+**Reproduction:**
+1. Open any track in the session player (e.g. `/mode/focus/<any-track-id>`)
+2. Use a browser window that is not full-height, or a mobile browser with visible address bar
+3. Observe the top bar — "Back" link and heart icon are clipped
+
+**Screenshot:** `Screenshot 2026-03-11 at 7.24.47 AM.png` — "Back" is barely visible, heart icon is cut off entirely.
+
+**User impact:** Rasikas cannot navigate back or toggle favorites without scrolling up first. On mobile Safari (the primary device), this is the default state since the address bar is always visible on initial load.
+
+**Fix options:**
+- Replace `min-h-screen` with `min-h-dvh` (dynamic viewport height, Tailwind v4) which accounts for browser chrome
+- Alternatively use `min-h-[100dvh]` if `min-h-dvh` isn't available in the current Tailwind version
+- Ensure `pt-6` provides enough clearance, or add `pt-safe` / `padding-top: env(safe-area-inset-top)` for notched devices
+
+**Status:** Open
+
+---
 
 ## 2026-02-25
 -  We need to do a pass on the session timer complete screen. It looks okay for now but should be better. I need it to really show completion. Also when saving the default, the entire "session" should be captured (track and duration) so that it's easy from the home screen to start the default duration. 
