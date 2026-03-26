@@ -27,16 +27,28 @@ type CertProgress = {
   progressPercent: number;
 };
 
-function CheckoutSuccessBanner() {
+function CheckoutBanner() {
   const searchParams = useSearchParams();
-  if (searchParams.get("checkout") !== "success") return null;
-  return (
-    <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
-      <p className="text-sm text-emerald-400">
-        Payment received — your plan will update shortly.
-      </p>
-    </div>
-  );
+  const status = searchParams.get("checkout");
+  if (status === "success") {
+    return (
+      <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
+        <p className="text-sm text-emerald-400">
+          Payment received — your plan will update shortly.
+        </p>
+      </div>
+    );
+  }
+  if (status === "error") {
+    return (
+      <div className="mb-3 rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-3">
+        <p className="text-sm text-red-400">
+          Something went wrong with checkout. Please try again.
+        </p>
+      </div>
+    );
+  }
+  return null;
 }
 
 export function ProfileClient({ user }: { user: User }) {
@@ -291,7 +303,7 @@ export function ProfileClient({ user }: { user: User }) {
             </h2>
 
             <Suspense fallback={null}>
-              <CheckoutSuccessBanner />
+              <CheckoutBanner />
             </Suspense>
 
             {prefs.subscription_status === "active" ||
