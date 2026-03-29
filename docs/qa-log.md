@@ -56,7 +56,7 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 ### Prerequisites
 - Polar sandbox account + org created at sandbox.polar.sh
 - 3 products exist in sandbox: monthly ($5), yearly ($30), lifetime ($100), sponsor ($300)
-- `.env.local` has all 6 env vars: `POLAR_ACCESS_TOKEN`, `POLAR_ORGANIZATION_ID`, `POLAR_WEBHOOK_SECRET`, `NEXT_PUBLIC_POLAR_SERVER`, `NEXT_PUBLIC_POLAR_ORG_SLUG`, `SUPABASE_SERVICE_ROLE_KEY`
+- `.env.local` has all 5 env vars: `POLAR_ACCESS_TOKEN`, `POLAR_WEBHOOK_SECRET`, `NEXT_PUBLIC_POLAR_SERVER`, `NEXT_PUBLIC_POLAR_ORG_SLUG`, `SUPABASE_SECRET_KEY`
 - Polar CLI installed (`npm install -g @anthropic-ai/polar-cli` or via Homebrew)
 
 ### Local testing (with `polar listen`)
