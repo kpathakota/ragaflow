@@ -2,6 +2,29 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-03-26
+
+### Issue — Timer drifts / runs slow when browser tab is not in focus
+
+**File:** `app/mode/[scenario]/[trackId]/session-player.tsx`
+
+**What's wrong:** The session timer uses `setInterval` to count down every second. When the browser tab loses focus, most browsers throttle `setInterval` to fire at most once per second (or less frequently). This causes the displayed time to drift behind real elapsed time — a 20-minute timer can take significantly longer than 20 minutes to complete.
+
+**User impact:** Rasikas who switch tabs or lock their phone during a session will see an inaccurate timer. Sessions take longer than expected to "complete", and listening session durations logged to the database will be incorrect.
+
+**Fix needed (two parts):**
+
+1. **Wall-clock timer:** Replace the interval-based countdown with a wall-clock approach — store `Date.now()` at session start and compute remaining time as `duration - (Date.now() - startTime)` on each tick. The interval drives re-renders, not timekeeping. Handles display drift and snaps to correct time when tab regains focus.
+
+2. **Background completion notification:** The wall-clock fix alone doesn't solve the case where the session *ends* while the tab is backgrounded — the rasika won't know it's done. Layered approach:
+   - **Notification API** — request permission at session start, fire a `new Notification(...)` when time is up. Works in background tabs without a service worker.
+   - **`visibilitychange` listener** — when tab regains focus, check if session should have completed and immediately trigger the completion flow. Covers the case where notification permission was denied.
+   - **Audio cue** (optional) — play a completion chime. Browsers generally allow audio started in a foreground tab to continue playing in the background.
+
+**Status:** Open
+
+---
+
 ## 2026-03-23
 
 ### Issue — Subscribe button on profile doesn't render until rasika interacts (e.g., favorites a track) (low priority)
