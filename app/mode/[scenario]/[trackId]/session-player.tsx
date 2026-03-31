@@ -51,6 +51,8 @@ export function SessionPlayer({
   const [session, setSession] = useState<SessionState>("idle");
   const [isFavorite, setIsFavorite] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const startedAtRef = useRef<number>(0);
+  const elapsedBeforePauseRef = useRef<number>(0);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
@@ -73,16 +75,14 @@ export function SessionPlayer({
     });
   }, [user, track.id]);
 
-  const stopAudio = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
+  const pauseAudio = useCallback(() => {
+    audioRef.current?.pause();
   }, []);
 
   const startSessionHandler = useCallback(async () => {
     setRemaining(duration * 60);
+    startedAtRef.current = Date.now();
+    elapsedBeforePauseRef.current = 0;
     setSession("running");
     audioRef.current?.play();
     if (user) {
@@ -92,20 +92,24 @@ export function SessionPlayer({
   }, [duration, user, track.id, scenario]);
 
   const pause = useCallback(() => {
+    elapsedBeforePauseRef.current += (Date.now() - startedAtRef.current) / 1000;
     setSession("paused");
     audioRef.current?.pause();
   }, []);
 
   const resume = useCallback(() => {
+    startedAtRef.current = Date.now();
     setSession("running");
     audioRef.current?.play();
   }, []);
 
   const stop = useCallback(async () => {
     setSession("idle");
-    const elapsed = duration * 60 - remaining;
+    const elapsed = Math.round(
+      elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000
+    );
     setRemaining(0);
-    stopAudio();
+    pauseAudio();
     if (sessionId) {
       await endListeningSession(sessionId, elapsed, false);
       setSessionId(null);
@@ -114,34 +118,33 @@ export function SessionPlayer({
       const countable = computeCountableSeconds(scenario, elapsed, false);
       upsertCertificationClient(track.ragam_id, countable);
     }
-  }, [stopAudio, sessionId, duration, remaining, user, scenario, track.ragam_id]);
+  }, [pauseAudio, sessionId, user, scenario, track.ragam_id]);
 
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
     setShowDefaultPrompt(false);
     setDefaultSet(false);
-    stopAudio();
-  }, [stopAudio]);
+  }, []);
 
   useEffect(() => {
     if (session !== "running") return;
-    const id = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(id);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const totalSeconds = duration * 60;
+    const tick = () => {
+      const elapsed = elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000;
+      const left = Math.max(0, Math.round(totalSeconds - elapsed));
+      setRemaining(left);
+      if (left <= 0) clearInterval(id);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [session]);
+  }, [session, duration]);
 
   useEffect(() => {
     if (session === "running" && remaining === 0) {
       setSession("complete");
-      stopAudio();
+      pauseAudio();
       if (sessionId) {
         endListeningSession(sessionId, duration * 60, true);
         setSessionId(null);
@@ -151,7 +154,7 @@ export function SessionPlayer({
         upsertCertificationClient(track.ragam_id, duration * 60);
       }
     }
-  }, [session, remaining, stopAudio, sessionId, duration, user, track.ragam_id]);
+  }, [session, remaining, pauseAudio, sessionId, duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!user) return;

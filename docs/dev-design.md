@@ -496,12 +496,77 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Subscribed rasikas see their plan status ✅
   - Works with the `subscription_status` field from Task 2.2 ✅
 
-**Task 2.5: Access Control — 10-Hour Listening Gate**
+**Task 2.4a: Fix — Timer Drift in Background Tabs**
+
+The session timer uses `setInterval` to count down, which drifts when the browser throttles backgrounded tabs. Three-task fix:
+
+**Task 2.4a-1: Wall-clock timer** ✅
+- Replace interval-based countdown with wall-clock approach
+- Store `Date.now()` at session start, compute remaining as `totalSeconds - elapsed`
+- Track cumulative elapsed across pause/resume cycles via refs
+- Interval still fires every 1s for re-renders, but is not the source of truth
+- `stop` handler computes elapsed from wall clock, not from `remaining` state
+- **Acceptance criteria:** Timer shows correct time after tab regains focus; pause/resume preserves correct elapsed; logged session durations are accurate
+
+**Task 2.4a-2: Background completion via `visibilitychange`** *(deferred to post-alpha backlog)*
+- Add `visibilitychange` listener in timer effect
+- When tab regains focus, recompute remaining; if ≤ 0, trigger completion flow
+- **Why deferred:** Wall-clock timer (2.4a-1) is the core fix; music stopping is sufficient signal that the session ended
+- **Acceptance criteria:** Returning to a tab after session should have ended immediately shows completion screen; logged duration is wall-clock accurate
+
+**Task 2.4a-3: Notification API (layered, optional)** *(deferred to post-alpha backlog)*
+- Request `Notification.requestPermission()` on session start
+- Fire `new Notification(...)` when session ends in a backgrounded tab
+- Falls back silently to Task 2 behavior if permission denied
+- No service worker needed
+- **Why deferred:** Nice-to-have UX polish, not needed for alpha launch
+- **Acceptance criteria:** Notification fires when session ends in background; no prompt if permission already granted/denied
+
+**Decisions:**
+- Timer keeps running when tab is backgrounded (no auto-pause) — audio may stop (browser behavior), but session completes on schedule
+- Audio completion chime deferred — requires an audio asset, separate task
+- Tasks are layered: 2.4a-1 is the core fix, 2.4a-2 and 2.4a-3 add background UX on top
+
+**Task 2.4b: Circular Audio — Preserve Playback Position Across Sessions**
+
+Audio currently resets to 0:00 on every session end (completion, stop, restart). Since `<audio loop>` already makes the track a continuous loop, we just need to stop rewinding it. This lets a rasika complete a session, start another, and hear a different section of the same raga — no repetitive beginnings.
+
+**Changes to `session-player.tsx`:**
+
+1. **Split `stopAudio` into `pauseAudio` + `resetAudioPosition`:**
+   - `pauseAudio()` — `audio.pause()` only, position preserved
+   - `resetAudioPosition()` — `audio.currentTime = 0` (available if ever needed, not currently called)
+
+2. **Session completes (`remaining === 0`):** call `pauseAudio()` instead of `stopAudio()`. Audio pauses at current position. Session logged, completion screen shown as today.
+
+3. **Stop (mid-session):** call `pauseAudio()` instead of `stopAudio()`. Audio pauses at current position, timer resets to idle.
+
+4. **"New session" / `restart`:** reset timer state to idle, **don't touch audio**. Audio stays paused at its position.
+
+5. **`startSessionHandler`:** calls `audio.play()` as today — resumes from wherever the audio was paused.
+
+6. **Navigate away:** component unmounts, `<audio>` element destroyed, position lost. This is fine — no persistence needed.
+
+**What we're NOT doing:**
+- No server-side or localStorage position tracking
+- No cross-track memory — only same-track, same-mount continuity
+- No audio during completion screen — audio pauses when timer hits zero
+
+**Acceptance criteria:**
+- Complete a session → start "New session" → audio resumes from where it was, not from 0:00
+- Stop mid-session → start again → audio resumes from the stop point
+- Navigate away → come back → audio starts fresh (position lost on unmount, acceptable)
+- Session logging, certifications, and set-default flow unchanged
+
+---
+
+**Task 2.5: Access Control — 10-Hour Listening Gate** *(deferred to post-alpha backlog)*
 - Compute total listening seconds for the current rasika (raw sum of `duration_seconds` from `listening_sessions`)
 - If ≥ 36,000 seconds (10 hours) AND rasika is not subscribed:
   - Premium tracks on track lists: greyed out, Premium tag, not tappable (or tap shows subscribe CTA)
   - Free tracks: unchanged, always playable
 - Session player: if a premium track is somehow reached while gated, show subscribe CTA instead of play button
+- **Why deferred:** Not enough users yet to need a paywall gate; billing is live but gate enforcement can wait
 - **Acceptance criteria:**
   - Under 10 hours: all tracks playable, premium tagged but not blocked
   - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected

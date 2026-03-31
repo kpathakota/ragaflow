@@ -79,11 +79,10 @@ Polar uses a fully isolated sandbox (not a toggle):
 ```bash
 # .env.local
 POLAR_ACCESS_TOKEN=polar_oat_...              # Server-only — Organization Access Token (sandbox)
-POLAR_ORGANIZATION_ID=org_...                 # Server-only — Polar org ID
 POLAR_WEBHOOK_SECRET=whsec_...                # Server-only — Webhook signing secret
 POLAR_PRODUCT_IDS=id1,id2,id3                 # Server-only — Comma-separated Polar product IDs for checkout
 NEXT_PUBLIC_POLAR_SERVER=sandbox              # "sandbox" or "production" — controls SDK server target
-SUPABASE_SERVICE_ROLE_KEY=eyJ...              # Server-only — bypasses RLS for webhook writes
+SUPABASE_SECRET_KEY=eyJ...                    # Server-only — bypasses RLS for webhook writes
 ```
 
 **`NEXT_PUBLIC_POLAR_SERVER` is intentionally public** — controls which Polar environment the SDK targets. `NEXT_PUBLIC_POLAR_ORG_SLUG` is no longer needed (checkout is server-side now).
@@ -93,6 +92,8 @@ Production env vars go in Vercel "Production" environment. Preview deploys use s
 **Webhook URL for local dev:** Don't configure a public URL in Polar dashboard for local testing. Use `polar listen http://localhost:3000/api/webhooks/polar` instead — it proxies events to localhost directly.
 
 **Webhook URL for Vercel preview:** Use the stable branch alias URL (e.g. `ragaflow-git-dev-yourteam.vercel.app`), not the per-commit hash URL which changes every push.
+
+**Vercel Deployment Protection:** Currently disabled. If re-enabled, Polar webhook requests to preview deployments will be blocked by Vercel's auth wall. To fix this, create a Protection Bypass secret in Vercel project settings and append `?x-vercel-protection-bypass=<secret>` to the webhook URL configured in Polar, or set the `x-vercel-protection-bypass` header.
 
 ## Implementation
 
@@ -118,7 +119,7 @@ Uses `@polar-sh/nextjs` `Webhooks()` helper for HMAC signature verification. Nam
 
 ### 2. Service Role Client — `lib/supabase/admin.ts`
 
-A server-only Supabase client using `SUPABASE_SERVICE_ROLE_KEY`. Used exclusively by the webhook handler to update rasika records without RLS restrictions.
+A server-only Supabase client using `SUPABASE_SECRET_KEY`. Used exclusively by the webhook handler to update rasika records without RLS restrictions.
 
 ### 3. Customer Portal — `app/api/portal/route.ts`
 
