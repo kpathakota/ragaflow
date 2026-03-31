@@ -75,12 +75,8 @@ export function SessionPlayer({
     });
   }, [user, track.id]);
 
-  const stopAudio = useCallback(() => {
-    const audio = audioRef.current;
-    if (audio) {
-      audio.pause();
-      audio.currentTime = 0;
-    }
+  const pauseAudio = useCallback(() => {
+    audioRef.current?.pause();
   }, []);
 
   const startSessionHandler = useCallback(async () => {
@@ -113,7 +109,7 @@ export function SessionPlayer({
       elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000
     );
     setRemaining(0);
-    stopAudio();
+    pauseAudio();
     if (sessionId) {
       await endListeningSession(sessionId, elapsed, false);
       setSessionId(null);
@@ -122,15 +118,14 @@ export function SessionPlayer({
       const countable = computeCountableSeconds(scenario, elapsed, false);
       upsertCertificationClient(track.ragam_id, countable);
     }
-  }, [stopAudio, sessionId, user, scenario, track.ragam_id]);
+  }, [pauseAudio, sessionId, user, scenario, track.ragam_id]);
 
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
     setShowDefaultPrompt(false);
     setDefaultSet(false);
-    stopAudio();
-  }, [stopAudio]);
+  }, []);
 
   useEffect(() => {
     if (session !== "running") return;
@@ -149,7 +144,7 @@ export function SessionPlayer({
   useEffect(() => {
     if (session === "running" && remaining === 0) {
       setSession("complete");
-      stopAudio();
+      pauseAudio();
       if (sessionId) {
         endListeningSession(sessionId, duration * 60, true);
         setSessionId(null);
@@ -159,7 +154,7 @@ export function SessionPlayer({
         upsertCertificationClient(track.ragam_id, duration * 60);
       }
     }
-  }, [session, remaining, stopAudio, sessionId, duration, user, track.ragam_id]);
+  }, [session, remaining, pauseAudio, sessionId, duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!user) return;

@@ -21,7 +21,7 @@ A record of bugs and issues encountered, why they mattered, and how they were re
    - **`visibilitychange` listener** — when tab regains focus, check if session should have completed and immediately trigger the completion flow. Covers the case where notification permission was denied.
    - **Audio cue** (optional) — play a completion chime. Browsers generally allow audio started in a foreground tab to continue playing in the background.
 
-**Status:** Open
+**Status:** Fixed. Handled the wall-clock timer but deferred background completion notification. 
 
 ---
 
@@ -37,7 +37,7 @@ A record of bugs and issues encountered, why they mattered, and how they were re
 
 **User impact:** New rasikas visiting their profile for the first time won't see the subscribe option until they've interacted with the app in a way that triggers a rasika data refresh.
 
-**Status:** Open — needs investigation
+**Status:** Fixed. 
 
 ---
 
