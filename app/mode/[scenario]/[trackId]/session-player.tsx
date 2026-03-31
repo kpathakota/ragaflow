@@ -51,6 +51,8 @@ export function SessionPlayer({
   const [session, setSession] = useState<SessionState>("idle");
   const [isFavorite, setIsFavorite] = useState(false);
   const [sessionId, setSessionId] = useState<string | null>(null);
+  const startedAtRef = useRef<number>(0);
+  const elapsedBeforePauseRef = useRef<number>(0);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
   const [noteExpanded, setNoteExpanded] = useState(false);
@@ -83,6 +85,8 @@ export function SessionPlayer({
 
   const startSessionHandler = useCallback(async () => {
     setRemaining(duration * 60);
+    startedAtRef.current = Date.now();
+    elapsedBeforePauseRef.current = 0;
     setSession("running");
     audioRef.current?.play();
     if (user) {
@@ -92,18 +96,22 @@ export function SessionPlayer({
   }, [duration, user, track.id, scenario]);
 
   const pause = useCallback(() => {
+    elapsedBeforePauseRef.current += (Date.now() - startedAtRef.current) / 1000;
     setSession("paused");
     audioRef.current?.pause();
   }, []);
 
   const resume = useCallback(() => {
+    startedAtRef.current = Date.now();
     setSession("running");
     audioRef.current?.play();
   }, []);
 
   const stop = useCallback(async () => {
     setSession("idle");
-    const elapsed = duration * 60 - remaining;
+    const elapsed = Math.round(
+      elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000
+    );
     setRemaining(0);
     stopAudio();
     if (sessionId) {
@@ -114,7 +122,7 @@ export function SessionPlayer({
       const countable = computeCountableSeconds(scenario, elapsed, false);
       upsertCertificationClient(track.ragam_id, countable);
     }
-  }, [stopAudio, sessionId, duration, remaining, user, scenario, track.ragam_id]);
+  }, [stopAudio, sessionId, user, scenario, track.ragam_id]);
 
   const restart = useCallback(() => {
     setSession("idle");
@@ -126,17 +134,17 @@ export function SessionPlayer({
 
   useEffect(() => {
     if (session !== "running") return;
-    const id = setInterval(() => {
-      setRemaining((prev) => {
-        if (prev <= 1) {
-          clearInterval(id);
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const totalSeconds = duration * 60;
+    const tick = () => {
+      const elapsed = elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000;
+      const left = Math.max(0, Math.round(totalSeconds - elapsed));
+      setRemaining(left);
+      if (left <= 0) clearInterval(id);
+    };
+    tick();
+    const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [session]);
+  }, [session, duration]);
 
   useEffect(() => {
     if (session === "running" && remaining === 0) {

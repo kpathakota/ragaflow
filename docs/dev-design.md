@@ -496,6 +496,35 @@ Replace the hardcoded `DURATION_OPTIONS = [5, 15, 25, 45]` with a flexible 3-pil
   - Subscribed rasikas see their plan status ✅
   - Works with the `subscription_status` field from Task 2.2 ✅
 
+**Task 2.4a: Fix — Timer Drift in Background Tabs**
+
+The session timer uses `setInterval` to count down, which drifts when the browser throttles backgrounded tabs. Three-task fix:
+
+**Task 2.4a-1: Wall-clock timer** ✅
+- Replace interval-based countdown with wall-clock approach
+- Store `Date.now()` at session start, compute remaining as `totalSeconds - elapsed`
+- Track cumulative elapsed across pause/resume cycles via refs
+- Interval still fires every 1s for re-renders, but is not the source of truth
+- `stop` handler computes elapsed from wall clock, not from `remaining` state
+- **Acceptance criteria:** Timer shows correct time after tab regains focus; pause/resume preserves correct elapsed; logged session durations are accurate
+
+**Task 2.4a-2: Background completion via `visibilitychange`**
+- Add `visibilitychange` listener in timer effect
+- When tab regains focus, recompute remaining; if ≤ 0, trigger completion flow
+- **Acceptance criteria:** Returning to a tab after session should have ended immediately shows completion screen; logged duration is wall-clock accurate
+
+**Task 2.4a-3: Notification API (layered, optional)**
+- Request `Notification.requestPermission()` on session start
+- Fire `new Notification(...)` when session ends in a backgrounded tab
+- Falls back silently to Task 2 behavior if permission denied
+- No service worker needed
+- **Acceptance criteria:** Notification fires when session ends in background; no prompt if permission already granted/denied
+
+**Decisions:**
+- Timer keeps running when tab is backgrounded (no auto-pause) — audio may stop (browser behavior), but session completes on schedule
+- Audio completion chime deferred — requires an audio asset, separate task
+- Tasks are layered: 2.4a-1 is the core fix, 2.4a-2 and 2.4a-3 add background UX on top
+
 **Task 2.5: Access Control — 10-Hour Listening Gate**
 - Compute total listening seconds for the current rasika (raw sum of `duration_seconds` from `listening_sessions`)
 - If ≥ 36,000 seconds (10 hours) AND rasika is not subscribed:
