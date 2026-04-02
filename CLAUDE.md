@@ -1,17 +1,39 @@
 # Ragaflow
 
-Ragaflow is a web app that serves Indian classical ragas for focus, sleep, and meditation. Rasikas (users) select a scenario, browse tracks tagged to that scenario, and play audio sessions. Tracks belong to ragams (melodic frameworks) and are tagged with scenarios and emotions — not hard-mapped 1:1.
+Ragaflow is a web + iOS app that serves Indian classical ragas for focus, sleep, and meditation. Rasikas (users) select a scenario, browse tracks tagged to that scenario, and play audio sessions. Tracks belong to ragams (melodic frameworks) and are tagged with scenarios and emotions — not hard-mapped 1:1.
 
-See `docs/spec.md` and `docs/dev-design.md` for the full product specification and development plan.
+See `docs/spec.md` and `docs/dev-design.md` for the full product specification and development plan. See `docs/ios-plan.md` for the iOS app implementation plan.
+
+## Monorepo structure
+
+```
+ragaflow/
+├── web/          ← Next.js web app (deployed to Vercel)
+├── ios/          ← SwiftUI iOS app (deployed via Xcode Cloud / TestFlight)
+├── docs/         ← Shared docs (spec, dev design, iOS plan)
+├── supabase/     ← Shared database (migrations, seed)
+└── CLAUDE.md
+```
+
+Both clients share the same Supabase backend. No shared code between web and iOS — just the same database and API.
 
 ## Tech stack
 
+### Web (`web/`)
 - **Framework:** Next.js 16.1.6 (App Router, Turbopack)
 - **Styling:** Tailwind CSS v4 (`@import "tailwindcss"` + `@theme inline` syntax)
 - **Language:** TypeScript
 - **Fonts:** Geist Sans / Geist Mono (via next/font)
 - **Auth & backend:** Supabase (auth, database, storage)
 - **Supabase client:** `@supabase/supabase-js` + `@supabase/ssr`
+- **Payments:** Polar.sh (merchant of record, web only)
+
+### iOS (`ios/`)
+- **Framework:** SwiftUI (iOS 17+)
+- **Language:** Swift
+- **Audio:** AVFoundation (M2)
+- **Auth & backend:** Supabase via `supabase-swift` SPM package
+- **Payments:** StoreKit 2 (M4, Apple IAP)
 
 ## Supabase setup
 
@@ -19,11 +41,13 @@ Two Supabase projects: **production** and **staging**.
 
 | Environment | Supabase project | How env vars are set |
 |---|---|---|
-| Local dev (`npm run dev`) | staging | `.env.local` |
+| Web local dev (`cd web && npm run dev`) | staging | `web/.env.local` |
 | Vercel preview (branch pushes) | staging | Vercel "Preview" env vars |
 | Vercel production (main) | production | Vercel "Production" env vars |
+| iOS debug | staging | `ios/Ragaflow/Configuration/Debug.xcconfig` |
+| iOS release | production | `ios/Ragaflow/Configuration/Release.xcconfig` |
 
-1. Copy `.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
+1. Copy `web/.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
 2. Run all migrations in `supabase/migrations/` in order in the SQL editor
 3. Run `supabase/seed.sql` to insert starter data
 4. Supabase is required — without env vars the app renders empty (no local seed fallback)
@@ -45,50 +69,63 @@ Two Supabase projects: **production** and **staging**.
 **Certification** — per ragam per rasika achievement:
 - rasika_id, ragam_id, level (1–4), total_seconds
 
-Types defined in `lib/types.ts`. Seed data in `supabase/seed.sql`. Data access via `lib/data.ts` (Supabase only, returns empty arrays without connection).
+Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed data in `supabase/seed.sql`. Data access via `web/lib/data.ts` (web) and `ios/Ragaflow/Services/SupabaseService.swift` (iOS).
 
 ## Key files
 
-### Data layer
-- `lib/types.ts` — TypeScript types for all entities
-- `lib/data.ts` — async data access functions (Supabase only)
+### Shared
 - `supabase/migrations/` — DDL + RLS policies (run in order)
 - `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
+- `docs/spec.md` — product specification
+- `docs/dev-design.md` — development design & execution plan
+- `docs/ios-plan.md` — iOS implementation plan (milestones M0–M5)
+- `docs/payments-design.md` — Polar.sh payments design (web)
 
-### Supabase
-- `lib/supabase/client.ts` — browser client (returns null if env vars missing)
-- `lib/supabase/server.ts` — server client (cookies adapter)
-- `lib/supabase/session.ts` — session refresh logic (used by proxy)
-- `proxy.ts` — Next.js 16 proxy (renamed from middleware.ts) calling Supabase session refresh
+### Web data layer
+- `web/lib/types.ts` — TypeScript types for all entities
+- `web/lib/data.ts` — async data access functions (Supabase only)
 
-### Auth
-- `lib/auth/auth-context.tsx` — `AuthProvider` + `useAuth()` hook
-- `app/auth/page.tsx` — sign-in/sign-up form
-- `app/auth/callback/route.ts` — email confirmation callback
+### Web Supabase
+- `web/lib/supabase/client.ts` — browser client (returns null if env vars missing)
+- `web/lib/supabase/server.ts` — server client (cookies adapter)
+- `web/lib/supabase/session.ts` — session refresh logic (used by proxy)
+- `web/proxy.ts` — Next.js 16 proxy (renamed from middleware.ts) calling Supabase session refresh
 
-### Features
-- `lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
-- `lib/preferences.ts` — set default track per scenario (client-side)
-- `lib/sessions.ts` — start/end listening session logging (client-side)
+### Web auth
+- `web/lib/auth/auth-context.tsx` — `AuthProvider` + `useAuth()` hook
+- `web/app/auth/page.tsx` — sign-in/sign-up form
+- `web/app/auth/callback/route.ts` — email confirmation callback
 
-### Components
-- `components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
-- `components/track-card.tsx` — reusable track card with heart icon
-- `components/nav-header.tsx` — reusable back-link + title header
-- `components/user-badge.tsx` — top-right user initial badge linking to /profile
+### Web features
+- `web/lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
+- `web/lib/preferences.ts` — set default track per scenario (client-side)
+- `web/lib/sessions.ts` — start/end listening session logging (client-side)
 
-### Pages
-- `app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
-- `app/profile/page.tsx` — profile page (account info, stats, defaults, sign-out)
-- `app/mode/[scenario]/page.tsx` — track list per scenario (dynamic, force-dynamic)
-- `app/mode/[scenario]/track-list-client.tsx` — client wrapper for track list with favorites
-- `app/mode/[scenario]/[trackId]/page.tsx` — session player server page
-- `app/mode/[scenario]/[trackId]/session-player.tsx` — client component: timer + audio + favorite + set-default
-- `app/explore/page.tsx` — browse all tracks grouped by ragam with tag filter
-- `app/explore/explore-client.tsx` — client wrapper for explore with tag filtering
-- `app/globals.css` — global styles (always-dark theme)
+### Web components
+- `web/components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
+- `web/components/track-card.tsx` — reusable track card with heart icon
+- `web/components/nav-header.tsx` — reusable back-link + title header
+- `web/components/user-badge.tsx` — top-right user initial badge linking to /profile
 
-## Routing
+### Web pages
+- `web/app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
+- `web/app/profile/page.tsx` — profile page (account info, stats, defaults, sign-out)
+- `web/app/mode/[scenario]/page.tsx` — track list per scenario (dynamic, force-dynamic)
+- `web/app/mode/[scenario]/track-list-client.tsx` — client wrapper for track list with favorites
+- `web/app/mode/[scenario]/[trackId]/page.tsx` — session player server page
+- `web/app/mode/[scenario]/[trackId]/session-player.tsx` — client component: timer + audio + favorite + set-default
+- `web/app/explore/page.tsx` — browse all tracks grouped by ragam with tag filter
+- `web/app/explore/explore-client.tsx` — client wrapper for explore with tag filtering
+- `web/app/globals.css` — global styles (always-dark theme)
+
+### iOS
+- `ios/Ragaflow/Models/` — Swift structs mirroring web types
+- `ios/Ragaflow/Services/SupabaseService.swift` — all data access (auth, CRUD, favorites, sessions, certs)
+- `ios/Ragaflow/Views/` — SwiftUI views by feature (Home, Auth, Scenarios, Player, Explore, Profile)
+- `ios/Ragaflow/Components/` — reusable UI (ScenarioCard, TrackCard, UserBadge)
+- `ios/Ragaflow/Configuration/` — xcconfig files for Supabase env vars (gitignored)
+
+## Routing (web)
 
 ```
 /                              → Home (personalized if rasika has defaults, otherwise scenario selection)
@@ -116,7 +153,8 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 
 - Always dark — no light mode
 - Mobile-first, minimal UI
-- Tailwind only — no component libraries
+- Web: Tailwind only — no component libraries
+- iOS: SwiftUI only — no UIKit unless necessary
 - Terminology: users are "rasikas", categories are "scenarios", content units are "tracks"
 
 ## Gotchas
@@ -125,7 +163,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Ragam has no `tradition` column — intentionally removed. Don't re-add it.
 - Dynamic route `params` is a `Promise` in Next.js 15+ — must `await params` before accessing fields
 - Pages use `force-dynamic` since data comes from Supabase (no `generateStaticParams`)
-- Audio files hosted on Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`). `audio_url` in the database is a full R2 URL. See `public/audio/README.md` for upload instructions.
+- Audio files hosted on Cloudflare R2 (bucket: `ragaflow-audio`, public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/`). `audio_url` in the database is a full R2 URL. See `web/public/audio/README.md` for upload instructions.
 - Session player is a server page wrapping a client `SessionPlayer` component (for interactivity)
 - Timer uses `setInterval` in `useEffect`; audio uses `<audio loop>` with ref-based play/pause
 - Supabase is required — without env vars the app renders empty (no local seed fallback)
@@ -138,6 +176,14 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - Downloads paid (subscribers only)
 - 10-hour cumulative listening gate → must subscribe to continue
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
+- Web payments: Polar.sh (merchant of record)
+- iOS payments: Apple IAP via StoreKit 2 (planned, M4)
+
+## Vercel deployment
+
+Vercel must be configured to use `web/` as the root directory:
+- Project Settings → General → Root Directory → `web`
+- Framework Preset: Next.js (auto-detected)
 
 ## Process
 
