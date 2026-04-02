@@ -83,3 +83,6 @@ ios/Ragaflow/Configuration/Release.xcconfig
 
 # CocoaPods (if ever used)
 ios/Pods/
+
+# integration test screenshots
+tests/integration/screenshots/
