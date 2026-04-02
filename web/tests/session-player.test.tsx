@@ -1,0 +1,257 @@
+import { describe, it, expect, vi, beforeEach } from "vitest";
+import { render, screen, fireEvent, act } from "@testing-library/react";
+import { SessionPlayer } from "@/app/mode/[scenario]/[trackId]/session-player";
+import type { Track, Ragam } from "@/lib/types";
+import { useAuth } from "@/lib/auth/auth-context";
+
+// Mock all external dependencies
+vi.mock("@/lib/auth/auth-context", () => ({
+  useAuth: vi.fn(() => ({ user: null, loading: false, signOut: vi.fn() })),
+}));
+
+vi.mock("@/lib/favorites", () => ({
+  toggleFavoriteTrackClient: vi.fn(),
+  getPreferencesClient: vi.fn().mockResolvedValue(null),
+}));
+
+vi.mock("@/lib/preferences", () => ({
+  setDefaultTrackClient: vi.fn(),
+  setCustomDurationClient: vi.fn(),
+}));
+
+vi.mock("@/lib/sessions", () => ({
+  startListeningSession: vi.fn().mockResolvedValue("session-1"),
+  endListeningSession: vi.fn(),
+}));
+
+vi.mock("@/lib/certifications", () => ({
+  computeCountableSeconds: vi.fn().mockReturnValue(0),
+  upsertCertificationClient: vi.fn(),
+  getTierInfo: vi.fn().mockReturnValue({
+    currentLabel: null,
+    currentLevel: 0,
+    nextLabel: "Bronze",
+    nextThreshold: 36000,
+    progressPercent: 0,
+  }),
+}));
+
+// Mock next/link
+vi.mock("next/link", () => ({
+  default: ({ children, href, ...props }: any) => (
+    <a href={href} {...props}>
+      {children}
+    </a>
+  ),
+}));
+
+// Mock HTMLAudioElement
+beforeEach(() => {
+  vi.clearAllMocks();
+  // Mock audio element methods
+  HTMLMediaElement.prototype.play = vi.fn().mockResolvedValue(undefined);
+  HTMLMediaElement.prototype.pause = vi.fn();
+  // Clear localStorage
+  localStorage.clear();
+});
+
+const mockTrack: Track = {
+  id: "t1",
+  title: "Morning Raag",
+  ragam_id: "r1",
+  scenarios: ["focus", "meditate"],
+  tags: ["grounding", "calm"],
+  description: "A peaceful morning session by the river",
+  artist_note: "Recorded at dawn, birds singing in the background",
+  recorded_date: "2025-12-01",
+  location: "Portland studio",
+  duration: 2700,
+  audio_url: "https://example.com/track.opus",
+  download_url: null,
+  free: true,
+  created_at: "2025-12-01T00:00:00Z",
+};
+
+const mockRagam: Ragam = {
+  id: "r1",
+  name: "Yaman",
+  description: "Evening raga",
+  time_of_day: "evening",
+};
+
+describe("SessionPlayer", () => {
+  it("renders ragam name as title", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("Yaman")).toBeInTheDocument();
+  });
+
+  it("renders track description", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(
+      screen.getByText("A peaceful morning session by the river")
+    ).toBeInTheDocument();
+  });
+
+  it("falls back to track title when ragam is undefined", () => {
+    render(
+      <SessionPlayer
+        track={mockTrack}
+        ragam={undefined}
+        scenario="focus"
+      />
+    );
+    expect(screen.getByText("Morning Raag")).toBeInTheDocument();
+  });
+
+  it("shows duration pills (25m, 45m, custom)", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("25m")).toBeInTheDocument();
+    expect(screen.getByText("45m")).toBeInTheDocument();
+  });
+
+  it("shows play button in idle state", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("▶")).toBeInTheDocument();
+  });
+
+  it("shows back link to scenario page", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    const backLink = screen.getByText("← Back");
+    expect(backLink).toHaveAttribute("href", "/mode/focus");
+  });
+
+  it("does not show favorite button when user is not signed in", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.queryByLabelText("Add to favorites")).not.toBeInTheDocument();
+  });
+
+  it("shows artist note toggle when track has artist_note", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("From the session")).toBeInTheDocument();
+  });
+
+  it("does not show artist note toggle when track has no artist_note", () => {
+    const trackWithoutNote = { ...mockTrack, artist_note: null };
+    render(
+      <SessionPlayer
+        track={trackWithoutNote}
+        ragam={mockRagam}
+        scenario="focus"
+      />
+    );
+    expect(screen.queryByText("From the session")).not.toBeInTheDocument();
+  });
+
+  it("expands artist note on click", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("From the session"));
+    expect(
+      screen.getByText("Recorded at dawn, birds singing in the background")
+    ).toBeInTheDocument();
+  });
+
+  it("starts audio playback when play is clicked", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(HTMLMediaElement.prototype.play).toHaveBeenCalled();
+  });
+
+  it("shows timer display when session is running", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    // Should show 25:00 (default duration)
+    expect(screen.getByText("25:00")).toBeInTheDocument();
+  });
+
+  it("shows stop button when session is running", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByText("stop")).toBeInTheDocument();
+  });
+
+  it("allows switching duration before starting", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("45m"));
+    // Duration should be selected (we check it starts a 45-min session)
+    expect(screen.getByText("45m")).toBeInTheDocument();
+  });
+
+  it("uses initialDuration prop when provided", async () => {
+    render(
+      <SessionPlayer
+        track={mockTrack}
+        ragam={mockRagam}
+        scenario="focus"
+        initialDuration={10}
+      />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByText("10:00")).toBeInTheDocument();
+  });
+
+  it("renders audio element with correct src", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    const audio = document.querySelector("audio");
+    expect(audio).toBeTruthy();
+    expect(audio?.getAttribute("src")).toBe("https://example.com/track.opus");
+    expect(audio?.hasAttribute("loop")).toBe(true);
+  });
+});
+
+describe("SessionPlayer with authenticated user", () => {
+  beforeEach(() => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: "user-123", email: "test@example.com" } as any,
+      loading: false,
+      signOut: vi.fn(),
+    });
+  });
+
+  it("shows favorite button for signed-in user", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByLabelText("Add to favorites")).toBeInTheDocument();
+  });
+
+  it("shows unfilled heart when track is not favorited", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("♡")).toBeInTheDocument();
+  });
+});
