@@ -1,0 +1,13 @@
+// This is a REFERENCE file showing the SPM dependency to add in Xcode.
+// You don't use this directly — instead, in Xcode:
+//   File → Add Package Dependencies → paste the URL below
+//
+// Supabase Swift SDK
+// URL: https://github.com/supabase/supabase-swift
+// Version: 2.0.0 (or latest)
+//
+// This gives you:
+//   import Supabase       — main client
+//   import Auth           — auth helpers
+//   import PostgREST      — database queries
+//   import Realtime       — realtime subscriptions (future)

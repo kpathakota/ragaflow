@@ -1,0 +1,27 @@
+# Xcode
+*.xcodeproj/
+*.xcworkspace/
+xcuserdata/
+DerivedData/
+build/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+*.xccheckout
+*.moved-aside
+
+# SPM
+.build/
+.swiftpm/
+
+# Secrets (real values, not the .example)
+Ragaflow/Configuration/Secrets.xcconfig
+Ragaflow/Configuration/Debug.xcconfig
+Ragaflow/Configuration/Release.xcconfig
+
+# OS
+.DS_Store
+
+# CocoaPods (if ever used)
+Pods/
