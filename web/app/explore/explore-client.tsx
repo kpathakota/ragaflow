@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect, useCallback } from "react";
+import { useState, useMemo, useEffect, useCallback, useRef } from "react";
 import type { Track, Ragam } from "@/lib/types";
 import { TrackCard } from "@/components/track-card";
 import { useAuth } from "@/lib/auth/auth-context";
@@ -16,6 +16,9 @@ export function ExploreClient({
   const { user } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [tagsExpanded, setTagsExpanded] = useState(false);
+  const tagsContainerRef = useRef<HTMLDivElement>(null);
+  const [needsCollapse, setNeedsCollapse] = useState(false);
 
   useEffect(() => {
     if (!user) return;
@@ -39,6 +42,15 @@ export function ExploreClient({
     tracks.forEach((t) => t.tags.forEach((tag) => tagSet.add(tag)));
     return Array.from(tagSet).sort();
   }, [tracks]);
+
+  // Check if tags container overflows beyond 2 rows (~72px)
+  const COLLAPSED_HEIGHT = 72;
+  useEffect(() => {
+    const el = tagsContainerRef.current;
+    if (el) {
+      setNeedsCollapse(el.scrollHeight > COLLAPSED_HEIGHT);
+    }
+  }, [allTags]);
 
   // Filter tracks
   const filtered = useMemo(() => {
@@ -79,30 +91,46 @@ export function ExploreClient({
   return (
     <>
       {/* Tag filter */}
-      <div className="mb-6 flex flex-wrap gap-2">
-        <button
-          onClick={() => setSelectedTag(null)}
-          className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-            selectedTag === null
-              ? "bg-emerald-500 text-white"
-              : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
-          }`}
+      <div className="mb-6">
+        <div
+          ref={tagsContainerRef}
+          className="flex flex-wrap gap-2 overflow-hidden transition-[max-height] duration-300 ease-in-out"
+          style={{
+            maxHeight: tagsExpanded || !needsCollapse ? "none" : `${COLLAPSED_HEIGHT}px`,
+          }}
         >
-          All
-        </button>
-        {allTags.map((tag) => (
           <button
-            key={tag}
-            onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+            onClick={() => setSelectedTag(null)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              selectedTag === tag
+              selectedTag === null
                 ? "bg-emerald-500 text-white"
                 : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
             }`}
           >
-            {tag}
+            All
           </button>
-        ))}
+          {allTags.map((tag) => (
+            <button
+              key={tag}
+              onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
+              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                selectedTag === tag
+                  ? "bg-emerald-500 text-white"
+                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+              }`}
+            >
+              {tag}
+            </button>
+          ))}
+        </div>
+        {needsCollapse && (
+          <button
+            onClick={() => setTagsExpanded((prev) => !prev)}
+            className="mt-2 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+          >
+            {tagsExpanded ? "Show fewer tags" : "Show all tags"}
+          </button>
+        )}
       </div>
 
       {/* Grouped by ragam */}
