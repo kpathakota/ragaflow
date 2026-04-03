@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // --- Mocks ---
@@ -41,6 +41,20 @@ beforeEach(() => {
   });
   process.env.POLAR_PRODUCT_IDS = "prod-monthly,prod-yearly,prod-lifetime";
   process.env.NEXT_PUBLIC_APP_URL = "http://localhost:3000";
+});
+
+const savedEnv: Record<string, string | undefined> = {};
+beforeEach(() => {
+  savedEnv.POLAR_PRODUCT_IDS = process.env.POLAR_PRODUCT_IDS;
+  savedEnv.NEXT_PUBLIC_APP_URL = process.env.NEXT_PUBLIC_APP_URL;
+});
+afterEach(() => {
+  // Restore env vars to prevent leaking between tests/files
+  for (const [key, val] of Object.entries(savedEnv)) {
+    if (val === undefined) delete process.env[key];
+    else process.env[key] = val;
+  }
+  vi.restoreAllMocks();
 });
 
 describe("GET /api/checkout", () => {
@@ -109,9 +123,9 @@ describe("GET /api/checkout", () => {
       );
     });
 
-    it("passes undefined email when user has no email", async () => {
+    it("converts null email to undefined via ?? operator", async () => {
       mockGetUser.mockResolvedValue({
-        data: { user: { id: "user-2", email: undefined } },
+        data: { user: { id: "user-2", email: null } },
         error: null,
       });
       mockCheckoutsCreate.mockResolvedValue({

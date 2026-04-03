@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 
 // --- Mocks ---
 
@@ -59,6 +59,10 @@ beforeEach(() => {
   vi.clearAllMocks();
   mockRpc.mockResolvedValue({ error: null });
   mockCreateAdminClient.mockReturnValue({ rpc: mockRpc } as any);
+});
+
+afterEach(() => {
+  vi.restoreAllMocks();
 });
 
 describe("webhook: updateRasika via event handlers", () => {
@@ -155,37 +159,34 @@ describe("webhook: updateRasika via event handlers", () => {
 
 describe("webhook: updateRasika edge cases", () => {
   it("skips update when externalId is null", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     await webhookConfig.onSubscriptionActive(
       subscriptionPayload(null, "polar-cust-x")
     );
     expect(mockRpc).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(console.error).toHaveBeenCalledWith(
       expect.stringContaining("Missing externalId")
     );
-    consoleSpy.mockRestore();
   });
 
   it("skips update when externalId is undefined", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     await webhookConfig.onSubscriptionActive(
       subscriptionPayload(undefined, "polar-cust-y")
     );
     expect(mockRpc).not.toHaveBeenCalled();
-    consoleSpy.mockRestore();
   });
 
   it("skips update when admin client is unavailable", async () => {
-    const consoleSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+    vi.spyOn(console, "error").mockImplementation(() => {});
     mockCreateAdminClient.mockReturnValue(null);
     await webhookConfig.onSubscriptionActive(
       subscriptionPayload("user-9", "polar-cust-9")
     );
     expect(mockRpc).not.toHaveBeenCalled();
-    expect(consoleSpy).toHaveBeenCalledWith(
+    expect(console.error).toHaveBeenCalledWith(
       expect.stringContaining("Admin Supabase client unavailable")
     );
-    consoleSpy.mockRestore();
   });
 
   it("throws when Supabase RPC fails (so Polar retries)", async () => {
