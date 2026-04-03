@@ -180,9 +180,7 @@ npm install @polar-sh/nextjs @polar-sh/sdk
 
 ## Implementation Status
 
-**Task 2.6 — implemented in PR #15 (`feat/polar-billing`), pending merge to `dev`.**
-
-All sub-tasks complete. Pending: human review + merge, then end-to-end testing with `polar listen`.
+**Task 2.6 — complete.** Merged to `dev`.
 
 ## Testing Checklist
 
@@ -211,7 +209,16 @@ End-to-end testing (after PR #15 merged):
 - **`externalCustomerId` via Checkout Sessions API:** Server-side `polar.checkouts.create({ externalCustomerId: uid })` is the official way to link a Polar Customer to our Supabase UID. Static checkout links don't support this as a query parameter. Webhook payload exposes it at `data.customer.externalId`.
 - **Manage subscription visibility:** Shown for `active`, `canceled`, `past_due`. Hidden for `lifetime` (no subscription to manage).
 
+## What Subscribers Get
+
+| Benefit | Web | iOS |
+|---|---|---|
+| **All tracks unlocked** (no 10h gate) | ✅ Now (once Task 2.5 enforces the gate) | ✅ Phase 3 |
+| **Download tracks for offline playback** | Deferred (PWA) | Phase 3, M4 (StoreKit 2) |
+
+**Access rule:** Any rasika with `subscription_status` in (`active`, `lifetime`, `canceled`, `past_due`) has full access to all premium tracks. `canceled` retains access until Polar fires `subscription.revoked` → `expired`.
+
 ## Next Steps
 
-After Task 2.6 is tested and stable:
-- **Task 2.5** — Access control: 10-hour listening gate. Premium tracks locked for non-subscribers after 10h. Depends on working subscription status from Task 2.6.
+- **Task 2.5** — Access control: 10-hour listening gate. Premium tracks locked for non-subscribers after 10h. Depends on working subscription status from Task 2.6 ✅.
+- **Task 2.8** — Premium track downloads. `download_url` is in the schema but no UI yet. Web deferred; iOS in M4.
