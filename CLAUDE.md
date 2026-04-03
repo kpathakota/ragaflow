@@ -96,6 +96,14 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 - `web/app/auth/page.tsx` — sign-in/sign-up form
 - `web/app/auth/callback/route.ts` — email confirmation callback
 
+### Web payments (Polar.sh)
+- `web/lib/polar/client.ts` — Polar SDK client factory
+- `web/lib/supabase/admin.ts` — service role client (bypasses RLS for webhook writes)
+- `web/app/api/checkout/route.ts` — server-side checkout session creation + redirect
+- `web/app/api/portal/route.ts` — customer portal redirect (manage subscription)
+- `web/app/api/webhooks/polar/route.ts` — webhook handler (subscription events → Supabase)
+- `supabase/migrations/008_subscription_update_fn.sql` — SECURITY DEFINER function for webhook writes
+
 ### Web features
 - `web/lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
 - `web/lib/preferences.ts` — set default track per scenario (client-side)
@@ -173,11 +181,12 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 ## Monetization model
 
 - Streaming free (account required)
-- Downloads paid (subscribers only)
-- 10-hour cumulative listening gate → must subscribe to continue
+- Downloads paid (subscribers only, deferred — iOS M4)
+- 10-hour cumulative listening gate → must subscribe to continue (Task 2.5, not yet enforced)
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
-- Web payments: Polar.sh (merchant of record)
+- Web payments: Polar.sh (merchant of record) ✅ — checkout, webhooks, portal all live
 - iOS payments: Apple IAP via StoreKit 2 (planned, M4)
+- Subscriber access: all premium tracks unlocked, no 10h gate. Statuses with access: `active`, `lifetime`, `canceled` (until period ends), `past_due` (grace period)
 
 ## Vercel deployment
 

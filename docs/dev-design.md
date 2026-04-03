@@ -40,10 +40,11 @@
 ~~Middleware → proxy migration~~ ✅
 
 **Phase 2+ — Future**
-- Polar.sh payments + subscription tiers
+- ~~Polar.sh payments + subscription tiers~~ ✅ (Task 2.6)
 - Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
-- Access control enforcement
-- iOS native app
+- Access control enforcement (Task 2.5 — 10-hour listening gate)
+- Premium track downloads (Task 2.8 — deferred to iOS)
+- iOS native app (Phase 3)
 
 ---
 
@@ -567,23 +568,33 @@ Audio currently resets to 0:00 on every session end (completion, stop, restart).
   - Free tracks: unchanged, always playable
 - Session player: if a premium track is somehow reached while gated, show subscribe CTA instead of play button
 - **Why deferred:** Not enough users yet to need a paywall gate; billing is live but gate enforcement can wait
+- **Depends on:** Task 2.6 (Polar billing) ✅
 - **Acceptance criteria:**
   - Under 10 hours: all tracks playable, premium tagged but not blocked
   - Over 10 hours + not subscribed: premium tracks greyed/locked on lists, free tracks unaffected
-  - Subscribed rasikas: all tracks playable regardless of hours
+  - Subscribed rasikas (`active`, `lifetime`, `canceled`, `past_due`): all tracks playable regardless of hours
 
-**Task 2.6: Billing Integration — Polar.sh** *(unblocked by Task 2.1)*
-- Integrate Polar.sh checkout for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
-- Create Polar products + pricing for each tier
-- Implement checkout flow: profile subscribe CTA → Polar hosted checkout → redirect back to app
-- Webhook endpoint (Next.js API route or Supabase edge function): listen for Polar subscription events → update `subscription_status` in `rasikas`
-- Handle subscription states: `active`, `past_due`, `canceled`, `expired`
-- Test end-to-end with Polar sandbox/test mode
+**Task 2.6: Billing Integration — Polar.sh** ✅
+- Polar.sh checkout for $5/mo, $30/yr, $100 lifetime tiers ($300 sponsor handled outside app)
+- Server-side checkout sessions via `polar.checkouts.create()` with `externalCustomerId` = Supabase UID
+- Webhook handler (`/api/webhooks/polar`): subscription lifecycle events → `update_rasika_subscription()` RPC
+- Customer portal (`/api/portal`): manage subscription, cancel, update payment
+- Profile page shows plan status + subscribe CTA or manage link
+- Subscription states: `free`, `active`, `past_due`, `canceled`, `expired`, `lifetime`
+- SECURITY DEFINER function for webhook writes (migration 008)
+- See `docs/payments-design.md` for full design and testing checklist
 
 **Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector
 - Seamless switching with position preservation
 - *Deferred — not blocking payments/gating work*
+
+**Task 2.8: Premium Track Downloads** *(deferred — iOS dependency)*
+- Subscribers (`active`, `lifetime`) can download tracks for offline playback
+- Web: deferred until PWA offline support is scoped
+- iOS: enabled via StoreKit 2 subscription validation + AVFoundation download (Phase 3, M4)
+- `download_url` field already in schema — no migration needed
+- **Depends on:** Task 2.6 (Polar billing) ✅, iOS M4 (StoreKit 2)
 
 ### Phase 3: iOS App
 
