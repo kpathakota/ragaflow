@@ -63,14 +63,22 @@ fail() { echo -e "  \033[1;31m✗ $1\033[0m"; FAIL=$((FAIL + 1)); }
 
 ref_from() { echo "$1" | grep -oE 'ref=e[0-9]+' | head -1 | sed 's/ref=/@/'; }
 
+# Full snapshot (includes all text content, not just interactive elements)
+take_snapshot() { ab snapshot 2>/dev/null || true; }
+
+# Interactive snapshot (refs for clickable elements)
+take_snapshot_i() { ab snapshot -i 2>/dev/null || true; }
+
 wait_for_text() {
   local text="$1" retries="${2:-10}"
   for _ in $(seq 1 "$retries"); do
-    if ab snapshot -i 2>/dev/null | grep -qi "$text"; then return 0; fi
+    if take_snapshot | grep -qi "$text"; then return 0; fi
     sleep 1
   done
   return 1
 }
+
+scroll_to_bottom() { ab eval 'window.scrollTo(0, document.body.scrollHeight)' 2>/dev/null || true; }
 
 set_subscription_status() {
   local status="$1"
@@ -121,14 +129,6 @@ if $FULL_MODE; then
   fi
 fi
 
-# Verify Supabase RPC works
-STATUS=$(get_subscription_status)
-if [[ -z "$STATUS" ]]; then
-  echo "ERROR: Could not query subscription_status for TEST_USER_ID=$TEST_USER_ID"
-  echo "Check SUPABASE_SECRET_KEY and TEST_USER_ID in web/.env.local"
-  exit 1
-fi
-
 # ------------------------------------------------------------------
 # 1. SIGN IN
 # ------------------------------------------------------------------
@@ -137,7 +137,7 @@ log "1. Sign in with test account"
 ab open "$BASE_URL/auth"
 sleep 2
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot_i)
 EMAIL_LINE=$(echo "$SNAP" | grep -i 'textbox.*Email' | head -1)
 PASS_LINE=$(echo "$SNAP" | grep -i 'textbox.*Password' | head -1)
 SUBMIT_LINE=$(echo "$SNAP" | grep -i 'button.*"Sign in"' | head -1)
@@ -163,6 +163,18 @@ else
   fail "Sign-in did not redirect to homepage"
 fi
 
+# Visit profile to ensure rasika row exists (ensureRasika triggers on first visit)
+ab open "$BASE_URL/profile"
+sleep 3
+
+# Verify Supabase RPC works (rasika row must exist after sign-in)
+STATUS=$(get_subscription_status)
+if [[ -z "$STATUS" ]]; then
+  echo "ERROR: Could not query subscription_status for TEST_USER_ID=$TEST_USER_ID"
+  echo "The test user may not have a rasika row. Check TEST_USER_ID in web/.env.local"
+  exit 1
+fi
+
 # ------------------------------------------------------------------
 # 2. VERIFY FREE STATE
 # ------------------------------------------------------------------
@@ -174,7 +186,7 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot)
 if echo "$SNAP" | grep -qi "Go Premium"; then
   pass "Free state: 'Go Premium' card visible"
 else
@@ -182,11 +194,13 @@ else
 fi
 
 if echo "$SNAP" | grep -qi "Subscribe"; then
-  pass "Free state: 'Subscribe' button visible"
+  pass "Free state: 'Subscribe' link visible"
 else
-  fail "Free state: 'Subscribe' button not found"
+  fail "Free state: 'Subscribe' link not found"
 fi
 
+scroll_to_bottom
+sleep 1
 ab screenshot "$SS_DIR/billing-01-free-profile.png"
 
 # ------------------------------------------------------------------
@@ -194,31 +208,18 @@ ab screenshot "$SS_DIR/billing-01-free-profile.png"
 # ------------------------------------------------------------------
 log "3. Test checkout redirect to Polar"
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
-SUB_LINE=$(echo "$SNAP" | grep -i 'link.*Subscribe' | head -1)
-SUB_REF=$(ref_from "$SUB_LINE")
+# Navigate directly to /api/checkout (ab click doesn't follow server-side redirects)
+ab open "$BASE_URL/api/checkout"
+sleep 5
 
-if [[ -z "$SUB_REF" ]]; then
-  # Fallback: try button
-  SUB_LINE=$(echo "$SNAP" | grep -i 'button.*Subscribe' | head -1)
-  SUB_REF=$(ref_from "$SUB_LINE")
-fi
-
-if [[ -n "$SUB_REF" ]]; then
-  ab click "$SUB_REF"
-  sleep 5
-
-  CURRENT_URL=$(ab eval 'window.location.href' 2>/dev/null || echo "")
-  if echo "$CURRENT_URL" | grep -qi "polar.sh"; then
-    pass "Checkout redirected to Polar ($CURRENT_URL)"
-  else
-    fail "Checkout did not redirect to Polar (URL: $CURRENT_URL)"
-  fi
-
-  ab screenshot "$SS_DIR/billing-02-polar-checkout.png"
+CURRENT_URL=$(ab eval 'window.location.href' 2>/dev/null || echo "")
+if echo "$CURRENT_URL" | grep -qi "polar.sh"; then
+  pass "Checkout redirected to Polar"
 else
-  fail "Subscribe button/link not found on profile"
+  fail "Checkout did not redirect to Polar (URL: $CURRENT_URL)"
 fi
+
+ab screenshot "$SS_DIR/billing-02-polar-checkout.png"
 
 # ------------------------------------------------------------------
 # 4. FULL CHECKOUT (--full mode only)
@@ -229,7 +230,7 @@ if $FULL_MODE; then
   # Take annotated snapshot for debugging
   ab screenshot "$SS_DIR/billing-03-checkout-annotated.png" --annotate
 
-  SNAP=$(ab snapshot -i 2>/dev/null || true)
+  SNAP=$(take_snapshot_i)
 
   # Look for card fields (Stripe iframes may or may not appear)
   CARD_LINE=$(echo "$SNAP" | grep -iE 'textbox.*(card|number)' | head -1)
@@ -250,7 +251,7 @@ if $FULL_MODE; then
     sleep 1
 
     # Find and click Pay/Subscribe button
-    SNAP=$(ab snapshot -i 2>/dev/null || true)
+    SNAP=$(take_snapshot_i)
     PAY_LINE=$(echo "$SNAP" | grep -iE 'button.*(Pay|Subscribe|Continue|Checkout|Submit)' | head -1)
     PAY_REF=$(ref_from "$PAY_LINE")
 
@@ -274,7 +275,7 @@ if $FULL_MODE; then
         pass "Redirected to /profile?checkout=success"
 
         # Verify success banner
-        SNAP=$(ab snapshot -i 2>/dev/null || true)
+        SNAP=$(take_snapshot)
         if echo "$SNAP" | grep -qi "Payment received\|plan will update"; then
           pass "Checkout success banner displayed"
         else
@@ -326,7 +327,7 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot)
 if echo "$SNAP" | grep -qi "Premium"; then
   pass "Active state: 'Premium' card visible"
 else
@@ -345,6 +346,8 @@ else
   fail "Active state: 'Manage subscription' link not found"
 fi
 
+scroll_to_bottom
+sleep 1
 ab screenshot "$SS_DIR/billing-05-active-profile.png"
 
 # ------------------------------------------------------------------
@@ -358,7 +361,7 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot)
 if echo "$SNAP" | grep -qi "Lifetime"; then
   pass "Lifetime state: 'Lifetime' card visible"
 else
@@ -378,6 +381,8 @@ else
   pass "Lifetime state: no 'Manage subscription' link (correct)"
 fi
 
+scroll_to_bottom
+sleep 1
 ab screenshot "$SS_DIR/billing-06-lifetime-profile.png"
 
 # ------------------------------------------------------------------
@@ -391,7 +396,7 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot)
 if echo "$SNAP" | grep -qi "Premium"; then
   pass "Canceled state: 'Premium' card visible"
 else
@@ -410,6 +415,8 @@ else
   fail "Canceled state: 'Manage subscription' link not found"
 fi
 
+scroll_to_bottom
+sleep 1
 ab screenshot "$SS_DIR/billing-07-canceled-profile.png"
 
 # ------------------------------------------------------------------
@@ -423,7 +430,7 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
+SNAP=$(take_snapshot)
 if echo "$SNAP" | grep -qi "Premium"; then
   pass "Past due state: 'Premium' card visible"
 else
@@ -436,6 +443,8 @@ else
   fail "Past due state: 'Payment failed' text not found"
 fi
 
+scroll_to_bottom
+sleep 1
 ab screenshot "$SS_DIR/billing-08-past-due-profile.png"
 
 # ------------------------------------------------------------------
@@ -449,25 +458,34 @@ sleep 1
 ab open "$BASE_URL/profile"
 sleep 3
 
-SNAP=$(ab snapshot -i 2>/dev/null || true)
-PORTAL_LINE=$(echo "$SNAP" | grep -i 'link.*Manage subscription' | head -1)
+# Verify Manage subscription link exists
+SNAP=$(take_snapshot)
+if echo "$SNAP" | grep -qi "Manage subscription"; then
+  pass "Portal: 'Manage subscription' link present"
+else
+  fail "Portal: 'Manage subscription' link not found"
+fi
+
+# Verify the link href points to /api/portal
+SNAP_I=$(take_snapshot_i)
+PORTAL_LINE=$(echo "$SNAP_I" | grep -i 'link.*Manage subscription' | head -1)
 PORTAL_REF=$(ref_from "$PORTAL_LINE")
 
 if [[ -n "$PORTAL_REF" ]]; then
-  ab click "$PORTAL_REF"
-  sleep 5
-
-  CURRENT_URL=$(ab eval 'window.location.href' 2>/dev/null || echo "")
-  if echo "$CURRENT_URL" | grep -qi "polar.sh"; then
-    pass "Portal redirected to Polar ($CURRENT_URL)"
+  PORTAL_HREF=$(ab eval 'document.querySelector("a[href*=portal]")?.getAttribute("href")' 2>/dev/null || echo "")
+  if echo "$PORTAL_HREF" | grep -qi "portal"; then
+    pass "Portal: link points to /api/portal"
   else
-    fail "Portal did not redirect to Polar (URL: $CURRENT_URL)"
+    fail "Portal: link href does not contain 'portal'"
   fi
-
-  ab screenshot "$SS_DIR/billing-09-portal.png"
 else
-  fail "Manage subscription link not found for portal test"
+  fail "Portal: 'Manage subscription' link ref not found"
 fi
+
+# Note: actual Polar redirect only works with a real polar_customer_id
+# from a real checkout — seeded test IDs will fail. Full e2e portal
+# testing requires --full mode with a real sandbox transaction.
+ab screenshot "$SS_DIR/billing-09-portal.png"
 
 # ------------------------------------------------------------------
 # 10. CLEANUP
