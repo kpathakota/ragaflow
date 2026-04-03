@@ -135,7 +135,11 @@ fi
 log "1. Sign in with test account"
 
 ab open "$BASE_URL/auth"
-sleep 2
+sleep 1
+
+# Set mobile viewport (iPhone 14 Pro: 393×852)
+ab set viewport 393 852
+sleep 1
 
 SNAP=$(take_snapshot_i)
 EMAIL_LINE=$(echo "$SNAP" | grep -i 'textbox.*Email' | head -1)
