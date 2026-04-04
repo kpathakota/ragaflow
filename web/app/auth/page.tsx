@@ -8,7 +8,7 @@ export default async function AuthPage() {
   if (!supabase) {
     return (
       <div className="flex min-h-screen items-center justify-center px-6">
-        <p className="text-neutral-400">
+        <p className="text-stone-400">
           Auth is not configured. Set Supabase environment variables to enable sign-in.
         </p>
       </div>

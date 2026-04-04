@@ -32,16 +32,16 @@ describe("scenario-config", () => {
     }
   });
 
-  it("focus is blue-themed", () => {
-    expect(scenarioMap.focus.accent.bg).toContain("blue");
+  it("focus uses burnished gold accent", () => {
+    expect(scenarioMap.focus.accent.bg).toContain("D4A24E");
   });
 
-  it("sleep is indigo-themed", () => {
-    expect(scenarioMap.sleep.accent.bg).toContain("indigo");
+  it("sleep uses dusty rose accent", () => {
+    expect(scenarioMap.sleep.accent.bg).toContain("B07D7D");
   });
 
-  it("meditate is amber-themed", () => {
-    expect(scenarioMap.meditate.accent.bg).toContain("amber");
+  it("meditate uses temple leaf green accent", () => {
+    expect(scenarioMap.meditate.accent.bg).toContain("92B892");
   });
 
   it("each scenario has a label and subtitle", () => {

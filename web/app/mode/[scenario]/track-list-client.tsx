@@ -64,7 +64,7 @@ export function TrackListClient({
         ))}
       </div>
       {sorted.length === 0 && (
-        <p className="text-sm text-neutral-500">No tracks available yet.</p>
+        <p className="text-sm text-stone-500">No tracks available yet.</p>
       )}
     </>
   );

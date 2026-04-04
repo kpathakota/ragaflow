@@ -103,8 +103,8 @@ export function ExploreClient({
             onClick={() => setSelectedTag(null)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               selectedTag === null
-                ? "bg-emerald-500 text-white"
-                : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                ? "bg-[#C4885A] text-white"
+                : "bg-stone-800 text-stone-300 hover:bg-stone-700"
             }`}
           >
             All
@@ -115,8 +115,8 @@ export function ExploreClient({
               onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 selectedTag === tag
-                  ? "bg-emerald-500 text-white"
-                  : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                  ? "bg-[#C4885A] text-white"
+                  : "bg-stone-800 text-stone-300 hover:bg-stone-700"
               }`}
             >
               {tag}
@@ -126,7 +126,7 @@ export function ExploreClient({
         {needsCollapse && (
           <button
             onClick={() => setTagsExpanded((prev) => !prev)}
-            className="mt-2 text-xs text-neutral-400 hover:text-neutral-200 transition-colors"
+            className="mt-2 text-xs text-stone-400 hover:text-stone-200 transition-colors"
           >
             {tagsExpanded ? "Show fewer tags" : "Show all tags"}
           </button>
@@ -136,10 +136,10 @@ export function ExploreClient({
       {/* Grouped by ragam */}
       {grouped.map(({ ragam, tracks: groupTracks }) => (
         <section key={ragam.id} className="mb-8">
-          <h2 className="mb-1 text-lg font-medium text-neutral-200">
+          <h2 className="mb-1 text-lg font-medium text-stone-200">
             {ragam.name}
           </h2>
-          <p className="mb-3 text-xs text-neutral-500">{ragam.description}</p>
+          <p className="mb-3 text-xs text-stone-500">{ragam.description}</p>
           <div className="flex flex-col gap-3">
             {groupTracks.map((t) => (
               <TrackCard
@@ -155,7 +155,7 @@ export function ExploreClient({
       ))}
 
       {grouped.length === 0 && (
-        <p className="text-sm text-neutral-500">No tracks match this filter.</p>
+        <p className="text-sm text-stone-500">No tracks match this filter.</p>
       )}
     </>
   );

@@ -180,7 +180,7 @@ export function SessionPlayer({
       <div className="flex items-center justify-between">
         <Link
           href={`/mode/${scenario}`}
-          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+          className="text-sm text-stone-500 transition-colors hover:text-stone-300"
         >
           &larr; Back
         </Link>
@@ -189,7 +189,7 @@ export function SessionPlayer({
             type="button"
             onClick={handleToggleFavorite}
             className={`text-xl transition-colors ${
-              isFavorite ? "text-red-400" : "text-neutral-600 hover:text-neutral-400"
+              isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"
             }`}
             aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
           >
@@ -200,10 +200,10 @@ export function SessionPlayer({
 
       {/* Ragam name + brief description */}
       <div className="mt-5">
-        <h1 className="text-2xl font-semibold tracking-tight text-neutral-100">
+        <h1 className="text-2xl font-semibold tracking-tight text-stone-100">
           {ragam?.name ?? track.title}
         </h1>
-        <p className="mt-1.5 text-sm leading-relaxed text-neutral-500">
+        <p className="mt-1.5 text-sm leading-relaxed text-stone-500">
           {track.description}
         </p>
       </div>
@@ -218,13 +218,13 @@ export function SessionPlayer({
             <button
               type="button"
               onClick={() => setNoteExpanded((v) => !v)}
-              className="flex items-center gap-1.5 text-xs text-neutral-600 transition-colors hover:text-neutral-400"
+              className="flex items-center gap-1.5 text-xs text-stone-600 transition-colors hover:text-stone-400"
             >
               <span>{noteExpanded ? "▴" : "▾"}</span>
               <span>From the session</span>
             </button>
             {noteExpanded && (
-              <p className="mt-3 text-sm italic leading-relaxed text-neutral-400">
+              <p className="mt-3 text-sm italic leading-relaxed text-stone-400">
                 {track.artist_note}
               </p>
             )}
@@ -246,7 +246,7 @@ export function SessionPlayer({
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     duration === d && !showCustomInput
                       ? `${accent.bg} text-white`
-                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                      : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
                 >
                   {d}m
@@ -263,7 +263,7 @@ export function SessionPlayer({
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
                     !FIXED_DURATIONS.includes(duration)
                       ? `${accent.bg} text-white`
-                      : "bg-neutral-800 text-neutral-300 hover:bg-neutral-700"
+                      : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
                 >
                   {customDuration ? `${customDuration}m` : "…"}
@@ -298,7 +298,7 @@ export function SessionPlayer({
                       }
                       setShowCustomInput(false);
                     }}
-                    className="w-14 rounded-full bg-neutral-800 px-3 py-2 text-center text-sm font-medium text-neutral-100 outline-none focus:ring-1 focus:ring-neutral-600"
+                    className="w-14 rounded-full bg-stone-800 px-3 py-2 text-center text-sm font-medium text-stone-100 outline-none focus:ring-1 focus:ring-stone-600"
                     placeholder="min"
                   />
                 </form>
@@ -316,7 +316,7 @@ export function SessionPlayer({
 
         {(session === "running" || session === "paused") && (
           <>
-            <span className="text-xs tabular-nums text-neutral-600">{display}</span>
+            <span className="text-xs tabular-nums text-stone-600">{display}</span>
             <div className="relative flex items-center justify-center">
               {session === "running" ? (
                 <button
@@ -341,7 +341,7 @@ export function SessionPlayer({
               <button
                 type="button"
                 onClick={stop}
-                className="absolute left-full ml-4 whitespace-nowrap text-sm text-neutral-600 transition-colors hover:text-neutral-400"
+                className="absolute left-full ml-4 whitespace-nowrap text-sm text-stone-600 transition-colors hover:text-stone-400"
               >
                 stop
               </button>
@@ -361,14 +361,14 @@ export function SessionPlayer({
               <p className={`text-lg font-semibold ${accent.text}`}>
                 {duration} minutes of {config.label.toLowerCase()}
               </p>
-              <p className="mt-1 text-sm text-neutral-500">
+              <p className="mt-1 text-sm text-stone-500">
                 {ragam?.name ?? track.title}
               </p>
             </div>
 
             {showDefaultPrompt && !defaultSet && (
-              <div className="flex flex-col items-center gap-2 rounded-xl border border-neutral-700 bg-neutral-900 px-5 py-4">
-                <p className="text-sm text-neutral-300">
+              <div className="flex flex-col items-center gap-2 rounded-xl border border-stone-700 bg-stone-900 px-5 py-4">
+                <p className="text-sm text-stone-300">
                   Set as your default for {config.label}?
                 </p>
                 <div className="flex gap-3">
@@ -382,7 +382,7 @@ export function SessionPlayer({
                   <button
                     type="button"
                     onClick={() => setShowDefaultPrompt(false)}
-                    className="rounded-full bg-neutral-800 px-4 py-2 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700"
+                    className="rounded-full bg-stone-800 px-4 py-2 text-sm font-medium text-stone-300 transition-colors hover:bg-stone-700"
                   >
                     No thanks
                   </button>
@@ -391,7 +391,7 @@ export function SessionPlayer({
             )}
 
             {defaultSet && (
-              <p className="text-sm text-emerald-400">Default set! Quick-play from home.</p>
+              <p className="text-sm text-[#92B892]">Default set! Quick-play from home.</p>
             )}
 
             <div className="flex gap-4">
@@ -404,7 +404,7 @@ export function SessionPlayer({
               </button>
               <Link
                 href={`/mode/${scenario}`}
-                className="rounded-full bg-neutral-800 px-6 py-3 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700"
+                className="rounded-full bg-stone-800 px-6 py-3 text-sm font-medium text-stone-300 transition-colors hover:bg-stone-700"
               >
                 Back to list
               </Link>
