@@ -13,7 +13,7 @@ export function UserBadge() {
   return (
     <Link
       href="/profile"
-      className="flex h-9 w-9 items-center justify-center rounded-full bg-neutral-800 text-sm font-medium text-neutral-300 transition-colors hover:bg-neutral-700 hover:text-white"
+      className="flex h-9 w-9 items-center justify-center rounded-full bg-stone-800 text-sm font-medium text-stone-300 transition-colors hover:bg-stone-700 hover:text-white"
       title="Profile"
     >
       {initial}

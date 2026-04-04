@@ -78,10 +78,10 @@ describe("getTierInfo", () => {
 // getTierColor
 // -----------------------------------------------------------------------
 describe("getTierColor", () => {
-  it("returns amber colors for Bronze", () => {
+  it("returns warm gold colors for Bronze", () => {
     const colors = getTierColor("Bronze");
-    expect(colors.bar).toContain("amber");
-    expect(colors.text).toContain("amber");
+    expect(colors.bar).toContain("B8860B");
+    expect(colors.text).toContain("CD9B3A");
   });
 
   it("returns slate colors for Silver", () => {
@@ -99,9 +99,9 @@ describe("getTierColor", () => {
     expect(colors.bar).toContain("purple");
   });
 
-  it("returns neutral colors for null/unknown tier", () => {
+  it("returns stone colors for null/unknown tier", () => {
     const colors = getTierColor(null);
-    expect(colors.bar).toContain("neutral");
+    expect(colors.bar).toContain("stone");
   });
 });
 

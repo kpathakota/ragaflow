@@ -17,7 +17,7 @@ export function getTierColor(tierLabel: string | null): {
 } {
   switch (tierLabel) {
     case "Bronze":
-      return { bar: "bg-amber-700", text: "text-amber-600", label: "text-amber-500" };
+      return { bar: "bg-[#B8860B]", text: "text-[#CD9B3A]", label: "text-[#D4A054]" };
     case "Silver":
       return { bar: "bg-slate-400", text: "text-slate-400", label: "text-slate-300" };
     case "Gold":
@@ -25,7 +25,7 @@ export function getTierColor(tierLabel: string | null): {
     case "Platinum":
       return { bar: "bg-purple-400", text: "text-purple-400", label: "text-purple-300" };
     default:
-      return { bar: "bg-neutral-500", text: "text-neutral-500", label: "text-neutral-500" };
+      return { bar: "bg-stone-500", text: "text-stone-500", label: "text-stone-500" };
   }
 }
 

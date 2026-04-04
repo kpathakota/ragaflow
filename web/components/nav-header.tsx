@@ -11,7 +11,7 @@ export function NavHeader({ backHref, title, titleClass = "" }: NavHeaderProps) 
     <header className="mb-10 w-full max-w-sm">
       <Link
         href={backHref}
-        className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+        className="text-sm text-stone-500 transition-colors hover:text-stone-300"
       >
         &larr; Back
       </Link>

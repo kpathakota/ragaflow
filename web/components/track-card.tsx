@@ -54,23 +54,23 @@ export function TrackCard({
   return (
     <Link
       href={`/mode/${scenario}/${track.id}`}
-      className="group flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4 transition-colors hover:border-neutral-600 hover:bg-neutral-800/60"
+      className="group flex items-center justify-between rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4 transition-colors hover:border-stone-600 hover:bg-stone-800/60"
     >
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-neutral-200">{headline}</p>
-        <p className="mt-1 text-xs text-neutral-500">
+        <p className="text-sm font-medium text-stone-200">{headline}</p>
+        <p className="mt-1 text-xs text-stone-500">
           {durationMin} min
           {ragamName && <span> · {ragamName}</span>}
           {track.tags.slice(0, 3).map((tag) => (
             <span key={tag}> · {tag}</span>
           ))}
           {!track.free && (
-            <span className="ml-2 rounded-full bg-amber-500/10 px-2 py-0.5 text-[10px] font-medium text-amber-400/80">
+            <span className="ml-2 rounded-full bg-[#D4A054]/10 px-2 py-0.5 text-[10px] font-medium text-[#D4A054]/80">
               Premium
             </span>
           )}
         </p>
-        <p className="mt-1 text-xs text-neutral-500 line-clamp-2">
+        <p className="mt-1 text-xs text-stone-500 line-clamp-2">
           {track.description}
         </p>
       </div>
@@ -81,7 +81,7 @@ export function TrackCard({
           onClick={handleFavorite}
           className={`ml-4 shrink-0 text-xl transition-transform ${
             animating ? "scale-125" : ""
-          } ${isFavorite ? "text-red-400" : "text-neutral-600 hover:text-neutral-400"}`}
+          } ${isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"}`}
           aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
         >
           {isFavorite ? "♥" : "♡"}

@@ -12,7 +12,7 @@ export default async function ExplorePage() {
       <NavHeader
         backHref="/"
         title="Explore"
-        titleClass="text-emerald-400"
+        titleClass="text-[#C17F59]"
       />
 
       <main className="w-full max-w-sm">

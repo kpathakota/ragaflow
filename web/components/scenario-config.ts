@@ -18,10 +18,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Focus",
     subtitle: "Sharpen your mind with ragas for deep work",
     accent: {
-      text: "text-blue-400",
-      border: "border-blue-500/40",
-      borderHover: "hover:border-blue-400/60",
-      bg: "bg-blue-500",
+      text: "text-[#D4A054]",
+      border: "border-[#D4A054]/30",
+      borderHover: "hover:border-[#D4A054]/50",
+      bg: "bg-[#D4A054]",
     },
   },
   {
@@ -29,10 +29,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Sleep",
     subtitle: "Drift into rest with soothing evening ragas",
     accent: {
-      text: "text-indigo-400",
-      border: "border-indigo-500/40",
-      borderHover: "hover:border-indigo-400/60",
-      bg: "bg-indigo-500",
+      text: "text-[#8B6F8E]",
+      border: "border-[#8B6F8E]/30",
+      borderHover: "hover:border-[#8B6F8E]/50",
+      bg: "bg-[#8B6F8E]",
     },
   },
   {
@@ -40,10 +40,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Meditate",
     subtitle: "Find stillness with ragas for contemplation",
     accent: {
-      text: "text-amber-400",
-      border: "border-amber-500/40",
-      borderHover: "hover:border-amber-400/60",
-      bg: "bg-amber-500",
+      text: "text-[#9CAF88]",
+      border: "border-[#9CAF88]/30",
+      borderHover: "hover:border-[#9CAF88]/50",
+      bg: "bg-[#9CAF88]",
     },
   },
 ];

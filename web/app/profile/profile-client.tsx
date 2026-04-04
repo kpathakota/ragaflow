@@ -32,8 +32,8 @@ function CheckoutBanner() {
   const status = searchParams.get("checkout");
   if (status === "success") {
     return (
-      <div className="mb-3 rounded-xl border border-emerald-500/30 bg-emerald-500/10 px-5 py-3">
-        <p className="text-sm text-emerald-400">
+      <div className="mb-3 rounded-xl border border-[#9CAF88]/30 bg-[#9CAF88]/10 px-5 py-3">
+        <p className="text-sm text-[#9CAF88]">
           Payment received — your plan will update shortly.
         </p>
       </div>
@@ -184,12 +184,12 @@ export function ProfileClient({ user }: { user: User }) {
       <div className="flex w-full max-w-sm flex-col gap-8">
         {/* Account */}
         <section>
-          <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+          <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-stone-500">
             Account
           </h2>
-          <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
-            <p className="text-sm text-neutral-200">{user.email}</p>
-            <p className="mt-1 text-xs text-neutral-500">
+          <div className="rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4">
+            <p className="text-sm text-stone-200">{user.email}</p>
+            <p className="mt-1 text-xs text-stone-500">
               Member since {memberSince}
             </p>
           </div>
@@ -198,28 +198,28 @@ export function ProfileClient({ user }: { user: User }) {
         {/* Stats */}
         {stats && (
           <section>
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-stone-500">
               Listening
             </h2>
             <div className="grid grid-cols-2 gap-3">
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
-                <p className="text-2xl font-semibold text-neutral-100">
+              <div className="rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4">
+                <p className="text-2xl font-semibold text-stone-100">
                   {formatDuration(stats.totalSeconds)}
                 </p>
-                <p className="mt-1 text-xs text-neutral-500">Total time</p>
+                <p className="mt-1 text-xs text-stone-500">Total time</p>
               </div>
-              <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
-                <p className="text-2xl font-semibold text-neutral-100">
+              <div className="rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4">
+                <p className="text-2xl font-semibold text-stone-100">
                   {stats.sessionCount}
                 </p>
-                <p className="mt-1 text-xs text-neutral-500">Sessions</p>
+                <p className="mt-1 text-xs text-stone-500">Sessions</p>
               </div>
               {prefs && (
-                <div className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4">
-                  <p className="text-2xl font-semibold text-neutral-100">
+                <div className="rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4">
+                  <p className="text-2xl font-semibold text-stone-100">
                     {prefs.favorite_tracks.length}
                   </p>
-                  <p className="mt-1 text-xs text-neutral-500">Favorites</p>
+                  <p className="mt-1 text-xs text-stone-500">Favorites</p>
                 </div>
               )}
             </div>
@@ -229,7 +229,7 @@ export function ProfileClient({ user }: { user: User }) {
         {/* Listening Journey */}
         {certs.length > 0 && (
           <section>
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-stone-500">
               Listening Journey
             </h2>
             <div className="flex flex-col gap-3">
@@ -238,23 +238,23 @@ export function ProfileClient({ user }: { user: User }) {
                 return (
                   <div
                     key={c.ragamId}
-                    className="rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-4"
+                    className="rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4"
                   >
                     <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium text-neutral-200">
+                      <span className="text-sm font-medium text-stone-200">
                         {c.ragamName}
                       </span>
-                      <span className={`text-xs font-medium ${c.currentLabel ? tierColor.label : "text-neutral-500"}`}>
+                      <span className={`text-xs font-medium ${c.currentLabel ? tierColor.label : "text-stone-500"}`}>
                         {c.currentLabel ?? "—"}
                       </span>
                     </div>
-                    <div className="mt-3 h-1.5 w-full rounded-full bg-neutral-800">
+                    <div className="mt-3 h-1.5 w-full rounded-full bg-stone-800">
                       <div
                         className={`h-full rounded-full ${tierColor.bar} transition-all`}
                         style={{ width: `${c.progressPercent}%` }}
                       />
                     </div>
-                    <p className="mt-2 text-xs text-neutral-600">
+                    <p className="mt-2 text-xs text-stone-600">
                       {formatDuration(c.totalSeconds)}
                       {c.nextLabel
                         ? ` — ${formatDuration(c.nextThreshold - c.totalSeconds)} to ${c.nextLabel}`
@@ -270,7 +270,7 @@ export function ProfileClient({ user }: { user: User }) {
         {/* Defaults */}
         {defaults.length > 0 && (
           <section>
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-stone-500">
               Default tracks
             </h2>
             <div className="flex flex-col gap-2">
@@ -280,12 +280,12 @@ export function ProfileClient({ user }: { user: User }) {
                 return (
                   <div
                     key={scenario}
-                    className="flex items-center justify-between rounded-xl border border-neutral-800 bg-neutral-900/60 px-5 py-3"
+                    className="flex items-center justify-between rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-3"
                   >
                     <span className={`text-sm font-medium ${cfg.accent.text}`}>
                       {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
                     </span>
-                    <span className="text-sm text-neutral-400">
+                    <span className="text-sm text-stone-400">
                       {track.title}
                     </span>
                   </div>
@@ -298,7 +298,7 @@ export function ProfileClient({ user }: { user: User }) {
         {/* Subscription */}
         {prefs && (
           <section>
-            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="mb-3 text-xs font-medium uppercase tracking-wide text-stone-500">
               Plan
             </h2>
 
@@ -310,11 +310,11 @@ export function ProfileClient({ user }: { user: User }) {
             prefs.subscription_status === "canceled" ||
             prefs.subscription_status === "past_due" ||
             prefs.subscription_status === "lifetime" ? (
-              <div className="rounded-xl border border-emerald-500/30 bg-emerald-500/5 px-5 py-4">
-                <p className="text-sm font-medium text-emerald-400">
+              <div className="rounded-xl border border-[#9CAF88]/30 bg-[#9CAF88]/5 px-5 py-4">
+                <p className="text-sm font-medium text-[#9CAF88]">
                   {prefs.subscription_status === "lifetime" ? "Lifetime" : "Premium"}
                 </p>
-                <p className="mt-1 text-xs text-neutral-400">
+                <p className="mt-1 text-xs text-stone-400">
                   {prefs.subscription_status === "lifetime"
                     ? "You have lifetime access to all tracks"
                     : prefs.subscription_status === "canceled"
@@ -326,24 +326,24 @@ export function ProfileClient({ user }: { user: User }) {
                 {prefs.subscription_status !== "lifetime" && (
                   <a
                     href="/api/portal"
-                    className="mt-3 inline-block text-xs text-neutral-400 underline underline-offset-2 hover:text-neutral-200"
+                    className="mt-3 inline-block text-xs text-stone-400 underline underline-offset-2 hover:text-stone-200"
                   >
                     Manage subscription
                   </a>
                 )}
               </div>
             ) : (
-              <div className="rounded-xl border border-amber-500/30 bg-amber-500/5 px-5 py-4">
-                <p className="text-sm font-medium text-amber-400">Go Premium</p>
-                <p className="mt-1 text-xs text-neutral-400">
+              <div className="rounded-xl border border-[#D4A054]/30 bg-[#D4A054]/5 px-5 py-4">
+                <p className="text-sm font-medium text-[#D4A054]">Go Premium</p>
+                <p className="mt-1 text-xs text-stone-400">
                   Unlock all tracks with a subscription
                 </p>
-                <p className="mt-2 text-xs text-neutral-500">
+                <p className="mt-2 text-xs text-stone-500">
                   $5/mo · $30/yr · $100 lifetime · $300 sponsor
                 </p>
                 <a
                   href="/api/checkout"
-                  className="mt-3 inline-block rounded-lg bg-amber-500 px-4 py-2 text-xs font-medium text-black hover:bg-amber-400"
+                  className="mt-3 inline-block rounded-lg bg-[#D4A054] px-4 py-2 text-xs font-medium text-black hover:bg-[#D4A054]"
                 >
                   Subscribe
                 </a>
@@ -356,7 +356,7 @@ export function ProfileClient({ user }: { user: User }) {
         <button
           onClick={handleSignOut}
           disabled={signingOut}
-          className="mt-4 rounded-xl border border-neutral-700 bg-neutral-900/60 px-5 py-3 text-sm text-neutral-300 transition-colors hover:border-neutral-600 hover:text-white disabled:opacity-50"
+          className="mt-4 rounded-xl border border-stone-700 bg-stone-900/60 px-5 py-3 text-sm text-stone-300 transition-colors hover:border-stone-600 hover:text-white disabled:opacity-50"
         >
           {signingOut ? "Signing out..." : "Sign out"}
         </button>

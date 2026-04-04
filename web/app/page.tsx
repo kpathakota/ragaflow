@@ -54,7 +54,7 @@ export default async function Home() {
       </div>
       <header className="mb-12 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Ragaflow</h1>
-        <p className="mt-3 text-lg text-neutral-400">
+        <p className="mt-3 text-lg text-stone-400">
           Indian classical ragas for focus, sleep &amp; meditation
         </p>
       </header>
@@ -63,7 +63,7 @@ export default async function Home() {
         {/* One-tap play for defaults */}
         {defaults.length > 0 && (
           <section className="mb-4 flex flex-col gap-3">
-            <h2 className="text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="text-xs font-medium uppercase tracking-wide text-stone-500">
               Quick play
             </h2>
             {defaults.map(({ scenario, track, durationSeconds }) => {
@@ -76,7 +76,7 @@ export default async function Home() {
                 <Link
                   key={scenario}
                   href={href}
-                  className={`flex items-center gap-3 rounded-xl border ${cfg.accent.border} bg-neutral-900/60 px-5 py-4 transition-colors ${cfg.accent.borderHover}`}
+                  className={`flex items-center gap-3 rounded-xl border ${cfg.accent.border} bg-stone-900/60 px-5 py-4 transition-colors ${cfg.accent.borderHover}`}
                 >
                   <span
                     className={`flex h-10 w-10 items-center justify-center rounded-full ${cfg.accent.bg} text-white text-lg`}
@@ -87,7 +87,7 @@ export default async function Home() {
                     <p className={`text-sm font-medium ${cfg.accent.text}`}>
                       {cfg.label}{durationMin ? ` · ${durationMin}m` : ""}
                     </p>
-                    <p className="text-xs text-neutral-400">{track.title}</p>
+                    <p className="text-xs text-stone-400">{track.title}</p>
                   </div>
                 </Link>
               );
@@ -100,22 +100,22 @@ export default async function Home() {
           <Link
             key={s.key}
             href={`/mode/${s.key}`}
-            className={`block rounded-xl border ${s.accent.border} ${s.accent.borderHover} bg-neutral-900/60 px-6 py-5 transition-colors`}
+            className={`block rounded-xl border ${s.accent.border} ${s.accent.borderHover} bg-stone-900/60 px-6 py-5 transition-colors`}
           >
             <h2 className={`text-xl font-medium ${s.accent.text}`}>
               {s.label}
             </h2>
-            <p className="mt-1 text-sm text-neutral-400">{s.subtitle}</p>
+            <p className="mt-1 text-sm text-stone-400">{s.subtitle}</p>
           </Link>
         ))}
 
         {/* Explore */}
         <Link
           href="/explore"
-          className="block rounded-xl border border-emerald-500/40 hover:border-emerald-400/60 bg-neutral-900/60 px-6 py-5 transition-colors"
+          className="block rounded-xl border border-[#C17F59]/30 hover:border-[#C17F59]/50 bg-stone-900/60 px-6 py-5 transition-colors"
         >
-          <h2 className="text-xl font-medium text-emerald-400">Explore</h2>
-          <p className="mt-1 text-sm text-neutral-400">
+          <h2 className="text-xl font-medium text-[#C17F59]">Explore</h2>
+          <p className="mt-1 text-sm text-stone-400">
             Browse all tracks by ragam, tag, or mood
           </p>
         </Link>
@@ -123,13 +123,13 @@ export default async function Home() {
         {/* Favorites section */}
         {prefs && prefs.favorite_tracks.length > 0 && (
           <section className="mt-4">
-            <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-neutral-500">
+            <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
               Favorites
             </h2>
-            <p className="text-sm text-neutral-400">
+            <p className="text-sm text-stone-400">
               {prefs.favorite_tracks.length} favorited track
               {prefs.favorite_tracks.length !== 1 ? "s" : ""} —{" "}
-              <Link href="/explore" className="underline hover:text-neutral-200">
+              <Link href="/explore" className="underline hover:text-stone-200">
                 view in Explore
               </Link>
             </p>
@@ -140,7 +140,7 @@ export default async function Home() {
         {!user && (
           <Link
             href="/auth"
-            className="mt-4 text-center text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+            className="mt-4 text-center text-sm text-stone-500 transition-colors hover:text-stone-300"
           >
             Sign in for favorites &amp; personalization
           </Link>

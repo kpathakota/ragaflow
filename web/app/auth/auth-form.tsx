@@ -53,7 +53,7 @@ export function AuthForm() {
       <header className="mb-10 w-full max-w-sm">
         <Link
           href="/"
-          className="text-sm text-neutral-500 transition-colors hover:text-neutral-300"
+          className="text-sm text-stone-500 transition-colors hover:text-stone-300"
         >
           &larr; Back
         </Link>
@@ -69,7 +69,7 @@ export function AuthForm() {
           value={email}
           onChange={(e) => setEmail(e.target.value)}
           required
-          className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
+          className="rounded-lg border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-stone-500 focus:outline-none"
         />
         <input
           type="password"
@@ -78,16 +78,16 @@ export function AuthForm() {
           onChange={(e) => setPassword(e.target.value)}
           required
           minLength={6}
-          className="rounded-lg border border-neutral-700 bg-neutral-900 px-4 py-3 text-sm text-neutral-100 placeholder:text-neutral-500 focus:border-neutral-500 focus:outline-none"
+          className="rounded-lg border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-stone-500 focus:outline-none"
         />
 
         {error && <p className="text-sm text-red-400">{error}</p>}
-        {message && <p className="text-sm text-emerald-400">{message}</p>}
+        {message && <p className="text-sm text-[#9CAF88]">{message}</p>}
 
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-neutral-100 px-4 py-3 text-sm font-medium text-neutral-900 transition-opacity hover:opacity-90 disabled:opacity-50"
+          className="rounded-lg bg-stone-100 px-4 py-3 text-sm font-medium text-stone-900 transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {submitting
             ? "..."
@@ -103,7 +103,7 @@ export function AuthForm() {
             setError(null);
             setMessage(null);
           }}
-          className="text-sm text-neutral-400 transition-colors hover:text-neutral-200"
+          className="text-sm text-stone-400 transition-colors hover:text-stone-200"
         >
           {isSignUp
             ? "Already have an account? Sign in"
