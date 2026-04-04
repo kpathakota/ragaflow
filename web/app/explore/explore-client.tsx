@@ -103,7 +103,7 @@ export function ExploreClient({
             onClick={() => setSelectedTag(null)}
             className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               selectedTag === null
-                ? "bg-[#C17F59] text-white"
+                ? "bg-[#C4885A] text-white"
                 : "bg-stone-800 text-stone-300 hover:bg-stone-700"
             }`}
           >
@@ -115,7 +115,7 @@ export function ExploreClient({
               onClick={() => setSelectedTag(tag === selectedTag ? null : tag)}
               className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
                 selectedTag === tag
-                  ? "bg-[#C17F59] text-white"
+                  ? "bg-[#C4885A] text-white"
                   : "bg-stone-800 text-stone-300 hover:bg-stone-700"
               }`}
             >

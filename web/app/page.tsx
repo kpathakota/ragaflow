@@ -112,9 +112,9 @@ export default async function Home() {
         {/* Explore */}
         <Link
           href="/explore"
-          className="block rounded-xl border border-[#C17F59]/30 hover:border-[#C17F59]/50 bg-stone-900/60 px-6 py-5 transition-colors"
+          className="block rounded-xl border border-[#C4885A]/30 hover:border-[#C4885A]/50 bg-stone-900/60 px-6 py-5 transition-colors"
         >
-          <h2 className="text-xl font-medium text-[#C17F59]">Explore</h2>
+          <h2 className="text-xl font-medium text-[#C4885A]">Explore</h2>
           <p className="mt-1 text-sm text-stone-400">
             Browse all tracks by ragam, tag, or mood
           </p>

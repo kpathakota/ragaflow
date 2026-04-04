@@ -391,7 +391,7 @@ export function SessionPlayer({
             )}
 
             {defaultSet && (
-              <p className="text-sm text-[#9CAF88]">Default set! Quick-play from home.</p>
+              <p className="text-sm text-[#92B892]">Default set! Quick-play from home.</p>
             )}
 
             <div className="flex gap-4">

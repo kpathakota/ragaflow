@@ -32,16 +32,16 @@ describe("scenario-config", () => {
     }
   });
 
-  it("focus uses warm amber/gold accent", () => {
-    expect(scenarioMap.focus.accent.bg).toContain("D4A054");
+  it("focus uses burnished gold accent", () => {
+    expect(scenarioMap.focus.accent.bg).toContain("D4A24E");
   });
 
-  it("sleep uses plum/mauve accent", () => {
-    expect(scenarioMap.sleep.accent.bg).toContain("8B6F8E");
+  it("sleep uses dusty rose accent", () => {
+    expect(scenarioMap.sleep.accent.bg).toContain("B07D7D");
   });
 
-  it("meditate uses sage/olive accent", () => {
-    expect(scenarioMap.meditate.accent.bg).toContain("9CAF88");
+  it("meditate uses temple leaf green accent", () => {
+    expect(scenarioMap.meditate.accent.bg).toContain("92B892");
   });
 
   it("each scenario has a label and subtitle", () => {
