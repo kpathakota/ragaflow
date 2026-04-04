@@ -1,55 +1,60 @@
 ---
 name: upload-tracks
-description: "Upload audio tracks to Cloudflare R2 and insert metadata into Supabase. Use when the user wants to upload new tracks, add recordings, or batch-import audio content."
+description: "Sync track metadata from tracks.csv to Supabase and upload new audio to R2. Use when the user wants to upload new tracks, update track metadata, or sync the Google Sheet export to the database."
 argument-hint: <folder_path> [--dry-run]
 allowed-tools: [Read, Glob, Grep, Bash, Write, Edit]
 ---
 
-# Upload Tracks to Ragaflow
+# Sync Tracks to Ragaflow
 
-Uploads audio files from a local folder to Cloudflare R2, generates SQL INSERT statements for Supabase, and updates `supabase/seed.sql`.
+Syncs `tracks.csv` (exported from the Google Sheet) to Supabase and Cloudflare R2. The CSV is the **single source of truth** for all track metadata. This skill handles:
+
+- **New tracks** — upload audio to R2, INSERT into Supabase
+- **Updated tracks** — UPDATE metadata in Supabase (audio is never re-uploaded)
+- **Removed tracks** — flag tracks in Supabase that are missing from the CSV (requires user confirmation to delete)
+- **seed.sql regeneration** — rewrite `supabase/seed.sql` from the CSV so it always mirrors the live state
+
+## Workflow overview
+
+```
+Google Sheet (Gautam + Kiran edit)
+    ↓ download as CSV
+uploads/tracks.csv (local sync file)
+    ↓ /upload-tracks uploads/
+Cloudflare R2 (new audio only) + Supabase (full metadata sync) + seed.sql (regenerated)
+```
 
 ## Arguments
 
-- `$ARGUMENTS` — required. Path to a folder containing audio files and optionally a `tracks.csv` metadata file.
-- Append `--dry-run` to preview commands without executing them.
+- `$ARGUMENTS` — required. Path to a folder containing `tracks.csv` and any new audio files.
+- Append `--dry-run` to preview all changes without executing them.
 - Examples:
   - `/upload-tracks uploads/`
   - `/upload-tracks uploads/ --dry-run`
-  - `/upload-tracks ~/Desktop/new-tracks/`
 
 ## Constants
 
 - **R2 bucket:** `ragaflow-audio`
 - **R2 public URL:** `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/`
-- **Track path:** `tracks/<filename>`
-- **Supported formats:** `.m4a`, `.mp3`, `.flac`, `.opus`, `.wav`
+- **Track path in R2:** `tracks/<filename>`
+- **Supported audio formats:** `.m4a`, `.mp3`, `.flac`, `.opus`, `.wav`
 - **Content types:** m4a=`audio/mp4`, mp3=`audio/mpeg`, flac=`audio/flac`, opus=`audio/ogg`, wav=`audio/wav`
 
-## Step 1: Parse arguments and scan folder
+## Step 1: Parse arguments and load CSV
 
 1. Extract `<folder_path>` and check for `--dry-run` flag.
-2. Verify the folder exists.
-3. Find all audio files in the folder (`.m4a`, `.mp3`, `.flac`, `.opus`, `.wav`).
-4. Report how many files were found. If zero, stop with a helpful message.
-
-## Step 2: Load or collect metadata
-
-Look for a `tracks.csv` file in the folder.
-
-### If `tracks.csv` exists:
-
-Parse it. The CSV format is:
+2. Verify the folder exists and contains `tracks.csv`.
+3. Parse `tracks.csv`. The CSV format is:
 
 ```csv
 filename,id,ragam_id,title,scenarios,tags,description,artist_note,recorded_date,location,duration,free
-Bhairavi_440Hz.m4a,bhairavi-new-01,bhairavi,,focus;meditate,grounding;warmth,A morning session...,Notes from Gautam...,2026-03-15,Home studio Portland,2700,true
+Bhairavi_440Hz.m4a,bhairavi-focus-01,bhairavi,Morning Bhairavi,focus,grounding;concentration;warmth,A grounding Bhairavi improvisation...,,2025-01-12,Home studio Portland,2700,true
 ```
 
 **Field notes:**
-- `filename` — must match an audio file in the folder
-- `id` — unique track ID (kebab-case, e.g. `bhairavi-focus-03`)
-- `ragam_id` — must match an existing ragam in `supabase/seed.sql` (bhairavi, neelambari, sahana, hindolam, mohanam, kalyani, todi)
+- `filename` — the audio filename on R2 (e.g. `Bhairavi_440Hz.m4a`). For new tracks, the file must exist in the folder. For existing tracks, it's just a reference to what's already on R2.
+- `id` — unique track ID (kebab-case, e.g. `bhairavi-focus-01`)
+- `ragam_id` — must match an existing ragam in `supabase/seed.sql`
 - `title` — optional (leave empty for null). If absent, date + location identify the track.
 - `scenarios` — semicolon-separated: `focus;meditate;sleep`
 - `tags` — semicolon-separated: `grounding;warmth;contemplative`
@@ -57,32 +62,58 @@ Bhairavi_440Hz.m4a,bhairavi-new-01,bhairavi,,focus;meditate,grounding;warmth,A m
 - `artist_note` — Gautam's voice: scene, poetry, session context. Expandable on session player. Optional.
 - `recorded_date` — YYYY-MM-DD format
 - `location` — evocative editorial text (e.g. "Before sunrise, Chennai"), not just a city name
-- `duration` — in seconds. If 0 or empty, attempt to auto-detect with ffprobe.
+- `duration` — in seconds. If 0 or empty, attempt to auto-detect with ffprobe for new audio files.
 - `free` — `true` or `false`
 
-### If no `tracks.csv`:
+Report the total number of tracks in the CSV.
 
-Ask the user for metadata for each file. Present the list of required and optional fields. Offer to create a `tracks.csv` template they can fill out.
+## Step 2: Diff against current state
 
-## Step 3: Validate metadata
+Read `supabase/seed.sql` and extract all existing track IDs.
 
-For each track:
+Classify every track into one of three buckets:
+
+| Bucket | Definition |
+|--------|-----------|
+| **New** | ID is in CSV but NOT in seed.sql |
+| **Updated** | ID is in BOTH CSV and seed.sql |
+| **Removed** | ID is in seed.sql but NOT in CSV |
+
+Report the counts:
+```
+Sync summary:
+  X new tracks to add
+  Y existing tracks to update
+  Z tracks to remove (in Supabase but not in CSV)
+```
+
+## Step 3: Validate
+
+For **new** tracks:
 1. Verify `filename` matches an actual audio file in the folder.
-2. Verify `ragam_id` exists in `supabase/seed.sql` ragams section.
-3. Verify `id` doesn't already exist in `supabase/seed.sql` tracks section.
-4. Verify `scenarios` values are valid: `focus`, `sleep`, `meditate`.
-5. Verify `recorded_date` is valid YYYY-MM-DD.
-6. If `duration` is 0 or empty, try to detect it:
+2. Verify `ragam_id` exists in the ragams section of seed.sql.
+3. Verify `scenarios` values are valid: `focus`, `sleep`, `meditate`.
+4. Verify `recorded_date` is valid YYYY-MM-DD.
+5. If `duration` is 0 or empty, try to detect with ffprobe:
    ```bash
    ffprobe -v error -show_entries format=duration -of csv=p=0 "<filepath>"
    ```
    Round to nearest integer. If ffprobe is not available, ask the user.
 
+For **updated** tracks:
+1. Verify `ragam_id` exists.
+2. Verify `scenarios` values are valid.
+3. No audio file check needed — audio is already on R2.
+
+For **removed** tracks:
+1. List them clearly by ID and ragam name.
+2. Audio on R2 is NOT deleted (R2 cleanup is manual/separate).
+
 Report any validation errors and stop if there are issues.
 
-## Step 4: Upload audio files to R2
+## Step 4: Upload new audio files to R2
 
-For each audio file, run:
+**Only for new tracks** (not updates). For each new track's audio file:
 
 ```bash
 npx wrangler r2 object put ragaflow-audio/tracks/<filename> \
@@ -91,64 +122,113 @@ npx wrangler r2 object put ragaflow-audio/tracks/<filename> \
   --remote
 ```
 
-Map content types:
+Content type mapping:
 - `.m4a` → `audio/mp4`
 - `.mp3` → `audio/mpeg`
 - `.flac` → `audio/flac`
 - `.opus` → `audio/ogg`
 - `.wav` → `audio/wav`
 
-**If `--dry-run`:** Print each wrangler command but don't execute it.
+**If `--dry-run`:** Print each wrangler command but don't execute.
 
-Wait for each upload to complete before proceeding. Report success/failure per file.
+Report success/failure per file.
 
-## Step 5: Generate SQL INSERT statements
+## Step 5: Generate SQL
 
-Generate SQL matching the exact format in `supabase/seed.sql`:
+Generate three SQL blocks:
+
+### 5a: INSERTs for new tracks
 
 ```sql
+-- New tracks
 insert into tracks (id, title, ragam_id, scenarios, tags, description, artist_note, recorded_date, location, duration, audio_url, free, created_at) values
   ('<id>', <title_or_null>, '<ragam_id>', '{<scenarios>}', '{<tags>}', '<description>', <artist_note_or_null>, '<recorded_date>', '<location>', <duration>, 'https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/<filename>', <free>, '<recorded_date>T00:00:00Z');
 ```
 
-**Formatting rules:**
+### 5b: UPDATEs for existing tracks
+
+For each updated track, generate an UPDATE that sets all metadata fields (not audio_url — that doesn't change):
+
+```sql
+-- Updated tracks
+update tracks set
+  title = <title_or_null>,
+  ragam_id = '<ragam_id>',
+  scenarios = '{<scenarios>}',
+  tags = '{<tags>}',
+  description = '<description>',
+  artist_note = <artist_note_or_null>,
+  recorded_date = '<recorded_date>',
+  location = '<location>',
+  duration = <duration>,
+  free = <free>
+where id = '<id>';
+```
+
+### 5c: DELETEs for removed tracks (if any)
+
+```sql
+-- Removed tracks (review carefully!)
+-- These tracks are in Supabase but NOT in the CSV:
+-- <id> (<ragam_name>)
+delete from tracks where id in ('<id1>', '<id2>');
+```
+
+**Formatting rules (all SQL):**
 - `title`: use `'<value>'` if present, `null` if empty
-- `artist_note`: use `'<value>'` if present, `null` if empty. Escape single quotes by doubling them (`''`).
+- `artist_note`: use `'<value>'` if present, `null` if empty
 - `scenarios`: PostgreSQL array literal `'{focus,meditate}'` (comma-separated, no spaces)
 - `tags`: PostgreSQL array literal `'{grounding,warmth}'`
 - `free`: `true` or `false` (no quotes)
-- `created_at`: use `recorded_date` + `T00:00:00Z`
-- Escape any single quotes in text fields by doubling them (`it''s`)
+- `created_at` (INSERTs only): use `recorded_date` + `T00:00:00Z`
+- Escape single quotes in text fields by doubling them (`it''s`)
 
 ## Step 6: Present SQL for review
 
-Print the complete SQL INSERT block. Ask the user to:
+Print all SQL blocks. For each block, clearly label what it does (inserts, updates, deletes).
+
+**For deletes:** Require explicit user confirmation before including in the final SQL. List each track being removed with its ragam name and title so the user can verify.
+
+Ask the user to:
 1. **Review the SQL** for correctness
 2. **Run it in the Supabase SQL editor** (paste and execute)
+3. Confirm whether to include the DELETE block or skip it
 
 Do NOT attempt to run SQL directly against Supabase — the user runs it manually for safety.
 
-## Step 7: Update seed.sql
+## Step 7: Regenerate seed.sql
 
-After user confirms the SQL was run successfully:
-1. Read `supabase/seed.sql`
-2. Find the appropriate ragam section (e.g. `-- Bhairavi (5 tracks)`)
-3. Append the new INSERT statements under the correct ragam section
-4. Update the track count in the section comment (e.g. `5 tracks` → `6 tracks`)
-5. If tracks span multiple ragams, update each section
+After user confirms the SQL was run successfully, **regenerate `supabase/seed.sql` entirely from the CSV**:
+
+1. Read the existing `supabase/seed.sql` to preserve the **ragams section** (ragam INSERTs at the top — these are not managed by the CSV).
+2. Rebuild the **tracks section** from the CSV:
+   - Group tracks by `ragam_id`
+   - Sort groups alphabetically by ragam name
+   - Within each group, sort tracks by `recorded_date` (newest first)
+   - Write a comment header per group: `-- <RagamName> (<N> tracks)`
+   - Write INSERT statements matching the exact seed.sql format
+3. Write the complete file: ragams section + rebuilt tracks section.
+
+This ensures seed.sql always mirrors the CSV exactly — it's reproducible from scratch.
 
 ## Step 8: Summary
 
 Report:
-- Number of files uploaded to R2
-- Number of tracks inserted into Supabase
-- Files modified (`supabase/seed.sql`)
-- Remind user to verify tracks appear on the app (check explore page)
+- **New:** X tracks uploaded to R2 and inserted
+- **Updated:** Y tracks with metadata changes
+- **Removed:** Z tracks flagged/deleted (or "0 — skipped by user")
+- **seed.sql:** regenerated with N total tracks
+- Remind user:
+  - Verify tracks on the app (check explore page)
+  - If running against staging, they may need to run the same SQL on production
+  - R2 audio for removed tracks is NOT auto-deleted — clean up manually if needed
 
 ## Important notes
 
-- **Never delete existing tracks** — this skill only adds new ones
+- **CSV is the source of truth** — if a track is not in the CSV, it will be flagged for removal from Supabase
+- **Audio is upload-once** — only new tracks (not in seed.sql) need audio files in the folder. Updated tracks keep their existing R2 audio.
 - **R2 is shared** between staging and production — uploads are immediately available to both
 - **Supabase is NOT shared** — user may need to run the SQL on both staging and production databases
 - **Audio files should NOT be committed to git** — they live on R2 only
 - **The `uploads/` folder is gitignored** — safe to drop files there
+- **R2 audio is never auto-deleted** — removing a track from the CSV removes it from Supabase but leaves the file on R2. Manual cleanup via `npx wrangler r2 object delete ragaflow-audio/tracks/<filename> --remote`
