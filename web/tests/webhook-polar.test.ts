@@ -57,6 +57,7 @@ function orderPayload(
 
 beforeEach(() => {
   vi.clearAllMocks();
+  process.env.POLAR_WEBHOOK_SECRET = "test-secret";
   mockRpc.mockResolvedValue({ error: null });
   mockCreateAdminClient.mockReturnValue({ rpc: mockRpc } as any);
 });

@@ -30,6 +30,10 @@ export async function GET(req: NextRequest) {
 
   // 3. Create checkout session via Polar SDK
   const polar = getPolarClient();
+  if (!process.env.NEXT_PUBLIC_APP_URL && process.env.NODE_ENV === "production") {
+    console.error("[checkout] NEXT_PUBLIC_APP_URL is not set in production");
+    return NextResponse.redirect(new URL("/profile?checkout=error", req.url));
+  }
   const appUrl = process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3000";
 
   try {
@@ -44,10 +48,8 @@ export async function GET(req: NextRequest) {
   } catch (err: unknown) {
     console.error("[checkout] Failed to create session:", err);
 
-    // Log Polar API error details if available
     if (err instanceof Error) {
-      console.error("[checkout] Error message:", err.message);
-      console.error("[checkout] Error details:", JSON.stringify(err, Object.getOwnPropertyNames(err)));
+      console.error("[checkout] Error:", err.message);
     }
 
     return NextResponse.redirect(new URL("/profile?checkout=error", req.url));

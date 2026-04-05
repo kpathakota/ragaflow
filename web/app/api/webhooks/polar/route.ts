@@ -19,6 +19,10 @@ async function updateRasika(
   polarCustomerId: string,
   status: SubscriptionStatus
 ) {
+  if (!process.env.POLAR_WEBHOOK_SECRET) {
+    throw new Error("POLAR_WEBHOOK_SECRET is not configured");
+  }
+
   if (!externalId) {
     console.error("[polar/webhook] Missing externalId on customer — skipping");
     return;
@@ -43,7 +47,7 @@ async function updateRasika(
 }
 
 export const POST = Webhooks({
-  webhookSecret: process.env.POLAR_WEBHOOK_SECRET ?? "",
+  webhookSecret: process.env.POLAR_WEBHOOK_SECRET!,
 
   onSubscriptionActive: async (payload: WebhookSubscriptionActivePayload) => {
     const { data } = payload;
