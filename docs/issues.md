@@ -2,6 +2,28 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-04-09
+
+### Issue — Track title not displayed in session player or track cards
+
+**Files:** `components/track-card.tsx`, `app/mode/[scenario]/[trackId]/session-player.tsx`
+
+**What's wrong:** Tracks now have real titles in the database (e.g. "Fiery Todi", "A Kannadagowla in Rupakam", "A Sweet Asaveri"), but the UI doesn't surface them properly:
+
+1. **Session player** (`session-player.tsx` ~line 204, ~line 365): Displays `ragam?.name ?? track.title` — the ragam name always wins, so the track title is never shown. The completion summary has the same issue.
+
+2. **Track card** (`track-card.tsx` ~line 49-52): The headline logic is `dateLabel · location`, falling back to `track.title` only if both date and location are missing. With the new CSV data, most tracks have both, so titles are buried.
+
+**User impact:** Gautam's track titles (which carry editorial voice — "Fiery Todi", "A Sweet Asaveri") are invisible. Every track just shows the ragam name, making tracks within the same ragam indistinguishable. This is the same underlying problem described in Issue 1.13-B but now it's actionable since we have real titles.
+
+**Fix needed:**
+- Session player: Show `track.title` as the primary heading when present, with ragam name as a subtitle. Fall back to ragam name when title is null.
+- Track card: Show `track.title` prominently when present. Date/location can remain as secondary info.
+
+**Status:** Open
+
+---
+
 ## 2026-03-26
 
 ### Issue — Timer drifts / runs slow when browser tab is not in focus

@@ -14,8 +14,24 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ragaflow",
+  metadataBase: new URL("https://ragaflow.app"),
+  title: {
+    default: "Ragaflow",
+    template: "%s | Ragaflow",
+  },
   description: "Indian classical ragas for focus, sleep, and meditation",
+  openGraph: {
+    title: "Ragaflow",
+    description: "Indian classical ragas for focus, sleep, and meditation",
+    siteName: "Ragaflow",
+    locale: "en_US",
+    type: "website",
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: "Ragaflow",
+    description: "Indian classical ragas for focus, sleep, and meditation",
+  },
 };
 
 export default function RootLayout({

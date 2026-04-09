@@ -80,10 +80,19 @@ const mockRagam: Ragam = {
 };
 
 describe("SessionPlayer", () => {
-  it("renders ragam name as title", () => {
+  it("renders track title as heading when title is present", () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
+    expect(screen.getByText("Morning Raag")).toBeInTheDocument();
+  });
+
+  it("renders ragam name as subtitle when track has a title", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    // Title is the heading, ragam name appears as subtitle
+    expect(screen.getByText("Morning Raag")).toBeInTheDocument();
     expect(screen.getByText("Yaman")).toBeInTheDocument();
   });
 
@@ -96,6 +105,24 @@ describe("SessionPlayer", () => {
     ).toBeInTheDocument();
   });
 
+  it("falls back to ragam name when track has no title", () => {
+    const trackWithoutTitle = { ...mockTrack, title: null };
+    render(
+      <SessionPlayer track={trackWithoutTitle} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("Yaman")).toBeInTheDocument();
+  });
+
+  it("does not show ragam subtitle when track has no title", () => {
+    const trackWithoutTitle = { ...mockTrack, title: null };
+    const { container } = render(
+      <SessionPlayer track={trackWithoutTitle} ragam={mockRagam} scenario="focus" />
+    );
+    // Ragam name should appear as the heading, not duplicated as a subtitle
+    const yamanElements = screen.getAllByText("Yaman");
+    expect(yamanElements).toHaveLength(1);
+  });
+
   it("falls back to track title when ragam is undefined", () => {
     render(
       <SessionPlayer
@@ -105,6 +132,14 @@ describe("SessionPlayer", () => {
       />
     );
     expect(screen.getByText("Morning Raag")).toBeInTheDocument();
+  });
+
+  it("shows Untitled when both title and ragam are missing", () => {
+    const trackWithoutTitle = { ...mockTrack, title: null };
+    render(
+      <SessionPlayer track={trackWithoutTitle} ragam={undefined} scenario="focus" />
+    );
+    expect(screen.getByText("Untitled")).toBeInTheDocument();
   });
 
   it("shows duration pills (25m, 45m, custom)", () => {
