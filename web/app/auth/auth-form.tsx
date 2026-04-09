@@ -82,7 +82,7 @@ export function AuthForm() {
         />
 
         {error && <p className="text-sm text-red-400">{error}</p>}
-        {message && <p className="text-sm text-[#9CAF88]">{message}</p>}
+        {message && <p className="text-sm text-[#8A9B72]">{message}</p>}
 
         <button
           type="submit"

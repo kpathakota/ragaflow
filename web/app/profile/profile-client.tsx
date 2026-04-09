@@ -32,8 +32,8 @@ function CheckoutBanner() {
   const status = searchParams.get("checkout");
   if (status === "success") {
     return (
-      <div className="mb-3 rounded-xl border border-[#9CAF88]/30 bg-[#9CAF88]/10 px-5 py-3">
-        <p className="text-sm text-[#9CAF88]">
+      <div className="mb-3 rounded-xl border border-[#8A9B72]/30 bg-[#8A9B72]/10 px-5 py-3">
+        <p className="text-sm text-[#8A9B72]">
           Payment received — your plan will update shortly.
         </p>
       </div>
@@ -310,8 +310,8 @@ export function ProfileClient({ user }: { user: User }) {
             prefs.subscription_status === "canceled" ||
             prefs.subscription_status === "past_due" ||
             prefs.subscription_status === "lifetime" ? (
-              <div className="rounded-xl border border-[#9CAF88]/30 bg-[#9CAF88]/5 px-5 py-4">
-                <p className="text-sm font-medium text-[#9CAF88]">
+              <div className="rounded-xl border border-[#8A9B72]/30 bg-[#8A9B72]/5 px-5 py-4">
+                <p className="text-sm font-medium text-[#8A9B72]">
                   {prefs.subscription_status === "lifetime" ? "Lifetime" : "Premium"}
                 </p>
                 <p className="mt-1 text-xs text-stone-400">
@@ -333,8 +333,8 @@ export function ProfileClient({ user }: { user: User }) {
                 )}
               </div>
             ) : (
-              <div className="rounded-xl border border-[#D4A054]/30 bg-[#D4A054]/5 px-5 py-4">
-                <p className="text-sm font-medium text-[#D4A054]">Go Premium</p>
+              <div className="rounded-xl border border-[#C9A54C]/30 bg-[#C9A54C]/5 px-5 py-4">
+                <p className="text-sm font-medium text-[#C9A54C]">Go Premium</p>
                 <p className="mt-1 text-xs text-stone-400">
                   Unlock all tracks with a subscription
                 </p>
@@ -343,7 +343,7 @@ export function ProfileClient({ user }: { user: User }) {
                 </p>
                 <a
                   href="/api/checkout"
-                  className="mt-3 inline-block rounded-lg bg-[#D4A054] px-4 py-2 text-xs font-medium text-black hover:bg-[#D4A054]"
+                  className="mt-3 inline-block rounded-lg bg-[#C9A54C] px-4 py-2 text-xs font-medium text-black hover:bg-[#C9A54C]"
                 >
                   Subscribe
                 </a>

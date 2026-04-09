@@ -71,7 +71,7 @@ export function TrackCard({
             <span key={tag}> · {tag}</span>
           ))}
           {!track.free && (
-            <span className="ml-2 rounded-full bg-[#D4A054]/10 px-2 py-0.5 text-[10px] font-medium text-[#D4A054]/80">
+            <span className="ml-2 rounded-full bg-[#C9A54C]/10 px-2 py-0.5 text-[10px] font-medium text-[#C9A54C]/80">
               Premium
             </span>
           )}
