@@ -51,7 +51,7 @@ export function TrackCard({
     || dateLabel || track.location || "Untitled";
 
   const subtitle = track.title
-    ? [dateLabel, track.location].filter(Boolean).join(" · ")
+    ? [dateLabel, track.location].filter(Boolean).join(" · ") || null
     : null;
 
   return (
@@ -62,7 +62,7 @@ export function TrackCard({
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-stone-200">{headline}</p>
         {subtitle && (
-          <p className="mt-0.5 text-xs text-stone-600">{subtitle}</p>
+          <p className="mt-0.5 text-xs text-stone-500">{subtitle}</p>
         )}
         <p className="mt-1 text-xs text-stone-500">
           {durationMin} min
