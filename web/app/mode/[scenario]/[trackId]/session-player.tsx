@@ -198,11 +198,14 @@ export function SessionPlayer({
         )}
       </div>
 
-      {/* Ragam name + brief description */}
+      {/* Track title + ragam name + description */}
       <div className="mt-5">
         <h1 className="text-2xl font-semibold tracking-tight text-stone-100">
-          {ragam?.name ?? track.title}
+          {track.title ?? ragam?.name ?? "Untitled"}
         </h1>
+        {track.title && ragam?.name && (
+          <p className="mt-0.5 text-sm text-stone-500">{ragam.name}</p>
+        )}
         <p className="mt-1.5 text-sm leading-relaxed text-stone-500">
           {track.description}
         </p>
@@ -362,7 +365,7 @@ export function SessionPlayer({
                 {duration} minutes of {config.label.toLowerCase()}
               </p>
               <p className="mt-1 text-sm text-stone-500">
-                {ragam?.name ?? track.title}
+                {track.title ?? ragam?.name}
               </p>
             </div>
 
