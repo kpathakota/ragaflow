@@ -18,10 +18,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Focus",
     subtitle: "Sharpen your mind with ragas for deep work",
     accent: {
-      text: "text-[#D4A24E]",
-      border: "border-[#D4A24E]/30",
-      borderHover: "hover:border-[#D4A24E]/50",
-      bg: "bg-[#D4A24E]",
+      text: "text-[#C9A54C]",
+      border: "border-[#C9A54C]/30",
+      borderHover: "hover:border-[#C9A54C]/50",
+      bg: "bg-[#C9A54C]",
     },
   },
   {
@@ -29,10 +29,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Sleep",
     subtitle: "Drift into rest with soothing evening ragas",
     accent: {
-      text: "text-[#B07D7D]",
-      border: "border-[#B07D7D]/30",
-      borderHover: "hover:border-[#B07D7D]/50",
-      bg: "bg-[#B07D7D]",
+      text: "text-[#B08878]",
+      border: "border-[#B08878]/30",
+      borderHover: "hover:border-[#B08878]/50",
+      bg: "bg-[#B08878]",
     },
   },
   {
@@ -40,10 +40,10 @@ export const scenarios: ScenarioConfig[] = [
     label: "Meditate",
     subtitle: "Find stillness with ragas for contemplation",
     accent: {
-      text: "text-[#92B892]",
-      border: "border-[#92B892]/30",
-      borderHover: "hover:border-[#92B892]/50",
-      bg: "bg-[#92B892]",
+      text: "text-[#8A9B72]",
+      border: "border-[#8A9B72]/30",
+      borderHover: "hover:border-[#8A9B72]/50",
+      bg: "bg-[#8A9B72]",
     },
   },
 ];
