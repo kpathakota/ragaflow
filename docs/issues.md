@@ -4,6 +4,20 @@ A record of bugs and issues encountered, why they mattered, and how they were re
 
 ## 2026-04-09
 
+### Issue — Subscribe button has no visible hover state (low priority)
+
+**File:** `app/profile/profile-client.tsx` ~line 346
+
+**What's wrong:** The "Subscribe" button has `bg-[#C9A54C] ... hover:bg-[#C9A54C]` — the hover background is identical to the normal background, so there is no visible hover feedback. This was carried forward from the original palette (same issue with the old `#D4A054` color).
+
+**User impact:** The subscribe button feels unresponsive on hover. No visual affordance that it's interactive beyond the cursor change.
+
+**Fix needed:** Use a distinct hover shade, e.g. `hover:bg-[#C9A54C]/90` or a slightly lighter/darker variant.
+
+**Status:** Open
+
+---
+
 ### Issue — Track title not displayed in session player or track cards
 
 **Files:** `components/track-card.tsx`, `app/mode/[scenario]/[trackId]/session-player.tsx`
