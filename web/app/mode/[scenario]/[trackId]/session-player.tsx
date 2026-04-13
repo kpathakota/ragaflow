@@ -11,7 +11,6 @@ import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
 const FIXED_DURATIONS = [25, 45];
-const FULL_TRACK = "full" as const;
 const LAST_DURATION_KEY = "ragaflow:lastDuration";
 
 function getLastDuration(): number | null {
@@ -64,7 +63,7 @@ export function SessionPlayer({
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customInputValue, setCustomInputValue] = useState("");
   const [isFullTrack, setIsFullTrack] = useState(false);
-  const fullTrackMinutes = Math.ceil(track.duration / 60);
+  const fullTrackMinutes = Math.round(track.duration / 60);
 
   useEffect(() => {
     if (!user) return;
@@ -112,6 +111,7 @@ export function SessionPlayer({
 
   const stop = useCallback(async () => {
     setSession("idle");
+    setIsFullTrack(false);
     const elapsed = Math.round(
       elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000
     );
@@ -265,17 +265,19 @@ export function SessionPlayer({
                   {d}m
                 </button>
               ))}
-              <button
-                type="button"
-                onClick={() => { setIsFullTrack(true); setDuration(fullTrackMinutes); setShowCustomInput(false); }}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                  isFullTrack
-                    ? `${accent.bg} text-white`
-                    : "bg-stone-800 text-stone-300 hover:bg-stone-700"
-                }`}
-              >
-                Full track
-              </button>
+              {track.duration > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setIsFullTrack(true); setDurationRaw(fullTrackMinutes); setShowCustomInput(false); }}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    isFullTrack
+                      ? `${accent.bg} text-white`
+                      : "bg-stone-800 text-stone-300 hover:bg-stone-700"
+                  }`}
+                >
+                  Full track
+                </button>
+              )}
               {!showCustomInput ? (
                 <button
                   type="button"
@@ -439,7 +441,7 @@ export function SessionPlayer({
 
       </div>
 
-      <audio ref={audioRef} src={track.audio_url} loop={!isFullTrack} preload="auto" />
+      <audio ref={audioRef} src={track.audio_url} loop preload="auto" />
     </div>
   );
 }
