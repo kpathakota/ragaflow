@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { Track, Ragam, Scenario } from "@/lib/types";
 import { scenarioMap } from "@/components/scenario-config";
@@ -41,6 +42,7 @@ export function SessionPlayer({
   const accent = config.accent;
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
+  const router = useRouter();
 
   const [duration, setDurationRaw] = useState(() => initialDuration ?? getLastDuration() ?? 25);
   const setDuration = useCallback((d: number) => {
@@ -55,13 +57,15 @@ export function SessionPlayer({
   const elapsedBeforePauseRef = useRef<number>(0);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
-  const [noteExpanded, setNoteExpanded] = useState(false);
+  const [noteExpanded, setNoteExpanded] = useState(true);
   const [customDuration, setCustomDuration] = useState<number | null>(() => {
     const init = initialDuration ?? getLastDuration();
     return init && !FIXED_DURATIONS.includes(init) ? init : null;
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customInputValue, setCustomInputValue] = useState("");
+  const [isFullTrack, setIsFullTrack] = useState(false);
+  const fullTrackMinutes = Math.round(track.duration / 60);
 
   useEffect(() => {
     if (!user) return;
@@ -80,16 +84,20 @@ export function SessionPlayer({
   }, []);
 
   const startSessionHandler = useCallback(async () => {
-    setRemaining(duration * 60);
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
+    setRemaining(totalSeconds);
     startedAtRef.current = Date.now();
     elapsedBeforePauseRef.current = 0;
     setSession("running");
-    audioRef.current?.play();
+    if (audioRef.current) {
+      audioRef.current.loop = !isFullTrack;
+      audioRef.current.play();
+    }
     if (user) {
-      const id = await startListeningSession(track.id, scenario, duration * 60);
+      const id = await startListeningSession(track.id, scenario, totalSeconds);
       if (id) setSessionId(id);
     }
-  }, [duration, user, track.id, scenario]);
+  }, [duration, isFullTrack, track.duration, user, track.id, scenario]);
 
   const pause = useCallback(() => {
     elapsedBeforePauseRef.current += (Date.now() - startedAtRef.current) / 1000;
@@ -105,6 +113,7 @@ export function SessionPlayer({
 
   const stop = useCallback(async () => {
     setSession("idle");
+    setIsFullTrack(false);
     const elapsed = Math.round(
       elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000
     );
@@ -123,13 +132,15 @@ export function SessionPlayer({
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
+    pauseAudio();
+    setIsFullTrack(false);
     setShowDefaultPrompt(false);
     setDefaultSet(false);
-  }, []);
+  }, [pauseAudio]);
 
   useEffect(() => {
     if (session !== "running") return;
-    const totalSeconds = duration * 60;
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
     const tick = () => {
       const elapsed = elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000;
       const left = Math.max(0, Math.round(totalSeconds - elapsed));
@@ -139,35 +150,40 @@ export function SessionPlayer({
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [session, duration]);
+  }, [session, duration, isFullTrack, track.duration]);
 
   useEffect(() => {
     if (session === "running" && remaining === 0) {
+      const totalSeconds = isFullTrack ? track.duration : duration * 60;
       setSession("complete");
       pauseAudio();
       if (sessionId) {
-        endListeningSession(sessionId, duration * 60, true);
+        endListeningSession(sessionId, totalSeconds, true);
         setSessionId(null);
       }
       if (user) {
         setShowDefaultPrompt(true);
-        upsertCertificationClient(track.ragam_id, duration * 60);
+        upsertCertificationClient(track.ragam_id, totalSeconds);
       }
     }
-  }, [session, remaining, pauseAudio, sessionId, duration, user, track.ragam_id]);
+  }, [session, remaining, pauseAudio, sessionId, duration, isFullTrack, track.duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      router.push("/auth?reason=favorites");
+      return;
+    }
     const updated = await toggleFavoriteTrackClient(track.id);
     if (updated) setIsFavorite(updated.includes(track.id));
-  }, [user, track.id]);
+  }, [user, track.id, router]);
 
   const handleSetDefault = useCallback(async () => {
     if (!user) return;
-    await setDefaultTrackClient(scenario, track.id, duration * 60);
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
+    await setDefaultTrackClient(scenario, track.id, totalSeconds);
     setDefaultSet(true);
     setShowDefaultPrompt(false);
-  }, [user, scenario, track.id, duration]);
+  }, [user, scenario, track.id, duration, isFullTrack, track.duration]);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
@@ -184,18 +200,16 @@ export function SessionPlayer({
         >
           &larr; Back
         </Link>
-        {user && (
-          <button
-            type="button"
-            onClick={handleToggleFavorite}
-            className={`text-xl transition-colors ${
-              isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"
-            }`}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          >
-            {isFavorite ? "♥" : "♡"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          className={`text-xl transition-colors ${
+            isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"
+          }`}
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          {isFavorite ? "♥" : "♡"}
+        </button>
       </div>
 
       {/* Track title + ragam name + description */}
@@ -217,7 +231,7 @@ export function SessionPlayer({
 
         {/* Artist note — overlays bottom of visual zone */}
         {track.artist_note && session !== "complete" && (
-          <div className="absolute inset-x-0 bottom-0 px-1">
+          <div className="absolute inset-x-0 bottom-0 px-1 pb-4">
             <button
               type="button"
               onClick={() => setNoteExpanded((v) => !v)}
@@ -240,14 +254,14 @@ export function SessionPlayer({
 
         {session === "idle" && (
           <>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {FIXED_DURATIONS.map((d) => (
                 <button
                   key={d}
                   type="button"
-                  onClick={() => { setDuration(d); setShowCustomInput(false); }}
+                  onClick={() => { setDuration(d); setIsFullTrack(false); setShowCustomInput(false); }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    duration === d && !showCustomInput
+                    duration === d && !isFullTrack && !showCustomInput
                       ? `${accent.bg} text-white`
                       : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
@@ -255,16 +269,30 @@ export function SessionPlayer({
                   {d}m
                 </button>
               ))}
+              {track.duration > 0 && (
+                <button
+                  type="button"
+                  onClick={() => { setIsFullTrack(true); setDurationRaw(fullTrackMinutes); setShowCustomInput(false); }}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                    isFullTrack
+                      ? `${accent.bg} text-white`
+                      : "bg-stone-800 text-stone-300 hover:bg-stone-700"
+                  }`}
+                >
+                  Full track
+                </button>
+              )}
               {!showCustomInput ? (
                 <button
                   type="button"
                   onClick={() => {
                     setShowCustomInput(true);
+                    setIsFullTrack(false);
                     setCustomInputValue(customDuration?.toString() ?? "");
                     if (customDuration) setDuration(customDuration);
                   }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    !FIXED_DURATIONS.includes(duration)
+                    !FIXED_DURATIONS.includes(duration) && !isFullTrack
                       ? `${accent.bg} text-white`
                       : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
@@ -314,41 +342,43 @@ export function SessionPlayer({
             >
               ▶
             </button>
+            {/* Invisible spacer matching the reset button height to prevent layout shift */}
+            <span className="invisible text-sm">reset</span>
           </>
         )}
 
         {(session === "running" || session === "paused") && (
           <>
             <span className="text-xs tabular-nums text-stone-600">{display}</span>
-            <div className="relative flex items-center justify-center">
-              {session === "running" ? (
-                <button
-                  type="button"
-                  onClick={pause}
-                  className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
-                >
-                  <span aria-hidden="true" className="flex gap-[3px]">
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={resume}
-                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
-                >
-                  ▶
-                </button>
-              )}
+            {session === "running" ? (
               <button
                 type="button"
-                onClick={stop}
-                className="absolute left-full ml-4 whitespace-nowrap text-sm text-stone-600 transition-colors hover:text-stone-400"
+                onClick={pause}
+                aria-label="Pause session"
+                className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
               >
-                stop
+                <span aria-hidden="true" className="flex gap-[3px]">
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                </span>
               </button>
-            </div>
+            ) : (
+              <button
+                type="button"
+                onClick={resume}
+                aria-label="Resume session"
+                className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
+              >
+                ▶
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={restart}
+              className="text-sm text-stone-600 transition-colors hover:text-stone-400"
+            >
+              reset
+            </button>
           </>
         )}
 
@@ -362,7 +392,7 @@ export function SessionPlayer({
             {/* Session summary */}
             <div>
               <p className={`text-lg font-semibold ${accent.text}`}>
-                {duration} minutes of {config.label.toLowerCase()}
+                {isFullTrack ? fullTrackMinutes : duration} minutes of {config.label.toLowerCase()}
               </p>
               <p className="mt-1 text-sm text-stone-500">
                 {track.title ?? ragam?.name}

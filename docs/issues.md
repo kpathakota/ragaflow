@@ -2,6 +2,13 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-04-12
+
+- The artist note reads "From the session" and doesn't feel clickable. Have it be expanded to begin with and with larger padding between that and the buttons. 
+- Can we have one option be the "full-track" which would just play the thing from beginning to end on the session screen. That would effectively pre-set the length to the entire length of the track. 
+- Instead of stop, it should be called reset and be under the play button in the session screen. 
+- 
+
 ## 2026-04-09
 
 ### Issue — Subscribe button has no visible hover state (low priority)
