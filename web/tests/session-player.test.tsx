@@ -245,13 +245,16 @@ describe("SessionPlayer", () => {
     expect(screen.getByText("reset")).toBeInTheDocument();
   });
 
-  it("allows switching duration before starting", () => {
+  it("allows switching duration before starting", async () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
     fireEvent.click(screen.getByText("45m"));
-    // Duration should be selected (we check it starts a 45-min session)
-    expect(screen.getByText("45m")).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    // Verify the session actually uses 45 minutes
+    expect(screen.getByText("45:00")).toBeInTheDocument();
   });
 
   it("uses initialDuration prop when provided", async () => {
@@ -363,5 +366,162 @@ describe("SessionPlayer full-track mode", () => {
     });
     const audio = document.querySelector("audio");
     expect(audio?.loop).toBe(true);
+  });
+});
+
+describe("SessionPlayer reset behavior", () => {
+  it("reset pauses audio and returns to idle", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    // Start session
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByText("reset")).toBeInTheDocument();
+
+    // Click reset
+    await act(async () => {
+      fireEvent.click(screen.getByText("reset"));
+    });
+
+    // Should be back to idle — play button and duration pills visible
+    expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
+    expect(screen.getByText("▶")).toBeInTheDocument();
+    expect(screen.getByText("25m")).toBeInTheDocument();
+    expect(screen.getByText("45m")).toBeInTheDocument();
+  });
+
+  it("reset clears isFullTrack so next play uses timed duration", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    // Select full track and start
+    fireEvent.click(screen.getByText("Full track"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    // Verify we're in full-track mode (45:00 = 2700s)
+    expect(screen.getByText("45:00")).toBeInTheDocument();
+
+    // Reset
+    await act(async () => {
+      fireEvent.click(screen.getByText("reset"));
+    });
+
+    // Select 25m explicitly and start again — should use timed duration, not full track
+    fireEvent.click(screen.getByText("25m"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByText("25:00")).toBeInTheDocument();
+  });
+
+  it("reset does not call endListeningSession", async () => {
+    const { endListeningSession } = await import("@/lib/sessions");
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: "user-123", email: "test@example.com" } as any,
+      loading: false,
+      signOut: vi.fn(),
+    });
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    vi.mocked(endListeningSession).mockClear();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("reset"));
+    });
+
+    expect(endListeningSession).not.toHaveBeenCalled();
+  });
+
+  it("reset from paused state returns to idle", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    // Start then pause
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Pause session"));
+    });
+    expect(screen.getByLabelText("Resume session")).toBeInTheDocument();
+
+    // Reset from paused state
+    await act(async () => {
+      fireEvent.click(screen.getByText("reset"));
+    });
+
+    // Should be back to idle
+    expect(screen.getByText("▶")).toBeInTheDocument();
+    expect(screen.getByText("25m")).toBeInTheDocument();
+  });
+});
+
+describe("SessionPlayer aria-labels", () => {
+  it("pause button has aria-label 'Pause session'", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByLabelText("Pause session")).toBeInTheDocument();
+  });
+
+  it("resume button has aria-label 'Resume session'", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Pause session"));
+    });
+    expect(screen.getByLabelText("Resume session")).toBeInTheDocument();
+  });
+});
+
+describe("SessionPlayer full-track completion", () => {
+  beforeEach(() => {
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: "user-123", email: "test@example.com" } as any,
+      loading: false,
+      signOut: vi.fn(),
+    });
+  });
+
+  it("full-track mode starts timer at track duration, not fixed duration", async () => {
+    // Use a track with non-round duration to distinguish full-track vs timed
+    const oddTrack = { ...mockTrack, duration: 1830 }; // 30.5 min → rounds to 31
+    render(
+      <SessionPlayer track={oddTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("Full track"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+
+    // Full track uses track.duration (1830s = 30:30), not rounded minutes * 60
+    expect(screen.getByText("30:30")).toBeInTheDocument();
+  });
+
+  it("timed mode starts timer at selected duration, ignoring track length", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    // Default 25m selected, start without clicking Full track
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+
+    // Should show 25:00 (25 * 60 = 1500s), not 45:00 (track.duration = 2700s)
+    expect(screen.getByText("25:00")).toBeInTheDocument();
   });
 });
