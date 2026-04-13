@@ -144,7 +144,6 @@ export default async function Home() {
             </p>
           </section>
         )}
-
       </main>
     </div>
   );

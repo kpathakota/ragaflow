@@ -87,7 +87,7 @@ export function TrackCard({
         </p>
       </div>
 
-      {(user ? onToggleFavorite : true) && (
+      {(!user || onToggleFavorite) && (
         <button
           type="button"
           onClick={handleFavorite}
