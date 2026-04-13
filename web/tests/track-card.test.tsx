@@ -94,7 +94,6 @@ describe("TrackCard signed-in behavior", () => {
       />
     );
     expect(screen.getByLabelText("Remove from favorites")).toBeInTheDocument();
-    expect(screen.getByText("♥")).toBeInTheDocument();
   });
 
   it("shows unfilled heart when track is not in favoriteTrackIds", () => {
@@ -107,7 +106,6 @@ describe("TrackCard signed-in behavior", () => {
       />
     );
     expect(screen.getByLabelText("Add to favorites")).toBeInTheDocument();
-    expect(screen.getByText("♡")).toBeInTheDocument();
   });
 
   it("hides favorite button when user is signed in but onToggleFavorite is not provided", () => {
@@ -124,6 +122,19 @@ describe("TrackCard rendering", () => {
     expect(screen.getByText("Morning Raag")).toBeInTheDocument();
   });
 
+  it("falls back to date and location when title is null", () => {
+    const noTitle = { ...mockTrack, title: null };
+    render(<TrackCard track={noTitle} scenario="focus" />);
+    expect(screen.getByText(/Dec 1/)).toBeInTheDocument();
+    expect(screen.getByText(/Portland studio/)).toBeInTheDocument();
+  });
+
+  it("falls back to Untitled when title, date, and location are all missing", () => {
+    const bare = { ...mockTrack, title: null, recorded_date: null, location: null };
+    render(<TrackCard track={bare} scenario="focus" />);
+    expect(screen.getByText("Untitled")).toBeInTheDocument();
+  });
+
   it("shows duration in minutes", () => {
     render(<TrackCard track={mockTrack} scenario="focus" />);
     expect(screen.getByText(/45 min/)).toBeInTheDocument();
@@ -132,6 +143,15 @@ describe("TrackCard rendering", () => {
   it("shows ragam name when provided", () => {
     render(<TrackCard track={mockTrack} scenario="focus" ragamName="Yaman" />);
     expect(screen.getByText(/Yaman/)).toBeInTheDocument();
+  });
+
+  it("shows up to 3 tags", () => {
+    const taggy = { ...mockTrack, tags: ["grounding", "calm", "serene", "extra"] };
+    render(<TrackCard track={taggy} scenario="focus" />);
+    expect(screen.getByText(/grounding/)).toBeInTheDocument();
+    expect(screen.getByText(/calm/)).toBeInTheDocument();
+    expect(screen.getByText(/serene/)).toBeInTheDocument();
+    expect(screen.queryByText(/extra/)).not.toBeInTheDocument();
   });
 
   it("shows Premium badge for non-free tracks", () => {

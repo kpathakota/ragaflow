@@ -1,12 +1,16 @@
 import { describe, it, expect, vi, beforeEach } from "vitest";
-import { render, screen, fireEvent } from "@testing-library/react";
+import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { AuthForm } from "@/app/auth/auth-form";
+import { createClient } from "@/lib/supabase/client";
+
+const mockSignIn = vi.fn().mockResolvedValue({ error: null });
+const mockSignUp = vi.fn().mockResolvedValue({ error: null });
 
 vi.mock("@/lib/supabase/client", () => ({
   createClient: vi.fn(() => ({
     auth: {
-      signInWithPassword: vi.fn().mockResolvedValue({ error: null }),
-      signUp: vi.fn().mockResolvedValue({ error: null }),
+      signInWithPassword: mockSignIn,
+      signUp: mockSignUp,
     },
   })),
 }));
@@ -28,6 +32,8 @@ vi.mock("next/navigation", () => ({
 beforeEach(() => {
   vi.clearAllMocks();
   mockSearchParams = new URLSearchParams();
+  mockSignIn.mockResolvedValue({ error: null });
+  mockSignUp.mockResolvedValue({ error: null });
 });
 
 describe("AuthForm default mode", () => {
@@ -101,13 +107,103 @@ describe("AuthForm toggle", () => {
     ).not.toBeInTheDocument();
   });
 
-  it("clears error message when toggling modes", () => {
+  it("clears error message when toggling modes", async () => {
+    mockSignIn.mockResolvedValue({ error: { message: "Invalid credentials" } });
     render(<AuthForm />);
-    // Toggle to sign-up — any previous error should be cleared
-    // (We can't easily trigger an error without submitting, so we verify the toggle link exists)
-    const toggleBtn = screen.getByText("Need an account? Sign up");
-    fireEvent.click(toggleBtn);
-    expect(screen.queryByRole("alert")).not.toBeInTheDocument();
+
+    // Fill form and submit to trigger an error
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "test@test.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "password123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Invalid credentials")).toBeInTheDocument();
+    });
+
+    // Toggle to sign-up — error should be cleared
+    fireEvent.click(screen.getByText(/Need an account/));
+    expect(screen.queryByText("Invalid credentials")).not.toBeInTheDocument();
+  });
+});
+
+describe("AuthForm submission", () => {
+  it("calls signInWithPassword on sign-in submit", async () => {
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "secret123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(mockSignIn).toHaveBeenCalledWith({
+        email: "user@example.com",
+        password: "secret123",
+      });
+    });
+  });
+
+  it("redirects to home on successful sign-in", async () => {
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "user@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "secret123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(mockReplace).toHaveBeenCalledWith("/");
+    });
+  });
+
+  it("displays error on failed sign-in", async () => {
+    mockSignIn.mockResolvedValue({ error: { message: "Invalid login credentials" } });
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "bad@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "wrong" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign in" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Invalid login credentials")).toBeInTheDocument();
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("calls signUp on sign-up submit", async () => {
+    mockSearchParams = new URLSearchParams("reason=favorites");
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "new@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "newpass123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign up" }));
+
+    await waitFor(() => {
+      expect(mockSignUp).toHaveBeenCalledWith({
+        email: "new@example.com",
+        password: "newpass123",
+        options: { emailRedirectTo: expect.stringContaining("/auth/callback") },
+      });
+    });
+  });
+
+  it("shows confirmation message on successful sign-up", async () => {
+    mockSearchParams = new URLSearchParams("reason=favorites");
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "new@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "newpass123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign up" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("Check your email for a confirmation link.")).toBeInTheDocument();
+    });
+  });
+
+  it("displays error on failed sign-up", async () => {
+    mockSignUp.mockResolvedValue({ error: { message: "User already registered" } });
+    mockSearchParams = new URLSearchParams("reason=favorites");
+    render(<AuthForm />);
+    fireEvent.change(screen.getByPlaceholderText("Email"), { target: { value: "exists@example.com" } });
+    fireEvent.change(screen.getByPlaceholderText("Password"), { target: { value: "pass123" } });
+    fireEvent.submit(screen.getByRole("button", { name: "Sign up" }));
+
+    await waitFor(() => {
+      expect(screen.getByText("User already registered")).toBeInTheDocument();
+    });
   });
 });
 

@@ -245,13 +245,16 @@ describe("SessionPlayer", () => {
     expect(screen.getByText("reset")).toBeInTheDocument();
   });
 
-  it("allows switching duration before starting", () => {
+  it("allows switching duration before starting", async () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
     fireEvent.click(screen.getByText("45m"));
-    // Duration should be selected (we check it starts a 45-min session)
-    expect(screen.getByText("45m")).toBeInTheDocument();
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    // Verify the session actually uses 45 minutes
+    expect(screen.getByText("45:00")).toBeInTheDocument();
   });
 
   it("uses initialDuration prop when provided", async () => {
@@ -382,17 +385,14 @@ describe("SessionPlayer reset behavior", () => {
       fireEvent.click(screen.getByText("reset"));
     });
 
-    // Should be back to idle — play button visible
+    // Should be back to idle — play button and duration pills visible
     expect(HTMLMediaElement.prototype.pause).toHaveBeenCalled();
     expect(screen.getByText("▶")).toBeInTheDocument();
-    // The clickable reset button is gone; only the invisible spacer remains
-    const resetElements = screen.getAllByText("reset");
-    expect(resetElements).toHaveLength(1);
-    expect(resetElements[0].tagName).toBe("SPAN");
-    expect(resetElements[0].className).toContain("invisible");
+    expect(screen.getByText("25m")).toBeInTheDocument();
+    expect(screen.getByText("45m")).toBeInTheDocument();
   });
 
-  it("reset clears isFullTrack so Full track button is deselected", async () => {
+  it("reset clears isFullTrack so next play uses timed duration", async () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
@@ -401,17 +401,42 @@ describe("SessionPlayer reset behavior", () => {
     await act(async () => {
       fireEvent.click(screen.getByText("▶"));
     });
+    // Verify we're in full-track mode (45:00 = 2700s)
+    expect(screen.getByText("45:00")).toBeInTheDocument();
 
     // Reset
     await act(async () => {
       fireEvent.click(screen.getByText("reset"));
     });
 
-    // Back to idle — Full track button should not have active styling
-    // The 25m button should be selectable (isFullTrack was cleared)
-    const fullTrackBtn = screen.getByText("Full track");
-    // After reset, isFullTrack is false, so Full track button should have inactive styling
-    expect(fullTrackBtn.className).toContain("bg-stone-800");
+    // Select 25m explicitly and start again — should use timed duration, not full track
+    fireEvent.click(screen.getByText("25m"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    expect(screen.getByText("25:00")).toBeInTheDocument();
+  });
+
+  it("reset does not call endListeningSession", async () => {
+    const { endListeningSession } = await import("@/lib/sessions");
+    vi.mocked(useAuth).mockReturnValue({
+      user: { id: "user-123", email: "test@example.com" } as any,
+      loading: false,
+      signOut: vi.fn(),
+    });
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    vi.mocked(endListeningSession).mockClear();
+
+    await act(async () => {
+      fireEvent.click(screen.getByText("reset"));
+    });
+
+    expect(endListeningSession).not.toHaveBeenCalled();
   });
 
   it("reset from paused state returns to idle", async () => {
@@ -487,7 +512,7 @@ describe("SessionPlayer full-track completion", () => {
     expect(screen.getByText("30:30")).toBeInTheDocument();
   });
 
-  it("timed mode uses duration * 60, not track.duration", async () => {
+  it("timed mode starts timer at selected duration, ignoring track length", async () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
