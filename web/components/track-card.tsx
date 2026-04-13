@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import type { Track, Scenario } from "@/lib/types";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useCallback, useState } from "react";
@@ -21,6 +22,7 @@ export function TrackCard({
   onToggleFavorite,
 }: TrackCardProps) {
   const { user } = useAuth();
+  const router = useRouter();
   const [animating, setAnimating] = useState(false);
   const isFavorite = favoriteTrackIds.includes(track.id);
 
@@ -28,13 +30,17 @@ export function TrackCard({
     (e: React.MouseEvent) => {
       e.preventDefault();
       e.stopPropagation();
+      if (!user) {
+        router.push("/auth?reason=favorites");
+        return;
+      }
       if (onToggleFavorite) {
         setAnimating(true);
         onToggleFavorite(track.id);
         setTimeout(() => setAnimating(false), 200);
       }
     },
-    [onToggleFavorite, track.id]
+    [onToggleFavorite, track.id, user, router]
   );
 
   const durationMin = Math.round(track.duration / 60);
@@ -81,7 +87,7 @@ export function TrackCard({
         </p>
       </div>
 
-      {user && onToggleFavorite && (
+      {(!user || onToggleFavorite) && (
         <button
           type="button"
           onClick={handleFavorite}

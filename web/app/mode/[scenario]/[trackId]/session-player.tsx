@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useRef, useState, useEffect, useCallback } from "react";
 import type { Track, Ragam, Scenario } from "@/lib/types";
 import { scenarioMap } from "@/components/scenario-config";
@@ -41,6 +42,7 @@ export function SessionPlayer({
   const accent = config.accent;
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
+  const router = useRouter();
 
   const [duration, setDurationRaw] = useState(() => initialDuration ?? getLastDuration() ?? 25);
   const setDuration = useCallback((d: number) => {
@@ -167,10 +169,13 @@ export function SessionPlayer({
   }, [session, remaining, pauseAudio, sessionId, duration, isFullTrack, track.duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
-    if (!user) return;
+    if (!user) {
+      router.push("/auth?reason=favorites");
+      return;
+    }
     const updated = await toggleFavoriteTrackClient(track.id);
     if (updated) setIsFavorite(updated.includes(track.id));
-  }, [user, track.id]);
+  }, [user, track.id, router]);
 
   const handleSetDefault = useCallback(async () => {
     if (!user) return;
@@ -195,18 +200,16 @@ export function SessionPlayer({
         >
           &larr; Back
         </Link>
-        {user && (
-          <button
-            type="button"
-            onClick={handleToggleFavorite}
-            className={`text-xl transition-colors ${
-              isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"
-            }`}
-            aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
-          >
-            {isFavorite ? "♥" : "♡"}
-          </button>
-        )}
+        <button
+          type="button"
+          onClick={handleToggleFavorite}
+          className={`text-xl transition-colors ${
+            isFavorite ? "text-red-400" : "text-stone-600 hover:text-stone-400"
+          }`}
+          aria-label={isFavorite ? "Remove from favorites" : "Add to favorites"}
+        >
+          {isFavorite ? "♥" : "♡"}
+        </button>
       </div>
 
       {/* Track title + ragam name + description */}

@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { AuthForm } from "./auth-form";
@@ -21,5 +22,5 @@ export default async function AuthPage() {
     redirect("/");
   }
 
-  return <AuthForm />;
+  return <Suspense><AuthForm /></Suspense>;
 }

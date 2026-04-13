@@ -45,6 +45,13 @@ vi.mock("next/link", () => ({
   ),
 }));
 
+// Mock next/navigation
+const mockPush = vi.fn();
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: mockPush, replace: vi.fn(), back: vi.fn() }),
+  useSearchParams: () => new URLSearchParams(),
+}));
+
 // Mock HTMLAudioElement
 beforeEach(() => {
   vi.clearAllMocks();
@@ -165,11 +172,14 @@ describe("SessionPlayer", () => {
     expect(backLink).toHaveAttribute("href", "/mode/focus");
   });
 
-  it("does not show favorite button when user is not signed in", () => {
+  it("shows favorite button for guest and redirects to auth on click", () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
-    expect(screen.queryByLabelText("Add to favorites")).not.toBeInTheDocument();
+    const btn = screen.getByLabelText("Add to favorites");
+    expect(btn).toBeInTheDocument();
+    fireEvent.click(btn);
+    expect(mockPush).toHaveBeenCalledWith("/auth?reason=favorites");
   });
 
   it("shows artist note toggle when track has artist_note", () => {
