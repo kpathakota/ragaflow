@@ -11,6 +11,7 @@ import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 
 const FIXED_DURATIONS = [25, 45];
+const FULL_TRACK = "full" as const;
 const LAST_DURATION_KEY = "ragaflow:lastDuration";
 
 function getLastDuration(): number | null {
@@ -62,6 +63,8 @@ export function SessionPlayer({
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customInputValue, setCustomInputValue] = useState("");
+  const [isFullTrack, setIsFullTrack] = useState(false);
+  const fullTrackMinutes = Math.ceil(track.duration / 60);
 
   useEffect(() => {
     if (!user) return;
@@ -80,16 +83,20 @@ export function SessionPlayer({
   }, []);
 
   const startSessionHandler = useCallback(async () => {
-    setRemaining(duration * 60);
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
+    setRemaining(totalSeconds);
     startedAtRef.current = Date.now();
     elapsedBeforePauseRef.current = 0;
     setSession("running");
-    audioRef.current?.play();
+    if (audioRef.current) {
+      audioRef.current.loop = !isFullTrack;
+      audioRef.current.play();
+    }
     if (user) {
-      const id = await startListeningSession(track.id, scenario, duration * 60);
+      const id = await startListeningSession(track.id, scenario, totalSeconds);
       if (id) setSessionId(id);
     }
-  }, [duration, user, track.id, scenario]);
+  }, [duration, isFullTrack, track.duration, user, track.id, scenario]);
 
   const pause = useCallback(() => {
     elapsedBeforePauseRef.current += (Date.now() - startedAtRef.current) / 1000;
@@ -123,13 +130,14 @@ export function SessionPlayer({
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
+    setIsFullTrack(false);
     setShowDefaultPrompt(false);
     setDefaultSet(false);
   }, []);
 
   useEffect(() => {
     if (session !== "running") return;
-    const totalSeconds = duration * 60;
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
     const tick = () => {
       const elapsed = elapsedBeforePauseRef.current + (Date.now() - startedAtRef.current) / 1000;
       const left = Math.max(0, Math.round(totalSeconds - elapsed));
@@ -139,22 +147,23 @@ export function SessionPlayer({
     tick();
     const id = setInterval(tick, 1000);
     return () => clearInterval(id);
-  }, [session, duration]);
+  }, [session, duration, isFullTrack, track.duration]);
 
   useEffect(() => {
     if (session === "running" && remaining === 0) {
+      const totalSeconds = isFullTrack ? track.duration : duration * 60;
       setSession("complete");
       pauseAudio();
       if (sessionId) {
-        endListeningSession(sessionId, duration * 60, true);
+        endListeningSession(sessionId, totalSeconds, true);
         setSessionId(null);
       }
       if (user) {
         setShowDefaultPrompt(true);
-        upsertCertificationClient(track.ragam_id, duration * 60);
+        upsertCertificationClient(track.ragam_id, totalSeconds);
       }
     }
-  }, [session, remaining, pauseAudio, sessionId, duration, user, track.ragam_id]);
+  }, [session, remaining, pauseAudio, sessionId, duration, isFullTrack, track.duration, user, track.ragam_id]);
 
   const handleToggleFavorite = useCallback(async () => {
     if (!user) return;
@@ -164,10 +173,11 @@ export function SessionPlayer({
 
   const handleSetDefault = useCallback(async () => {
     if (!user) return;
-    await setDefaultTrackClient(scenario, track.id, duration * 60);
+    const totalSeconds = isFullTrack ? track.duration : duration * 60;
+    await setDefaultTrackClient(scenario, track.id, totalSeconds);
     setDefaultSet(true);
     setShowDefaultPrompt(false);
-  }, [user, scenario, track.id, duration]);
+  }, [user, scenario, track.id, duration, isFullTrack, track.duration]);
 
   const mins = Math.floor(remaining / 60);
   const secs = remaining % 60;
@@ -240,14 +250,14 @@ export function SessionPlayer({
 
         {session === "idle" && (
           <>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center justify-center gap-2">
               {FIXED_DURATIONS.map((d) => (
                 <button
                   key={d}
                   type="button"
-                  onClick={() => { setDuration(d); setShowCustomInput(false); }}
+                  onClick={() => { setDuration(d); setIsFullTrack(false); setShowCustomInput(false); }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    duration === d && !showCustomInput
+                    duration === d && !isFullTrack && !showCustomInput
                       ? `${accent.bg} text-white`
                       : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
@@ -255,16 +265,28 @@ export function SessionPlayer({
                   {d}m
                 </button>
               ))}
+              <button
+                type="button"
+                onClick={() => { setIsFullTrack(true); setDuration(fullTrackMinutes); setShowCustomInput(false); }}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+                  isFullTrack
+                    ? `${accent.bg} text-white`
+                    : "bg-stone-800 text-stone-300 hover:bg-stone-700"
+                }`}
+              >
+                Full track
+              </button>
               {!showCustomInput ? (
                 <button
                   type="button"
                   onClick={() => {
                     setShowCustomInput(true);
+                    setIsFullTrack(false);
                     setCustomInputValue(customDuration?.toString() ?? "");
                     if (customDuration) setDuration(customDuration);
                   }}
                   className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                    !FIXED_DURATIONS.includes(duration)
+                    !FIXED_DURATIONS.includes(duration) && !isFullTrack
                       ? `${accent.bg} text-white`
                       : "bg-stone-800 text-stone-300 hover:bg-stone-700"
                   }`}
@@ -362,7 +384,7 @@ export function SessionPlayer({
             {/* Session summary */}
             <div>
               <p className={`text-lg font-semibold ${accent.text}`}>
-                {duration} minutes of {config.label.toLowerCase()}
+                {isFullTrack ? fullTrackMinutes : duration} minutes of {config.label.toLowerCase()}
               </p>
               <p className="mt-1 text-sm text-stone-500">
                 {track.title ?? ragam?.name}
@@ -417,7 +439,7 @@ export function SessionPlayer({
 
       </div>
 
-      <audio ref={audioRef} src={track.audio_url} loop preload="auto" />
+      <audio ref={audioRef} src={track.audio_url} loop={!isFullTrack} preload="auto" />
     </div>
   );
 }
