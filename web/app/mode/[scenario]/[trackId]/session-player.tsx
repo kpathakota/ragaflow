@@ -320,35 +320,33 @@ export function SessionPlayer({
         {(session === "running" || session === "paused") && (
           <>
             <span className="text-xs tabular-nums text-stone-600">{display}</span>
-            <div className="relative flex items-center justify-center">
-              {session === "running" ? (
-                <button
-                  type="button"
-                  onClick={pause}
-                  className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
-                >
-                  <span aria-hidden="true" className="flex gap-[3px]">
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={resume}
-                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
-                >
-                  ▶
-                </button>
-              )}
+            {session === "running" ? (
               <button
                 type="button"
-                onClick={stop}
-                className="absolute left-full ml-4 whitespace-nowrap text-sm text-stone-600 transition-colors hover:text-stone-400"
+                onClick={pause}
+                className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
               >
-                stop
+                <span aria-hidden="true" className="flex gap-[3px]">
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                </span>
               </button>
-            </div>
+            ) : (
+              <button
+                type="button"
+                onClick={resume}
+                className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
+              >
+                ▶
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={stop}
+              className="text-sm text-stone-600 transition-colors hover:text-stone-400"
+            >
+              reset
+            </button>
           </>
         )}
 

@@ -225,14 +225,14 @@ describe("SessionPlayer", () => {
     expect(screen.getByText("25:00")).toBeInTheDocument();
   });
 
-  it("shows stop button when session is running", async () => {
+  it("shows reset button when session is running", async () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
     await act(async () => {
       fireEvent.click(screen.getByText("▶"));
     });
-    expect(screen.getByText("stop")).toBeInTheDocument();
+    expect(screen.getByText("reset")).toBeInTheDocument();
   });
 
   it("allows switching duration before starting", () => {
