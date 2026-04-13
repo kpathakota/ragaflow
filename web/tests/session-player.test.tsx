@@ -191,14 +191,17 @@ describe("SessionPlayer", () => {
     expect(screen.queryByText("From the session")).not.toBeInTheDocument();
   });
 
-  it("expands artist note on click", () => {
+  it("shows artist note expanded by default and collapses on click", () => {
     render(
       <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
     );
-    fireEvent.click(screen.getByText("From the session"));
     expect(
       screen.getByText("Recorded at dawn, birds singing in the background")
     ).toBeInTheDocument();
+    fireEvent.click(screen.getByText("From the session"));
+    expect(
+      screen.queryByText("Recorded at dawn, birds singing in the background")
+    ).not.toBeInTheDocument();
   });
 
   it("starts audio playback when play is clicked", async () => {

@@ -55,7 +55,7 @@ export function SessionPlayer({
   const elapsedBeforePauseRef = useRef<number>(0);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
-  const [noteExpanded, setNoteExpanded] = useState(false);
+  const [noteExpanded, setNoteExpanded] = useState(true);
   const [customDuration, setCustomDuration] = useState<number | null>(() => {
     const init = initialDuration ?? getLastDuration();
     return init && !FIXED_DURATIONS.includes(init) ? init : null;
@@ -217,7 +217,7 @@ export function SessionPlayer({
 
         {/* Artist note — overlays bottom of visual zone */}
         {track.artist_note && session !== "complete" && (
-          <div className="absolute inset-x-0 bottom-0 px-1">
+          <div className="absolute inset-x-0 bottom-0 px-1 pb-4">
             <button
               type="button"
               onClick={() => setNoteExpanded((v) => !v)}
