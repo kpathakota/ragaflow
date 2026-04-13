@@ -55,7 +55,7 @@ export function SessionPlayer({
   const elapsedBeforePauseRef = useRef<number>(0);
   const [showDefaultPrompt, setShowDefaultPrompt] = useState(false);
   const [defaultSet, setDefaultSet] = useState(false);
-  const [noteExpanded, setNoteExpanded] = useState(false);
+  const [noteExpanded, setNoteExpanded] = useState(true);
   const [customDuration, setCustomDuration] = useState<number | null>(() => {
     const init = initialDuration ?? getLastDuration();
     return init && !FIXED_DURATIONS.includes(init) ? init : null;
@@ -130,10 +130,11 @@ export function SessionPlayer({
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
+    pauseAudio();
     setIsFullTrack(false);
     setShowDefaultPrompt(false);
     setDefaultSet(false);
-  }, []);
+  }, [pauseAudio]);
 
   useEffect(() => {
     if (session !== "running") return;
@@ -227,7 +228,7 @@ export function SessionPlayer({
 
         {/* Artist note — overlays bottom of visual zone */}
         {track.artist_note && session !== "complete" && (
-          <div className="absolute inset-x-0 bottom-0 px-1">
+          <div className="absolute inset-x-0 bottom-0 px-1 pb-4">
             <button
               type="button"
               onClick={() => setNoteExpanded((v) => !v)}
@@ -338,41 +339,43 @@ export function SessionPlayer({
             >
               ▶
             </button>
+            {/* Invisible spacer matching the reset button height to prevent layout shift */}
+            <span className="invisible text-sm">reset</span>
           </>
         )}
 
         {(session === "running" || session === "paused") && (
           <>
             <span className="text-xs tabular-nums text-stone-600">{display}</span>
-            <div className="relative flex items-center justify-center">
-              {session === "running" ? (
-                <button
-                  type="button"
-                  onClick={pause}
-                  className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
-                >
-                  <span aria-hidden="true" className="flex gap-[3px]">
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                  </span>
-                </button>
-              ) : (
-                <button
-                  type="button"
-                  onClick={resume}
-                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
-                >
-                  ▶
-                </button>
-              )}
+            {session === "running" ? (
               <button
                 type="button"
-                onClick={stop}
-                className="absolute left-full ml-4 whitespace-nowrap text-sm text-stone-600 transition-colors hover:text-stone-400"
+                onClick={pause}
+                aria-label="Pause session"
+                className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
               >
-                stop
+                <span aria-hidden="true" className="flex gap-[3px]">
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                </span>
               </button>
-            </div>
+            ) : (
+              <button
+                type="button"
+                onClick={resume}
+                aria-label="Resume session"
+                className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
+              >
+                ▶
+              </button>
+            )}
+            <button
+              type="button"
+              onClick={restart}
+              className="text-sm text-stone-600 transition-colors hover:text-stone-400"
+            >
+              reset
+            </button>
           </>
         )}
 
