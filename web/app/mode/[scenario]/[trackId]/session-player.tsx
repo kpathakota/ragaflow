@@ -314,6 +314,8 @@ export function SessionPlayer({
             >
               ▶
             </button>
+            {/* Invisible spacer matching the reset button height to prevent layout shift */}
+            <span className="invisible text-sm">reset</span>
           </>
         )}
 
