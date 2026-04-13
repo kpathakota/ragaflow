@@ -290,3 +290,65 @@ describe("SessionPlayer with authenticated user", () => {
     expect(screen.getByText("♡")).toBeInTheDocument();
   });
 });
+
+describe("SessionPlayer full-track mode", () => {
+  it("shows Full track button when track has positive duration", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.getByText("Full track")).toBeInTheDocument();
+  });
+
+  it("hides Full track button when track duration is 0", () => {
+    const zeroTrack = { ...mockTrack, duration: 0 };
+    render(
+      <SessionPlayer track={zeroTrack} ragam={mockRagam} scenario="focus" />
+    );
+    expect(screen.queryByText("Full track")).not.toBeInTheDocument();
+  });
+
+  it("sets timer to track duration when Full track is selected and play is clicked", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("Full track"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    // mockTrack.duration = 2700s = 45:00
+    expect(screen.getByText("45:00")).toBeInTheDocument();
+  });
+
+  it("disables audio loop in full-track mode", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("Full track"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    const audio = document.querySelector("audio");
+    expect(audio?.loop).toBe(false);
+  });
+
+  it("does not save full-track selection to localStorage", () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("Full track"));
+    expect(localStorage.getItem("ragaflow:lastDuration")).toBeNull();
+  });
+
+  it("restores loop when switching back to fixed duration after full-track", async () => {
+    render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    fireEvent.click(screen.getByText("Full track"));
+    fireEvent.click(screen.getByText("25m"));
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    const audio = document.querySelector("audio");
+    expect(audio?.loop).toBe(true);
+  });
+});
