@@ -1,13 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
 
 export function AuthForm() {
   const router = useRouter();
-  const [isSignUp, setIsSignUp] = useState(false);
+  const searchParams = useSearchParams();
+  const reason = searchParams.get("reason");
+  const [isSignUp, setIsSignUp] = useState(reason === "favorites");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
@@ -60,6 +62,11 @@ export function AuthForm() {
         <h1 className="mt-4 text-3xl font-semibold tracking-tight">
           {isSignUp ? "Create account" : "Sign in"}
         </h1>
+        {isSignUp && (
+          <p className="mt-2 text-sm text-stone-400">
+            Create a free account to save favorites, set defaults, and track your listening.
+          </p>
+        )}
       </header>
 
       <form onSubmit={handleSubmit} className="flex w-full max-w-sm flex-col gap-4">

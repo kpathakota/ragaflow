@@ -50,7 +50,16 @@ export default async function Home() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-6 py-16">
       <div className="absolute right-6 top-6">
-        <UserBadge />
+        {user ? (
+          <UserBadge />
+        ) : (
+          <Link
+            href="/auth"
+            className="rounded-full bg-stone-800 px-4 py-2 text-sm font-medium text-stone-300 transition-colors hover:bg-stone-700 hover:text-white"
+          >
+            Sign in
+          </Link>
+        )}
       </div>
       <header className="mb-12 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Ragaflow</h1>
@@ -136,15 +145,6 @@ export default async function Home() {
           </section>
         )}
 
-        {/* Auth link */}
-        {!user && (
-          <Link
-            href="/auth"
-            className="mt-4 text-center text-sm text-stone-500 transition-colors hover:text-stone-300"
-          >
-            Sign in for favorites &amp; personalization
-          </Link>
-        )}
       </main>
     </div>
   );
