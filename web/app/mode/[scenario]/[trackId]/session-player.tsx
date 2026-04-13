@@ -123,9 +123,10 @@ export function SessionPlayer({
   const restart = useCallback(() => {
     setSession("idle");
     setRemaining(0);
+    pauseAudio();
     setShowDefaultPrompt(false);
     setDefaultSet(false);
-  }, []);
+  }, [pauseAudio]);
 
   useEffect(() => {
     if (session !== "running") return;
@@ -326,6 +327,7 @@ export function SessionPlayer({
               <button
                 type="button"
                 onClick={pause}
+                aria-label="Pause session"
                 className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
               >
                 <span aria-hidden="true" className="flex gap-[3px]">
@@ -337,6 +339,7 @@ export function SessionPlayer({
               <button
                 type="button"
                 onClick={resume}
+                aria-label="Resume session"
                 className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
               >
                 ▶
@@ -344,7 +347,7 @@ export function SessionPlayer({
             )}
             <button
               type="button"
-              onClick={stop}
+              onClick={restart}
               className="text-sm text-stone-600 transition-colors hover:text-stone-400"
             >
               reset
