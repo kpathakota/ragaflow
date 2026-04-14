@@ -8,12 +8,17 @@ final class AudioService {
     private(set) var isPlaying = false
     private(set) var currentTrackId: String?
 
+    /// Called when playback state changes from remote commands (lock screen).
+    /// SessionPlayerView observes this to sync its own state.
+    var onRemotePause: (() -> Void)?
+    var onRemoteResume: (() -> Void)?
+
     private var player: AVQueuePlayer?
     private var looper: AVPlayerLooper?
     private var fadeTimer: Timer?
+    private var audioSessionActive = false
 
     private init() {
-        configureAudioSession()
         configureRemoteCommands()
     }
 
@@ -21,6 +26,7 @@ final class AudioService {
 
     func play(url: URL, trackId: String) {
         stop()
+        activateAudioSession()
 
         let item = AVPlayerItem(url: url)
         let queuePlayer = AVQueuePlayer(items: [item])
@@ -51,31 +57,40 @@ final class AudioService {
         isPlaying = false
         currentTrackId = nil
         clearNowPlaying()
+        deactivateAudioSession()
     }
 
     // MARK: - Volume fade (sleep scenario)
 
     /// Fades volume from current level to 0 over `duration` seconds.
     func startVolumeFade(duration: TimeInterval) {
-        guard let player, duration > 0 else { return }
+        guard player != nil, duration > 0 else { return }
 
-        let startVolume = player.volume
-        let steps = Int(duration) // 1 step per second
+        let startVolume = player?.volume ?? 1.0
+        let steps = Int(duration)
         guard steps > 0 else { return }
         let decrement = startVolume / Float(steps)
         var remaining = steps
 
         fadeTimer?.invalidate()
-        fadeTimer = Timer.scheduledTimer(withTimeInterval: 1.0, repeats: true) { [weak self] timer in
+
+        // Schedule on main RunLoop explicitly to avoid background thread issues
+        let timer = Timer(timeInterval: 1.0, repeats: true) { [weak self] timer in
+            guard let self, let player = self.player else {
+                timer.invalidate()
+                return
+            }
             remaining -= 1
             if remaining <= 0 {
                 player.volume = 0
                 timer.invalidate()
-                self?.fadeTimer = nil
+                self.fadeTimer = nil
             } else {
                 player.volume = max(0, startVolume - decrement * Float(steps - remaining))
             }
         }
+        RunLoop.main.add(timer, forMode: .common)
+        fadeTimer = timer
     }
 
     func resetVolume() {
@@ -104,13 +119,25 @@ final class AudioService {
 
     // MARK: - Audio session
 
-    private func configureAudioSession() {
+    private func activateAudioSession() {
+        guard !audioSessionActive else { return }
         do {
             let session = AVAudioSession.sharedInstance()
             try session.setCategory(.playback, mode: .default)
             try session.setActive(true)
+            audioSessionActive = true
         } catch {
-            // Audio session config failed — playback may not work in background
+            // Audio session activation failed — background playback may not work
+        }
+    }
+
+    private func deactivateAudioSession() {
+        guard audioSessionActive else { return }
+        do {
+            try AVAudioSession.sharedInstance().setActive(false, options: .notifyOthersOnDeactivation)
+            audioSessionActive = false
+        } catch {
+            // Deactivation failed — other apps' audio may not resume
         }
     }
 
@@ -121,17 +148,25 @@ final class AudioService {
 
         center.playCommand.addTarget { [weak self] _ in
             self?.resume()
+            self?.onRemoteResume?()
             return .success
         }
 
         center.pauseCommand.addTarget { [weak self] _ in
             self?.pause()
+            self?.onRemotePause?()
             return .success
         }
 
         center.togglePlayPauseCommand.addTarget { [weak self] _ in
             guard let self else { return .commandFailed }
-            if self.isPlaying { self.pause() } else { self.resume() }
+            if self.isPlaying {
+                self.pause()
+                self.onRemotePause?()
+            } else {
+                self.resume()
+                self.onRemoteResume?()
+            }
             return .success
         }
     }

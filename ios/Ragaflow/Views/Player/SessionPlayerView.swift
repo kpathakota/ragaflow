@@ -23,6 +23,7 @@ struct SessionPlayerView: View {
     @State private var showDefaultPrompt = false
     @State private var defaultSet = false
     @State private var customDuration: Int?
+    @State private var fadeStarted = false
 
     private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
@@ -60,6 +61,24 @@ struct SessionPlayerView: View {
         }
         .task {
             await loadData()
+        }
+        .onAppear {
+            // Sync lock screen remote commands with view state
+            audio.onRemotePause = { [self] in
+                guard sessionState == .running, let startedAt else { return }
+                elapsedBeforePause += Date().timeIntervalSince(startedAt)
+                sessionState = .paused
+            }
+            audio.onRemoteResume = { [self] in
+                guard sessionState == .paused else { return }
+                self.startedAt = Date()
+                sessionState = .running
+                startTimer()
+            }
+        }
+        .onDisappear {
+            audio.onRemotePause = nil
+            audio.onRemoteResume = nil
         }
     }
 
@@ -338,8 +357,9 @@ struct SessionPlayerView: View {
                     elapsed: elapsed
                 )
 
-                // Start volume fade for sleep scenario
-                if scenario == .sleep && Double(left) <= sleepFadeDuration && Double(left) > sleepFadeDuration - 1 {
+                // Start volume fade for sleep scenario (once)
+                if scenario == .sleep && !fadeStarted && Double(left) <= sleepFadeDuration {
+                    fadeStarted = true
                     audio.startVolumeFade(duration: Double(left))
                 }
 
@@ -405,6 +425,7 @@ struct SessionPlayerView: View {
         remaining = 0
         showDefaultPrompt = false
         defaultSet = false
+        fadeStarted = false
         audio.resetVolume()
     }
 

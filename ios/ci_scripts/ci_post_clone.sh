@@ -17,7 +17,10 @@ SUPABASE_URL = ${SUPABASE_URL}
 SUPABASE_PUBLISHABLE_KEY = ${SUPABASE_PUBLISHABLE_KEY}
 EOF
 
-echo "Writing Debug.xcconfig with same values for CI builds..."
+# Note: CI builds use production values for both configs since
+# Xcode Cloud archives are distributed to TestFlight (production).
+# Local debug builds use staging values from manually created Debug.xcconfig.
+echo "Writing Debug.xcconfig for CI builds..."
 cat > "$CONFIG_DIR/Debug.xcconfig" <<EOF
 SUPABASE_URL = ${SUPABASE_URL}
 SUPABASE_PUBLISHABLE_KEY = ${SUPABASE_PUBLISHABLE_KEY}
