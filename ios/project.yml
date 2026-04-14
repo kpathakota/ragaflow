@@ -7,9 +7,12 @@ options:
 
 settings:
   base:
-    INFOPLIST_FILE: Ragaflow/Resources/Info.plist
     ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
     SWIFT_VERSION: "5.0"
+
+configFiles:
+  Debug: Ragaflow/Configuration/Debug.xcconfig
+  Release: Ragaflow/Configuration/Release.xcconfig
 
 configs:
   Debug: debug
@@ -25,16 +28,35 @@ targets:
           - "Configuration/*.xcconfig"
           - "Configuration/*.example"
           - "Resources/Package.swift.reference"
+          - "Resources/Info.plist"
+    info:
+      path: Ragaflow/Resources/Info.plist
+      properties:
+        CFBundleName: Ragaflow
+        CFBundleDisplayName: Ragaflow
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        CFBundlePackageType: APPL
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UIUserInterfaceStyle: Dark
+        UIBackgroundModes:
+          - audio
+        SUPABASE_URL: $(SUPABASE_URL)
+        SUPABASE_PUBLISHABLE_KEY: $(SUPABASE_PUBLISHABLE_KEY)
     settings:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ragaflow.app
         GENERATE_INFOPLIST_FILE: false
-        UIUserInterfaceStyle: Dark
-      configs:
-        Debug:
-          xcconfig: Ragaflow/Configuration/Debug.xcconfig
-        Release:
-          xcconfig: Ragaflow/Configuration/Release.xcconfig
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
     entitlements:
       path: Ragaflow/Ragaflow.entitlements
       properties:

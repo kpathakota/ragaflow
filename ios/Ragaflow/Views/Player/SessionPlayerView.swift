@@ -24,6 +24,11 @@ struct SessionPlayerView: View {
     @State private var defaultSet = false
     @State private var customDuration: Int?
     @State private var fadeStarted = false
+    @State private var isFullTrack = false
+    @State private var showCustomInput = false
+    @State private var customInputText = ""
+
+    @Environment(\.dismiss) private var dismiss
 
     private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
@@ -153,10 +158,49 @@ struct SessionPlayerView: View {
                 // Duration picker
                 HStack(spacing: 8) {
                     ForEach(fixedDurations, id: \.self) { d in
-                        durationPill(d, isSelected: duration == d)
+                        durationPill("\(d)m", isSelected: duration == d && !isFullTrack) {
+                            duration = d
+                            isFullTrack = false
+                            showCustomInput = false
+                        }
                     }
-                    if let custom = customDuration, !fixedDurations.contains(custom) {
-                        durationPill(custom, isSelected: duration == custom)
+                    // Full track pill
+                    if track.duration > 0 {
+                        durationPill("Full track", isSelected: isFullTrack) {
+                            duration = track.duration / 60
+                            isFullTrack = true
+                            showCustomInput = false
+                        }
+                    }
+                    // Custom pill
+                    durationPill(
+                        customDuration != nil && !fixedDurations.contains(customDuration!) ? "\(customDuration!)m" : "...",
+                        isSelected: !isFullTrack && customDuration != nil && duration == customDuration && !fixedDurations.contains(duration)
+                    ) {
+                        showCustomInput.toggle()
+                    }
+                }
+
+                // Custom duration input
+                if showCustomInput {
+                    HStack(spacing: 8) {
+                        TextField("1–120", text: $customInputText)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                        Text("min")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button("Set") {
+                            if let val = Int(customInputText), val >= 1, val <= 120 {
+                                customDuration = val
+                                duration = val
+                                isFullTrack = false
+                                showCustomInput = false
+                            }
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(scenario.accentColor)
                     }
                 }
 
@@ -174,6 +218,11 @@ struct SessionPlayerView: View {
                         }
                 }
 
+                // Invisible spacer to match "reset" text height
+                Text("reset")
+                    .font(.subheadline)
+                    .hidden()
+
             case .running, .paused:
                 // Timer display
                 Text(timerDisplay)
@@ -181,30 +230,28 @@ struct SessionPlayerView: View {
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
 
-                HStack(spacing: 24) {
-                    // Play/Pause
-                    Button {
-                        if sessionState == .running { pause() }
-                        else { resume() }
-                    } label: {
-                        Circle()
-                            .fill(scenario.accentColor)
-                            .frame(width: 64, height: 64)
-                            .overlay {
-                                Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                            }
-                    }
+                // Play/Pause button
+                Button {
+                    if sessionState == .running { pause() }
+                    else { resume() }
+                } label: {
+                    Circle()
+                        .fill(scenario.accentColor)
+                        .frame(width: 64, height: 64)
+                        .overlay {
+                            Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                        }
+                }
 
-                    // Stop
-                    Button {
-                        Task { await stop(track: track) }
-                    } label: {
-                        Text("stop")
-                            .font(.subheadline)
-                            .foregroundStyle(.tertiary)
-                    }
+                // Reset
+                Button {
+                    Task { await stop(track: track) }
+                } label: {
+                    Text("reset")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
                 }
 
             case .complete:
@@ -213,11 +260,9 @@ struct SessionPlayerView: View {
         }
     }
 
-    private func durationPill(_ minutes: Int, isSelected: Bool) -> some View {
-        Button {
-            duration = minutes
-        } label: {
-            Text("\(minutes)m")
+    private func durationPill(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .padding(.horizontal, 16)
@@ -285,6 +330,11 @@ struct SessionPlayerView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(scenario.accentColor)
+
+                Button("Back to list") {
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
             }
         }
     }
@@ -426,6 +476,7 @@ struct SessionPlayerView: View {
         showDefaultPrompt = false
         defaultSet = false
         fadeStarted = false
+        isFullTrack = false
         audio.resetVolume()
     }
 

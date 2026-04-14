@@ -93,10 +93,20 @@ struct HomeView: View {
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
-                NavigationLink {
-                    ProfileView()
-                } label: {
-                    UserBadge()
+                if supabase.currentUser != nil {
+                    NavigationLink {
+                        ProfileView()
+                    } label: {
+                        UserBadge()
+                    }
+                } else {
+                    NavigationLink {
+                        AuthView()
+                    } label: {
+                        Text("Sign in")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                    }
                 }
             }
         }

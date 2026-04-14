@@ -34,8 +34,9 @@
 		15E0989A03D3CEAA59863D64 /* Scenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scenario.swift; sourceTree = "<group>"; };
 		16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ragaflow.entitlements; sourceTree = "<group>"; };
 		26DC56A75637E4572BF38ED6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		44EFE15DB19746626C260B83 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowApp.swift; sourceTree = "<group>"; };
-		4BAEB34B2FE7F94CAF872327 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
 		4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
 		5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPlayerView.swift; sourceTree = "<group>"; };
 		5743CEC8E8EBA3D278D7E3DA /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
@@ -135,9 +136,20 @@
 		6C8EC38CF67BD3BDE7C40892 = {
 			isa = PBXGroup;
 			children = (
+				9386B0A09D7E7A652EF44715 /* Configuration */,
 				11613A7A0340A002FAC7A468 /* Ragaflow */,
 				69120638EEAE6DE2AF2AEBFC /* Products */,
 			);
+			sourceTree = "<group>";
+		};
+		9386B0A09D7E7A652EF44715 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */,
+				44EFE15DB19746626C260B83 /* Release.xcconfig */,
+			);
+			name = Configuration;
+			path = Ragaflow/Configuration;
 			sourceTree = "<group>";
 		};
 		B0083D73166943BEE40E3BDB /* Views */ = {
@@ -178,7 +190,6 @@
 			isa = PBXGroup;
 			children = (
 				E281ED4D732131448A16A649 /* Assets.xcassets */,
-				4BAEB34B2FE7F94CAF872327 /* Info.plist */,
 			);
 			path = Resources;
 			sourceTree = "<group>";
@@ -308,6 +319,7 @@
 /* Begin XCBuildConfiguration section */
 		36903ABA96C261E15FC3E32D /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -352,7 +364,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
@@ -366,6 +377,7 @@
 		};
 		754B154AE5DB14A03A8CB9CC /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
@@ -379,13 +391,12 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UIUserInterfaceStyle = Dark;
-				xcconfig = Ragaflow/Configuration/Release.xcconfig;
 			};
 			name = Release;
 		};
 		7663612AF4C88155C8CFE3ED /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
@@ -436,7 +447,6 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
@@ -451,6 +461,7 @@
 		};
 		820A978EDF1DA558B06B3B24 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
@@ -464,8 +475,6 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
-				UIUserInterfaceStyle = Dark;
-				xcconfig = Ragaflow/Configuration/Debug.xcconfig;
 			};
 			name = Debug;
 		};
