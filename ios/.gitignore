@@ -1,6 +1,4 @@
-# Xcode
-*.xcodeproj/
-*.xcworkspace/
+# Xcode (keep .xcodeproj committed for Xcode Cloud)
 xcuserdata/
 DerivedData/
 build/

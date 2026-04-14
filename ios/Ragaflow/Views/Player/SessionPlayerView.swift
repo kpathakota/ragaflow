@@ -24,7 +24,10 @@ struct SessionPlayerView: View {
     @State private var defaultSet = false
     @State private var customDuration: Int?
 
+    private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
+    /// Seconds before session end to begin sleep volume fade
+    private let sleepFadeDuration: TimeInterval = 120
 
     enum SessionState {
         case idle, running, paused, complete
@@ -301,7 +304,9 @@ struct SessionPlayerView: View {
         elapsedBeforePause = 0
         sessionState = .running
 
-        // TODO M2: Start audio playback here
+        if let url = URL(string: track.audioUrl) {
+            audio.play(url: url, trackId: track.id)
+        }
 
         if supabase.currentUser != nil {
             sessionId = try? await supabase.startListeningSession(
@@ -325,6 +330,19 @@ struct SessionPlayerView: View {
                 let left = max(0, Int(Double(duration * 60) - elapsed))
                 remaining = left
 
+                // Update lock screen / Control Center
+                let ragamName = ragam?.name ?? track?.displayName ?? "Ragaflow"
+                audio.updateNowPlaying(
+                    title: ragamName,
+                    duration: Double(duration * 60),
+                    elapsed: elapsed
+                )
+
+                // Start volume fade for sleep scenario
+                if scenario == .sleep && Double(left) <= sleepFadeDuration && Double(left) > sleepFadeDuration - 1 {
+                    audio.startVolumeFade(duration: Double(left))
+                }
+
                 if left <= 0 {
                     await complete()
                     break
@@ -337,14 +355,14 @@ struct SessionPlayerView: View {
         guard let startedAt else { return }
         elapsedBeforePause += Date().timeIntervalSince(startedAt)
         sessionState = .paused
-        // TODO M2: Pause audio
+        audio.pause()
     }
 
     private func resume() {
         startedAt = Date()
         sessionState = .running
         startTimer()
-        // TODO M2: Resume audio
+        audio.resume()
     }
 
     private func stop(track: Track) async {
@@ -352,7 +370,7 @@ struct SessionPlayerView: View {
         let elapsed = Int(elapsedBeforePause + Date().timeIntervalSince(startedAt))
         sessionState = .idle
         remaining = 0
-        // TODO M2: Stop audio
+        audio.stop()
 
         if let sessionId {
             try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: elapsed, completed: false)
@@ -367,7 +385,7 @@ struct SessionPlayerView: View {
 
     private func complete() async {
         sessionState = .complete
-        // TODO M2: Stop audio
+        audio.stop()
 
         if let sessionId {
             try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: duration * 60, completed: true)
@@ -387,6 +405,7 @@ struct SessionPlayerView: View {
         remaining = 0
         showDefaultPrompt = false
         defaultSet = false
+        audio.resetVolume()
     }
 
     private func toggleFavorite() async {

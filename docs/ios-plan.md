@@ -2,7 +2,7 @@
 
 ## Overview
 
-Native iOS app built in Swift/SwiftUI, sharing the same Supabase backend as the web app. This is a **separate Xcode project** (separate repo) that talks to the same Supabase tables and R2 audio storage.
+Native iOS app built in Swift/SwiftUI, sharing the same Supabase backend as the web app. Lives in the **`ios/` directory** of the ragaflow monorepo, alongside the web app. Both clients share the same Supabase backend — no shared code between web and iOS, just the same database and API.
 
 Two things change fundamentally from the web app:
 1. **Payments** — Apple requires StoreKit for in-app purchases. Polar.sh is web-only. The iOS app must use native Apple IAP.
@@ -30,7 +30,7 @@ Everything else (auth, data model, audio streaming, favorites, timers, certifica
 ### Apple Developer Program setup
 
 - [x] Enroll in Apple Developer Program ($99/year) if not already enrolled
-- [ ] Create App ID (bundle identifier: `io.ragaflow.app` or similar)
+- [ ] Create App ID (bundle identifier: `com.ragaflow.app`)
 - [ ] Create provisioning profiles (development + distribution)
 - [ ] Enable capabilities: Background Modes (audio), Push Notifications (future)
 - [ ] Set up App Store Connect listing (name, description, screenshots come later)
@@ -51,32 +51,61 @@ xcrun simctl list devices     # Should list available simulators
 security find-identity -v -p codesigning  # Should show dev certificate
 ```
 
-### Project creation
+### Xcode Cloud setup
+
+Xcode Cloud is used for CI/CD — builds on push to `dev`, distributes to TestFlight.
+
+1. In App Store Connect → Xcode Cloud, create a workflow for this repo
+2. Set source path filter to `ios/` (monorepo — only trigger on iOS changes)
+3. Set trigger: push to `dev` branch
+4. Add environment variables (secrets):
+   - `SUPABASE_URL` → production Supabase URL
+   - `SUPABASE_PUBLISHABLE_KEY` → production publishable key
+5. Action: Build → Archive → Distribute to TestFlight (internal testing group)
+6. The `ci_scripts/ci_post_clone.sh` script injects these env vars into xcconfig files at build time
+
+Free tier: 25 compute hours/month (sufficient for alpha).
+
+### Testing
+
+Model tests run via `swift test` (SPM, no Xcode project needed):
+```bash
+cd ios && swift test
+```
+
+Tests cover: model JSON decoding, computed properties (displayName, durationFormatted), tier calculations, countable seconds logic, timer math, volume fade math.
+
+AudioService and views are tested on-device via Simulator/TestFlight.
+
+### Project structure (monorepo)
+
+The iOS app lives at `ios/` in the ragaflow monorepo:
 
 ```
-Ragaflow-iOS/
-├── Ragaflow.xcodeproj
-├── Ragaflow/
-│   ├── App/
-│   │   ├── RagaflowApp.swift          # @main entry point
-│   │   └── ContentView.swift
-│   ├── Models/                        # Mirror of lib/types.ts
-│   ├── Services/                      # Supabase, audio, StoreKit
-│   ├── Views/                         # SwiftUI views by feature
-│   │   ├── Home/
-│   │   ├── Scenarios/
-│   │   ├── Player/
-│   │   ├── Explore/
-│   │   ├── Profile/
-│   │   └── Auth/
-│   ├── Components/                    # Reusable UI components
-│   ├── Extensions/
-│   └── Resources/
-│       ├── Assets.xcassets
-│       └── Info.plist
-├── RagaflowTests/
-├── RagaflowUITests/
-└── Package.swift (or use Xcode SPM)
+ragaflow/
+├── web/              ← Next.js web app
+├── ios/              ← iOS app (this plan)
+│   ├── Ragaflow.xcodeproj
+│   ├── Package.swift             # SPM manifest for model tests (swift test)
+│   ├── ci_scripts/
+│   │   └── ci_post_clone.sh      # Xcode Cloud secret injection
+│   ├── Ragaflow/
+│   │   ├── App/
+│   │   │   ├── RagaflowApp.swift
+│   │   │   └── ContentView.swift
+│   │   ├── Models/               # Mirror of lib/types.ts
+│   │   ├── Services/             # Supabase, audio, StoreKit
+│   │   ├── Views/                # SwiftUI views by feature
+│   │   ├── Components/           # Reusable UI components
+│   │   ├── Configuration/        # xcconfig (gitignored secrets)
+│   │   └── Resources/
+│   │       ├── Assets.xcassets
+│   │       └── Info.plist
+│   └── Tests/
+│       └── RagaflowModelTests/   # SPM unit tests (swift test)
+├── docs/
+├── supabase/
+└── CLAUDE.md
 ```
 
 ### Dependencies (Swift Package Manager)
