@@ -23,8 +23,17 @@ struct SessionPlayerView: View {
     @State private var showDefaultPrompt = false
     @State private var defaultSet = false
     @State private var customDuration: Int?
+    @State private var fadeStarted = false
+    @State private var isFullTrack = false
+    @State private var showCustomInput = false
+    @State private var customInputText = ""
 
+    @Environment(\.dismiss) private var dismiss
+
+    private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
+    /// Seconds before session end to begin sleep volume fade
+    private let sleepFadeDuration: TimeInterval = 120
 
     enum SessionState {
         case idle, running, paused, complete
@@ -57,6 +66,24 @@ struct SessionPlayerView: View {
         }
         .task {
             await loadData()
+        }
+        .onAppear {
+            // Sync lock screen remote commands with view state
+            audio.onRemotePause = { [self] in
+                guard sessionState == .running, let startedAt else { return }
+                elapsedBeforePause += Date().timeIntervalSince(startedAt)
+                sessionState = .paused
+            }
+            audio.onRemoteResume = { [self] in
+                guard sessionState == .paused else { return }
+                self.startedAt = Date()
+                sessionState = .running
+                startTimer()
+            }
+        }
+        .onDisappear {
+            audio.onRemotePause = nil
+            audio.onRemoteResume = nil
         }
     }
 
@@ -131,10 +158,49 @@ struct SessionPlayerView: View {
                 // Duration picker
                 HStack(spacing: 8) {
                     ForEach(fixedDurations, id: \.self) { d in
-                        durationPill(d, isSelected: duration == d)
+                        durationPill("\(d)m", isSelected: duration == d && !isFullTrack) {
+                            duration = d
+                            isFullTrack = false
+                            showCustomInput = false
+                        }
                     }
-                    if let custom = customDuration, !fixedDurations.contains(custom) {
-                        durationPill(custom, isSelected: duration == custom)
+                    // Full track pill
+                    if track.duration > 0 {
+                        durationPill("Full track", isSelected: isFullTrack) {
+                            duration = track.duration / 60
+                            isFullTrack = true
+                            showCustomInput = false
+                        }
+                    }
+                    // Custom pill
+                    durationPill(
+                        customDuration != nil && !fixedDurations.contains(customDuration!) ? "\(customDuration!)m" : "...",
+                        isSelected: !isFullTrack && customDuration != nil && duration == customDuration && !fixedDurations.contains(duration)
+                    ) {
+                        showCustomInput.toggle()
+                    }
+                }
+
+                // Custom duration input
+                if showCustomInput {
+                    HStack(spacing: 8) {
+                        TextField("1–120", text: $customInputText)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: 80)
+                        Text("min")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button("Set") {
+                            if let val = Int(customInputText), val >= 1, val <= 120 {
+                                customDuration = val
+                                duration = val
+                                isFullTrack = false
+                                showCustomInput = false
+                            }
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(scenario.accentColor)
                     }
                 }
 
@@ -152,6 +218,11 @@ struct SessionPlayerView: View {
                         }
                 }
 
+                // Invisible spacer to match "reset" text height
+                Text("reset")
+                    .font(.subheadline)
+                    .hidden()
+
             case .running, .paused:
                 // Timer display
                 Text(timerDisplay)
@@ -159,30 +230,28 @@ struct SessionPlayerView: View {
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
 
-                HStack(spacing: 24) {
-                    // Play/Pause
-                    Button {
-                        if sessionState == .running { pause() }
-                        else { resume() }
-                    } label: {
-                        Circle()
-                            .fill(scenario.accentColor)
-                            .frame(width: 64, height: 64)
-                            .overlay {
-                                Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                            }
-                    }
+                // Play/Pause button
+                Button {
+                    if sessionState == .running { pause() }
+                    else { resume() }
+                } label: {
+                    Circle()
+                        .fill(scenario.accentColor)
+                        .frame(width: 64, height: 64)
+                        .overlay {
+                            Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
+                                .font(.title2)
+                                .foregroundStyle(.white)
+                        }
+                }
 
-                    // Stop
-                    Button {
-                        Task { await stop(track: track) }
-                    } label: {
-                        Text("stop")
-                            .font(.subheadline)
-                            .foregroundStyle(.tertiary)
-                    }
+                // Reset
+                Button {
+                    Task { await stop(track: track) }
+                } label: {
+                    Text("reset")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
                 }
 
             case .complete:
@@ -191,11 +260,9 @@ struct SessionPlayerView: View {
         }
     }
 
-    private func durationPill(_ minutes: Int, isSelected: Bool) -> some View {
-        Button {
-            duration = minutes
-        } label: {
-            Text("\(minutes)m")
+    private func durationPill(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .padding(.horizontal, 16)
@@ -263,6 +330,11 @@ struct SessionPlayerView: View {
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(scenario.accentColor)
+
+                Button("Back to list") {
+                    dismiss()
+                }
+                .buttonStyle(.bordered)
             }
         }
     }
@@ -301,7 +373,9 @@ struct SessionPlayerView: View {
         elapsedBeforePause = 0
         sessionState = .running
 
-        // TODO M2: Start audio playback here
+        if let url = URL(string: track.audioUrl) {
+            audio.play(url: url, trackId: track.id)
+        }
 
         if supabase.currentUser != nil {
             sessionId = try? await supabase.startListeningSession(
@@ -325,6 +399,20 @@ struct SessionPlayerView: View {
                 let left = max(0, Int(Double(duration * 60) - elapsed))
                 remaining = left
 
+                // Update lock screen / Control Center
+                let ragamName = ragam?.name ?? track?.displayName ?? "Ragaflow"
+                audio.updateNowPlaying(
+                    title: ragamName,
+                    duration: Double(duration * 60),
+                    elapsed: elapsed
+                )
+
+                // Start volume fade for sleep scenario (once)
+                if scenario == .sleep && !fadeStarted && Double(left) <= sleepFadeDuration {
+                    fadeStarted = true
+                    audio.startVolumeFade(duration: Double(left))
+                }
+
                 if left <= 0 {
                     await complete()
                     break
@@ -337,14 +425,14 @@ struct SessionPlayerView: View {
         guard let startedAt else { return }
         elapsedBeforePause += Date().timeIntervalSince(startedAt)
         sessionState = .paused
-        // TODO M2: Pause audio
+        audio.pause()
     }
 
     private func resume() {
         startedAt = Date()
         sessionState = .running
         startTimer()
-        // TODO M2: Resume audio
+        audio.resume()
     }
 
     private func stop(track: Track) async {
@@ -352,7 +440,7 @@ struct SessionPlayerView: View {
         let elapsed = Int(elapsedBeforePause + Date().timeIntervalSince(startedAt))
         sessionState = .idle
         remaining = 0
-        // TODO M2: Stop audio
+        audio.stop()
 
         if let sessionId {
             try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: elapsed, completed: false)
@@ -367,7 +455,7 @@ struct SessionPlayerView: View {
 
     private func complete() async {
         sessionState = .complete
-        // TODO M2: Stop audio
+        audio.stop()
 
         if let sessionId {
             try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: duration * 60, completed: true)
@@ -387,6 +475,9 @@ struct SessionPlayerView: View {
         remaining = 0
         showDefaultPrompt = false
         defaultSet = false
+        fadeStarted = false
+        isFullTrack = false
+        audio.resetVolume()
     }
 
     private func toggleFavorite() async {

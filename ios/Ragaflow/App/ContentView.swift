@@ -9,8 +9,6 @@ struct ContentView: View {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
                     .background(Color.black)
-            } else if supabase.currentUser == nil {
-                AuthView()
             } else {
                 MainTabView()
             }

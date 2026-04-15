@@ -1,0 +1,524 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		061DE32159153681129D770B /* AudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F553F2A3FAA2EB99A237D85 /* AudioService.swift */; };
+		3CC2CD850C5685E2CE1C1E3A /* UserBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31E631D3ED8FB54ADFFC744 /* UserBadge.swift */; };
+		4C6D0BFF2B952A24EEB84B67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E281ED4D732131448A16A649 /* Assets.xcassets */; };
+		4F881DB4BA2E1E016EA155E8 /* TrackCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA826FFC2335ABAE273E179 /* TrackCard.swift */; };
+		52747B8BCD8711297560511C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF83213E88EF5298667C21D /* ContentView.swift */; };
+		54D90DD8442AEDA180525228 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26DC56A75637E4572BF38ED6 /* AuthView.swift */; };
+		7AF416BFE0D2D3D53BDD0427 /* Rasika.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFC357E623E6A41EDF2308A /* Rasika.swift */; };
+		A80400460E8848EBA3F2DE9A /* SessionPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */; };
+		B57C95892743755334E44F6F /* RagaflowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */; };
+		B7CB4BC48DC30632E9A4EBF5 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0DDD1A2D8EFDACE46E102DDA /* Supabase */; };
+		BCD4E2CEFF56E52CF0CEA6A9 /* Certification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA469ECB10ACA244F775C6CD /* Certification.swift */; };
+		BE873BFF738B3B194B6B8EFA /* Scenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E0989A03D3CEAA59863D64 /* Scenario.swift */; };
+		C5C74E0C25F736309A049D56 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743CEC8E8EBA3D278D7E3DA /* Track.swift */; };
+		D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966A1852C0B156E908F43DDF /* Ragam.swift */; };
+		D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA77D1F146B22E3A514E3E61 /* ExploreView.swift */; };
+		D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29F8271D78294D42B4E57AF /* ProfileView.swift */; };
+		D9ED2C5370200C3061C4DC40 /* ListeningSession.swift in Sources */ = {isa = PBXBuildFile; fileRef = FB5F841227FE20D91CD25B61 /* ListeningSession.swift */; };
+		E642F3DFC3D3EE0ED50527AA /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2F6EDB47FF81A2A8E50C59 /* HomeView.swift */; };
+		E9AA430C81C6ACDC204926FB /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */; };
+		EFEC4E5E41F1583EC4BA0C77 /* ScenarioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4379B8E57D55C4808164A3C /* ScenarioCard.swift */; };
+		FD095D31A41B791A161E2569 /* TrackListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24971D8ADA94B5CDE50676 /* TrackListView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		15E0989A03D3CEAA59863D64 /* Scenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scenario.swift; sourceTree = "<group>"; };
+		16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ragaflow.entitlements; sourceTree = "<group>"; };
+		26DC56A75637E4572BF38ED6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		44EFE15DB19746626C260B83 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowApp.swift; sourceTree = "<group>"; };
+		4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPlayerView.swift; sourceTree = "<group>"; };
+		5743CEC8E8EBA3D278D7E3DA /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
+		5BF83213E88EF5298667C21D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		5EA826FFC2335ABAE273E179 /* TrackCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCard.swift; sourceTree = "<group>"; };
+		6AFC357E623E6A41EDF2308A /* Rasika.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rasika.swift; sourceTree = "<group>"; };
+		8F2F6EDB47FF81A2A8E50C59 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
+		8F553F2A3FAA2EB99A237D85 /* AudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioService.swift; sourceTree = "<group>"; };
+		966A1852C0B156E908F43DDF /* Ragam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ragam.swift; sourceTree = "<group>"; };
+		A31E631D3ED8FB54ADFFC744 /* UserBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserBadge.swift; sourceTree = "<group>"; };
+		A4379B8E57D55C4808164A3C /* ScenarioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioCard.swift; sourceTree = "<group>"; };
+		AB24971D8ADA94B5CDE50676 /* TrackListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackListView.swift; sourceTree = "<group>"; };
+		C29F8271D78294D42B4E57AF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
+		DA469ECB10ACA244F775C6CD /* Certification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Certification.swift; sourceTree = "<group>"; };
+		E281ED4D732131448A16A649 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		E67C11CB71736E44DA9D4390 /* Ragaflow.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Ragaflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FA77D1F146B22E3A514E3E61 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
+		FB5F841227FE20D91CD25B61 /* ListeningSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningSession.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		526B535919D31B2E84CBD862 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B7CB4BC48DC30632E9A4EBF5 /* Supabase in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0B9C9EB46EC9E09F6ED80679 /* App */ = {
+			isa = PBXGroup;
+			children = (
+				5BF83213E88EF5298667C21D /* ContentView.swift */,
+				4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */,
+			);
+			path = App;
+			sourceTree = "<group>";
+		};
+		11613A7A0340A002FAC7A468 /* Ragaflow */ = {
+			isa = PBXGroup;
+			children = (
+				16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */,
+				0B9C9EB46EC9E09F6ED80679 /* App */,
+				EFEC44BEC73B583F074A17A3 /* Components */,
+				BC6DE9EA88DAD5475951AEF1 /* Models */,
+				CF03BFB97C452863805041F0 /* Resources */,
+				64F0EC6FDD90EA4E2FED33CA /* Services */,
+				B0083D73166943BEE40E3BDB /* Views */,
+			);
+			path = Ragaflow;
+			sourceTree = "<group>";
+		};
+		337E1C9E6E86F5FFAD205B93 /* Explore */ = {
+			isa = PBXGroup;
+			children = (
+				FA77D1F146B22E3A514E3E61 /* ExploreView.swift */,
+			);
+			path = Explore;
+			sourceTree = "<group>";
+		};
+		5C2F9DD882FEF5B46D770465 /* Scenarios */ = {
+			isa = PBXGroup;
+			children = (
+				AB24971D8ADA94B5CDE50676 /* TrackListView.swift */,
+			);
+			path = Scenarios;
+			sourceTree = "<group>";
+		};
+		5F2F13C5763387AE43BB3FB2 /* Home */ = {
+			isa = PBXGroup;
+			children = (
+				8F2F6EDB47FF81A2A8E50C59 /* HomeView.swift */,
+			);
+			path = Home;
+			sourceTree = "<group>";
+		};
+		64F0EC6FDD90EA4E2FED33CA /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				8F553F2A3FAA2EB99A237D85 /* AudioService.swift */,
+				4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		69120638EEAE6DE2AF2AEBFC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E67C11CB71736E44DA9D4390 /* Ragaflow.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		6C8EC38CF67BD3BDE7C40892 = {
+			isa = PBXGroup;
+			children = (
+				9386B0A09D7E7A652EF44715 /* Configuration */,
+				11613A7A0340A002FAC7A468 /* Ragaflow */,
+				69120638EEAE6DE2AF2AEBFC /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		9386B0A09D7E7A652EF44715 /* Configuration */ = {
+			isa = PBXGroup;
+			children = (
+				40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */,
+				44EFE15DB19746626C260B83 /* Release.xcconfig */,
+			);
+			name = Configuration;
+			path = Ragaflow/Configuration;
+			sourceTree = "<group>";
+		};
+		B0083D73166943BEE40E3BDB /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				DA5B627CB86A3EB721D586A9 /* Auth */,
+				337E1C9E6E86F5FFAD205B93 /* Explore */,
+				5F2F13C5763387AE43BB3FB2 /* Home */,
+				D8135011EE598208C45FF55D /* Player */,
+				BB7952FE4C05549DC5CFDC05 /* Profile */,
+				5C2F9DD882FEF5B46D770465 /* Scenarios */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+		BB7952FE4C05549DC5CFDC05 /* Profile */ = {
+			isa = PBXGroup;
+			children = (
+				C29F8271D78294D42B4E57AF /* ProfileView.swift */,
+			);
+			path = Profile;
+			sourceTree = "<group>";
+		};
+		BC6DE9EA88DAD5475951AEF1 /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				DA469ECB10ACA244F775C6CD /* Certification.swift */,
+				FB5F841227FE20D91CD25B61 /* ListeningSession.swift */,
+				966A1852C0B156E908F43DDF /* Ragam.swift */,
+				6AFC357E623E6A41EDF2308A /* Rasika.swift */,
+				15E0989A03D3CEAA59863D64 /* Scenario.swift */,
+				5743CEC8E8EBA3D278D7E3DA /* Track.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		CF03BFB97C452863805041F0 /* Resources */ = {
+			isa = PBXGroup;
+			children = (
+				E281ED4D732131448A16A649 /* Assets.xcassets */,
+			);
+			path = Resources;
+			sourceTree = "<group>";
+		};
+		D8135011EE598208C45FF55D /* Player */ = {
+			isa = PBXGroup;
+			children = (
+				5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */,
+			);
+			path = Player;
+			sourceTree = "<group>";
+		};
+		DA5B627CB86A3EB721D586A9 /* Auth */ = {
+			isa = PBXGroup;
+			children = (
+				26DC56A75637E4572BF38ED6 /* AuthView.swift */,
+			);
+			path = Auth;
+			sourceTree = "<group>";
+		};
+		EFEC44BEC73B583F074A17A3 /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				A4379B8E57D55C4808164A3C /* ScenarioCard.swift */,
+				5EA826FFC2335ABAE273E179 /* TrackCard.swift */,
+				A31E631D3ED8FB54ADFFC744 /* UserBadge.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		5724ACFD42D87003ECEA88E5 /* Ragaflow */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = F444CC0438CA806414620E76 /* Build configuration list for PBXNativeTarget "Ragaflow" */;
+			buildPhases = (
+				9E25855472412755434B5B2B /* Sources */,
+				F0397B073079A23A5F7D78BD /* Resources */,
+				526B535919D31B2E84CBD862 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Ragaflow;
+			packageProductDependencies = (
+				0DDD1A2D8EFDACE46E102DDA /* Supabase */,
+			);
+			productName = Ragaflow;
+			productReference = E67C11CB71736E44DA9D4390 /* Ragaflow.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		E0C306B38989B229D1AF6A69 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1600;
+				TargetAttributes = {
+				};
+			};
+			buildConfigurationList = FF03F4D6898CCC379D0A7D55 /* Build configuration list for PBXProject "Ragaflow" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 6C8EC38CF67BD3BDE7C40892;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				68EE4374EAEEDAEB6EACE88C /* XCRemoteSwiftPackageReference "supabase-swift" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 69120638EEAE6DE2AF2AEBFC /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				5724ACFD42D87003ECEA88E5 /* Ragaflow */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F0397B073079A23A5F7D78BD /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4C6D0BFF2B952A24EEB84B67 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		9E25855472412755434B5B2B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				061DE32159153681129D770B /* AudioService.swift in Sources */,
+				54D90DD8442AEDA180525228 /* AuthView.swift in Sources */,
+				BCD4E2CEFF56E52CF0CEA6A9 /* Certification.swift in Sources */,
+				52747B8BCD8711297560511C /* ContentView.swift in Sources */,
+				D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */,
+				E642F3DFC3D3EE0ED50527AA /* HomeView.swift in Sources */,
+				D9ED2C5370200C3061C4DC40 /* ListeningSession.swift in Sources */,
+				D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */,
+				B57C95892743755334E44F6F /* RagaflowApp.swift in Sources */,
+				D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */,
+				7AF416BFE0D2D3D53BDD0427 /* Rasika.swift in Sources */,
+				BE873BFF738B3B194B6B8EFA /* Scenario.swift in Sources */,
+				EFEC4E5E41F1583EC4BA0C77 /* ScenarioCard.swift in Sources */,
+				A80400460E8848EBA3F2DE9A /* SessionPlayerView.swift in Sources */,
+				E9AA430C81C6ACDC204926FB /* SupabaseService.swift in Sources */,
+				C5C74E0C25F736309A049D56 /* Track.swift in Sources */,
+				4F881DB4BA2E1E016EA155E8 /* TrackCard.swift in Sources */,
+				FD095D31A41B791A161E2569 /* TrackListView.swift in Sources */,
+				3CC2CD850C5685E2CE1C1E3A /* UserBadge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		36903ABA96C261E15FC3E32D /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		754B154AE5DB14A03A8CB9CC /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		7663612AF4C88155C8CFE3ED /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		820A978EDF1DA558B06B3B24 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		F444CC0438CA806414620E76 /* Build configuration list for PBXNativeTarget "Ragaflow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				820A978EDF1DA558B06B3B24 /* Debug */,
+				754B154AE5DB14A03A8CB9CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FF03F4D6898CCC379D0A7D55 /* Build configuration list for PBXProject "Ragaflow" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				7663612AF4C88155C8CFE3ED /* Debug */,
+				36903ABA96C261E15FC3E32D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		68EE4374EAEEDAEB6EACE88C /* XCRemoteSwiftPackageReference "supabase-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/supabase/supabase-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 2.0.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0DDD1A2D8EFDACE46E102DDA /* Supabase */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 68EE4374EAEEDAEB6EACE88C /* XCRemoteSwiftPackageReference "supabase-swift" */;
+			productName = Supabase;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = E0C306B38989B229D1AF6A69 /* Project object */;
+}

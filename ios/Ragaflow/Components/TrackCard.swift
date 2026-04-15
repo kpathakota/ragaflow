@@ -7,15 +7,42 @@ struct TrackCard: View {
     let scenario: Scenario?
     var onToggleFavorite: (() -> Void)?
 
+    /// Headline: title if present, otherwise "date · location" fallback
+    private var headline: String {
+        track.displayName
+    }
+
+    /// Subtitle: "date · location" when title is present (otherwise nil)
+    private var subtitle: String? {
+        guard track.title != nil, !((track.title ?? "").isEmpty) else { return nil }
+        let parts = [formattedDate, track.location].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
+    }
+
+    /// Format recordedDate as "Mon DD" (e.g. "Jan 15") matching web
+    private var formattedDate: String? {
+        guard let raw = track.recordedDate else { return nil }
+        let formatter = DateFormatter()
+        formatter.dateFormat = "yyyy-MM-dd"
+        guard let date = formatter.date(from: raw) else { return raw }
+        formatter.dateFormat = "MMM d"
+        return formatter.string(from: date)
+    }
+
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            // Top line: ragam name + favorite
-            HStack {
-                if let ragamName {
-                    Text(ragamName)
+            // Top line: headline + favorite
+            HStack(alignment: .top) {
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(headline)
                         .font(.subheadline)
                         .fontWeight(.medium)
                         .foregroundStyle(.primary)
+                    if let subtitle {
+                        Text(subtitle)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
                 Spacer()
                 if let onToggleFavorite {
@@ -28,28 +55,37 @@ struct TrackCard: View {
                 }
             }
 
-            // Metadata line: date · location, duration
+            // Metadata line: duration · ragam · tags (first 3) · Premium
             HStack(spacing: 4) {
-                if let date = track.recordedDate {
-                    Text(date)
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                if track.recordedDate != nil && track.location != nil {
+                Text("\(track.duration / 60)min")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+                if let ragamName {
                     Text("·")
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                }
-                if let location = track.location {
-                    Text(location)
+                    Text(ragamName)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                        .lineLimit(1)
+                }
+                ForEach(track.tags.prefix(3), id: \.self) { tag in
+                    Text("·")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text(tag)
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+                if !track.free {
+                    Text("·")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Text("Premium")
+                        .font(.caption)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color(red: 0.79, green: 0.65, blue: 0.30)) // gold
                 }
                 Spacer()
-                Text(track.durationFormatted)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
             }
 
             // Description
@@ -57,28 +93,6 @@ struct TrackCard: View {
                 .font(.caption)
                 .foregroundStyle(.secondary)
                 .lineLimit(2)
-
-            // Tags
-            if !track.tags.isEmpty {
-                HStack(spacing: 6) {
-                    ForEach(track.tags.prefix(4), id: \.self) { tag in
-                        Text(tag)
-                            .font(.caption2)
-                            .padding(.horizontal, 8)
-                            .padding(.vertical, 3)
-                            .background(Color(.systemGray5))
-                            .clipShape(Capsule())
-                    }
-                }
-            }
-
-            // Premium badge
-            if !track.free {
-                Text("Premium")
-                    .font(.caption2)
-                    .fontWeight(.medium)
-                    .foregroundStyle(.purple)
-            }
         }
         .padding(16)
         .background(

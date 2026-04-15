@@ -115,7 +115,7 @@ struct ExploreView: View {
                     if !selectedTags.isEmpty {
                         Text("(\(selectedTags.count))")
                             .font(.caption)
-                            .foregroundStyle(.green)
+                            .foregroundStyle(Color(red: 0.72, green: 0.52, blue: 0.35)) // tan
                     }
                 }
                 .foregroundStyle(.secondary)
@@ -136,8 +136,8 @@ struct ExploreView: View {
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(selectedTags.contains(tag) ? Color.green.opacity(0.3) : Color(.systemGray5))
-                                .foregroundStyle(selectedTags.contains(tag) ? .green : .secondary)
+                                .background(selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.3) : Color(.systemGray5))
+                                .foregroundStyle(selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35) : .secondary)
                                 .clipShape(Capsule())
                         }
                     }
