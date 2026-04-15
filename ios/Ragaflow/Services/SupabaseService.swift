@@ -19,7 +19,11 @@ final class SupabaseService {
             fatalError("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY in Info.plist")
         }
 
-        client = SupabaseClient(supabaseURL: url, supabaseKey: key)
+        client = SupabaseClient(
+            supabaseURL: url,
+            supabaseKey: key,
+            options: .init(auth: .init(emitLocalSessionAsInitialSession: true))
+        )
     }
 
     // MARK: - Auth
@@ -35,8 +39,9 @@ final class SupabaseService {
         // Listen for auth state changes
         Task {
             for await (event, session) in client.auth.authStateChanges {
+                let validUser = session.flatMap { $0.isExpired ? nil : $0.user }
                 await MainActor.run {
-                    self.currentUser = session?.user
+                    self.currentUser = validUser
                 }
                 if event == .signedIn, let userId = session?.user.id {
                     try? await ensureRasika(userId: userId)
