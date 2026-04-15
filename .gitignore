@@ -62,8 +62,6 @@ web/.wrangler/
 # =============================================================================
 
 # Xcode
-*.xcodeproj/
-*.xcworkspace/
 xcuserdata/
 DerivedData/
 build/
