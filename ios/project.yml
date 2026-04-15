@@ -54,6 +54,7 @@ targets:
       base:
         PRODUCT_BUNDLE_IDENTIFIER: com.ragaflow.app
         DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: false
     configFiles:
       Debug: Ragaflow/Configuration/Debug.xcconfig
