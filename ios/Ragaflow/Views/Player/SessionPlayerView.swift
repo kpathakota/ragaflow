@@ -6,6 +6,7 @@ struct SessionPlayerView: View {
     let initialDuration: Int? // minutes
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var track: Track?
     @State private var ragam: Ragam?
@@ -108,10 +109,16 @@ struct SessionPlayerView: View {
             Spacer()
 
             ZStack {
-                Circle()
-                    .fill(scenario.accentColor.opacity(0.15))
-                    .frame(width: 220, height: 220)
-                    .blur(radius: 60)
+                GeometryReader { geo in
+                    let size = horizontalSizeClass == .regular
+                        ? min(geo.size.width, geo.size.height) * 0.55
+                        : 220.0
+                    Circle()
+                        .fill(scenario.accentColor.opacity(0.15))
+                        .frame(width: size, height: size)
+                        .blur(radius: 60)
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                }
 
                 // Artist note
                 if let note = track.artistNote, sessionState != .complete {
@@ -187,7 +194,7 @@ struct SessionPlayerView: View {
                         TextField("1–120", text: $customInputText)
                             .keyboardType(.numberPad)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: 80)
+                            .frame(width: horizontalSizeClass == .regular ? 120 : 80)
                         Text("min")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
