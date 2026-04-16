@@ -6,6 +6,7 @@ struct SessionPlayerView: View {
     let initialDuration: Int? // minutes
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
     @State private var track: Track?
     @State private var ragam: Ragam?
@@ -32,6 +33,8 @@ struct SessionPlayerView: View {
 
     private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
+    private var playButtonSize: CGFloat { horizontalSizeClass == .regular ? 88 : 64 }
+    private var checkmarkSize: CGFloat { horizontalSizeClass == .regular ? 112 : 80 }
     /// Seconds before session end to begin sleep volume fade
     private let sleepFadeDuration: TimeInterval = 120
 
@@ -110,7 +113,12 @@ struct SessionPlayerView: View {
             ZStack {
                 Circle()
                     .fill(scenario.accentColor.opacity(0.15))
-                    .frame(width: 220, height: 220)
+                    .containerRelativeFrame([.horizontal, .vertical]) { length, axis in
+                        if horizontalSizeClass == .regular {
+                            return length * 0.35
+                        }
+                        return 220
+                    }
                     .blur(radius: 60)
 
                 // Artist note
@@ -138,7 +146,7 @@ struct SessionPlayerView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .offset(y: 80)
+                    .offset(y: horizontalSizeClass == .regular ? 140 : 80)
                 }
             }
 
@@ -187,7 +195,7 @@ struct SessionPlayerView: View {
                         TextField("1–120", text: $customInputText)
                             .keyboardType(.numberPad)
                             .textFieldStyle(.roundedBorder)
-                            .frame(width: 80)
+                            .frame(width: horizontalSizeClass == .regular ? 120 : 80)
                         Text("min")
                             .font(.subheadline)
                             .foregroundStyle(.secondary)
@@ -210,10 +218,10 @@ struct SessionPlayerView: View {
                 } label: {
                     Circle()
                         .fill(scenario.accentColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: playButtonSize, height: playButtonSize)
                         .overlay {
                             Image(systemName: "play.fill")
-                                .font(.title2)
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
                                 .foregroundStyle(.white)
                         }
                 }
@@ -237,10 +245,10 @@ struct SessionPlayerView: View {
                 } label: {
                     Circle()
                         .fill(scenario.accentColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: playButtonSize, height: playButtonSize)
                         .overlay {
                             Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
-                                .font(.title2)
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
                                 .foregroundStyle(.white)
                         }
                 }
@@ -278,10 +286,10 @@ struct SessionPlayerView: View {
         VStack(spacing: 24) {
             Circle()
                 .fill(scenario.accentColor.opacity(0.2))
-                .frame(width: 80, height: 80)
+                .frame(width: checkmarkSize, height: checkmarkSize)
                 .overlay {
                     Image(systemName: "checkmark")
-                        .font(.title)
+                        .font(horizontalSizeClass == .regular ? .largeTitle : .title)
                         .foregroundStyle(scenario.accentColorLight)
                 }
 
