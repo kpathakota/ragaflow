@@ -1,4 +1,5 @@
 import Foundation
+@testable import Ragaflow
 
 @Observable
 final class MockAudioService: AudioServiceProtocol {

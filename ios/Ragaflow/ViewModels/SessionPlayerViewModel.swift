@@ -46,7 +46,7 @@ final class SessionPlayerViewModel {
 
     // MARK: - Computed
 
-    var isLoggedIn: Bool { supabase.currentUser != nil }
+    var isLoggedIn: Bool { supabase.isAuthenticated }
 
     var timerDisplay: String {
         let mins = remaining / 60
@@ -107,7 +107,7 @@ final class SessionPlayerViewModel {
             audio.play(url: url, trackId: track.id)
         }
 
-        if supabase.currentUser != nil {
+        if supabase.isAuthenticated {
             sessionId = try? await supabase.startListeningSession(
                 trackId: track.id,
                 scenario: scenario,
@@ -210,7 +210,7 @@ final class SessionPlayerViewModel {
             self.sessionId = nil
         }
 
-        if supabase.currentUser != nil {
+        if supabase.isAuthenticated {
             showDefaultPrompt = true
             if let track {
                 try? await supabase.upsertCertification(ragamId: track.ragamId, additionalSeconds: duration * 60)
@@ -278,10 +278,10 @@ final class SessionPlayerViewModel {
 
     func setupRemoteCommands() {
         audio.onRemotePause = { [weak self] in
-            self?.handleRemotePause()
+            Task { @MainActor in self?.handleRemotePause() }
         }
         audio.onRemoteResume = { [weak self] in
-            self?.handleRemoteResume()
+            Task { @MainActor in self?.handleRemoteResume() }
         }
     }
 

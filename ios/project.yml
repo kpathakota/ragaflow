@@ -29,6 +29,7 @@ targets:
           - "Configuration/*.example"
           - "Resources/Package.swift.reference"
           - "Resources/Info.plist"
+          - "Services/Mocks/**"
     info:
       path: Ragaflow/Resources/Info.plist
       properties:
@@ -79,6 +80,7 @@ targets:
     platform: iOS
     sources:
       - path: RagaflowTests
+      - path: Ragaflow/Services/Mocks
     dependencies:
       - target: Ragaflow
     settings:

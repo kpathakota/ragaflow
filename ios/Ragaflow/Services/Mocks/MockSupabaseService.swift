@@ -1,5 +1,6 @@
 import Foundation
 import Supabase
+@testable import Ragaflow
 
 @Observable
 final class MockSupabaseService: SupabaseServiceProtocol {
@@ -7,6 +8,7 @@ final class MockSupabaseService: SupabaseServiceProtocol {
 
     var currentUser: User?
     var isLoading = false
+    var isAuthenticated = false
 
     // MARK: - Configurable return values
 

@@ -168,10 +168,8 @@ struct SessionPlayerViewModelTests {
         mock.tracks = [makeTrack()]
         mock.ragams = [makeRagam()]
         mock.rasika = makeRasika()
-        // Simulate logged in user — set currentUser
-        // MockSupabaseService has currentUser as User? which is from Supabase SDK
-        // We can't easily create a User object, so we test the no-user path
-        // and verify the session wasn't started
+        mock.isAuthenticated = true
+
         let vm = SessionPlayerViewModel(
             trackId: "track-1", scenario: .focus, initialDuration: nil,
             supabase: mock, audio: audio
@@ -179,7 +177,29 @@ struct SessionPlayerViewModelTests {
         await vm.loadData()
         await vm.startSession()
 
-        // No user → no session logged
+        #expect(mock.startSessionCalls.count == 1)
+        #expect(mock.startSessionCalls[0].trackId == "track-1")
+        #expect(mock.startSessionCalls[0].scenario == .focus)
+        vm.restart()
+    }
+
+    @Test("startSession does NOT log session when logged out")
+    @MainActor
+    func startSessionNoLogWhenLoggedOut() async {
+        let mock = MockSupabaseService()
+        let audio = MockAudioService()
+        mock.tracks = [makeTrack()]
+        mock.ragams = [makeRagam()]
+        mock.rasika = makeRasika()
+        mock.isAuthenticated = false
+
+        let vm = SessionPlayerViewModel(
+            trackId: "track-1", scenario: .focus, initialDuration: nil,
+            supabase: mock, audio: audio
+        )
+        await vm.loadData()
+        await vm.startSession()
+
         #expect(mock.startSessionCalls.isEmpty)
         vm.restart()
     }
@@ -494,7 +514,7 @@ struct SessionPlayerViewModelTests {
         #expect(vm.sessionState == .idle)
     }
 
-    @Test("isLoggedIn reflects currentUser state")
+    @Test("isLoggedIn reflects isAuthenticated state")
     @MainActor
     func isLoggedIn() {
         let mock = MockSupabaseService()
@@ -505,5 +525,8 @@ struct SessionPlayerViewModelTests {
         )
 
         #expect(vm.isLoggedIn == false)
+
+        mock.isAuthenticated = true
+        #expect(vm.isLoggedIn == true)
     }
 }

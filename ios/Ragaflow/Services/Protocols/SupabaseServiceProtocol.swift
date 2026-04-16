@@ -5,6 +5,7 @@ protocol SupabaseServiceProtocol: AnyObject {
     // Auth state
     var currentUser: User? { get }
     var isLoading: Bool { get }
+    var isAuthenticated: Bool { get }
 
     // Auth actions
     func initialize() async

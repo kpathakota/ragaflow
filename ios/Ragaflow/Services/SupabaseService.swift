@@ -9,6 +9,7 @@ final class SupabaseService: SupabaseServiceProtocol {
 
     private(set) var currentUser: User?
     private(set) var isLoading = true
+    var isAuthenticated: Bool { currentUser != nil }
 
     private init() {
         guard
