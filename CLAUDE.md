@@ -69,6 +69,10 @@ Two Supabase projects: **production** and **staging**.
 **Certification** — per ragam per rasika achievement:
 - rasika_id, ragam_id, level (1–4), total_seconds
 
+**AnalyticsEvent** — general-purpose event log (shared by web + iOS):
+- anonymous_id (per-session UUID), rasika_id (nullable), event_type, platform (web/ios), metadata (jsonb), created_at
+- Event types: `app_open`, `scenario_view`, `auth_error`, `playback_error`
+
 Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed data in `supabase/seed.sql`. Data access via `web/lib/data.ts` (web) and `ios/Ragaflow/Services/SupabaseService.swift` (iOS).
 
 ## Key files
@@ -76,6 +80,7 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 ### Shared
 - `supabase/migrations/` — DDL + RLS policies (run in order)
 - `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
+- `supabase/analytics-queries.sql` — ad-hoc SQL queries for analytics (DAU/WAU, errors, session quality)
 - `docs/spec.md` — product specification
 - `docs/dev-design.md` — development design & execution plan
 - `docs/ios-plan.md` — iOS implementation plan (milestones M0–M5)
@@ -108,12 +113,14 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 - `web/lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
 - `web/lib/preferences.ts` — set default track per scenario (client-side)
 - `web/lib/sessions.ts` — start/end listening session logging (client-side)
+- `web/lib/analytics.ts` — event tracking with per-session anonymous UUID (client-side)
 
 ### Web components
 - `web/components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
 - `web/components/track-card.tsx` — reusable track card with heart icon
 - `web/components/nav-header.tsx` — reusable back-link + title header
 - `web/components/user-badge.tsx` — top-right user initial badge linking to /profile
+- `web/components/analytics-provider.tsx` — fires `app_open` event on page load
 
 ### Web pages
 - `web/app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)

@@ -59,3 +59,19 @@ export type Certification = {
   level: 1 | 2 | 3 | 4;
   total_seconds: number;
 };
+
+export type AnalyticsEventType =
+  | "app_open"
+  | "scenario_view"
+  | "auth_error"
+  | "playback_error";
+
+export type AnalyticsEvent = {
+  id: string;
+  anonymous_id: string;
+  rasika_id: string | null;
+  event_type: AnalyticsEventType;
+  platform: "web" | "ios";
+  metadata: Record<string, unknown>;
+  created_at: string;
+};

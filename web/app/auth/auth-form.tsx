@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { createClient } from "@/lib/supabase/client";
+import { trackEvent } from "@/lib/analytics";
 
 export function AuthForm() {
   const router = useRouter();
@@ -32,6 +33,7 @@ export function AuthForm() {
       });
       if (err) {
         setError(err.message);
+        trackEvent("auth_error", { method: "sign_up", error: err.message });
       } else {
         setMessage("Check your email for a confirmation link.");
       }
@@ -42,6 +44,7 @@ export function AuthForm() {
       });
       if (err) {
         setError(err.message);
+        trackEvent("auth_error", { method: "sign_in", error: err.message });
       } else {
         router.replace("/");
       }

@@ -12,6 +12,7 @@ vi.mock("@/lib/supabase/client", () => ({
       signInWithPassword: mockSignIn,
       signUp: mockSignUp,
     },
+    from: vi.fn(() => ({ insert: vi.fn().mockResolvedValue({ error: null }) })),
   })),
 }));
 

@@ -10,6 +10,7 @@ import { toggleFavoriteTrackClient, getPreferencesClient } from "@/lib/favorites
 import { setDefaultTrackClient, setCustomDurationClient } from "@/lib/preferences";
 import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
+import { trackEvent } from "@/lib/analytics";
 
 const FIXED_DURATIONS = [25, 45];
 const LAST_DURATION_KEY = "ragaflow:lastDuration";
@@ -447,7 +448,20 @@ export function SessionPlayer({
 
       </div>
 
-      <audio ref={audioRef} src={track.audio_url} loop preload="auto" />
+      <audio
+        ref={audioRef}
+        src={track.audio_url}
+        loop
+        preload="auto"
+        onError={(e) => {
+          const mediaError = (e.target as HTMLAudioElement).error;
+          trackEvent("playback_error", {
+            track_id: track.id,
+            error: mediaError?.message ?? "Unknown playback error",
+            code: mediaError?.code,
+          }, user?.id);
+        }}
+      />
     </div>
   );
 }
