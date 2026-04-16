@@ -99,6 +99,7 @@ struct HomeView: View {
                     } label: {
                         UserBadge()
                     }
+                    .accessibilityLabel("Profile")
                 } else {
                     NavigationLink {
                         AuthView()

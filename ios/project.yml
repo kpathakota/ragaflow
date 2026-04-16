@@ -29,6 +29,7 @@ targets:
           - "Configuration/*.example"
           - "Resources/Package.swift.reference"
           - "Resources/Info.plist"
+          - "Services/Mocks/**"
     info:
       path: Ragaflow/Resources/Info.plist
       properties:
@@ -73,6 +74,39 @@ targets:
       - package: supabase-swift
         product: Supabase
     postCompileScripts: []
+
+  RagaflowTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: RagaflowTests
+      - path: Ragaflow/Services/Mocks
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+
+  RagaflowUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RagaflowUITests
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
 
 packages:
   supabase-swift:

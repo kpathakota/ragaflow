@@ -3,150 +3,125 @@ import SwiftUI
 struct ExploreView: View {
     @Environment(SupabaseService.self) private var supabase
 
-    @State private var tracks: [Track] = []
-    @State private var ragams: [String: Ragam] = [:]
-    @State private var favorites: Set<String> = []
-    @State private var selectedTags: Set<String> = []
-    @State private var isLoading = true
-    @State private var tagsExpanded = false
-
-    /// All unique tags across all tracks, sorted alphabetically
-    private var allTags: [String] {
-        let tags = Set(tracks.flatMap(\.tags))
-        return tags.sorted()
-    }
-
-    /// Tracks filtered by selected tags
-    private var filteredTracks: [Track] {
-        if selectedTags.isEmpty { return tracks }
-        return tracks.filter { track in
-            !selectedTags.isDisjoint(with: track.tags)
-        }
-    }
-
-    /// Filtered tracks grouped by ragam, sorted by ragam name
-    private var groupedByRagam: [(ragam: Ragam, tracks: [Track])] {
-        let grouped = Dictionary(grouping: filteredTracks) { $0.ragamId }
-        return grouped.compactMap { ragamId, tracks in
-            guard let ragam = ragams[ragamId] else { return nil }
-            let sorted = tracks.sorted { ($0.recordedDate ?? "") > ($1.recordedDate ?? "") }
-            return (ragam, sorted)
-        }
-        .sorted { $0.ragam.name < $1.ragam.name }
-    }
+    @State private var viewModel: ExploreViewModel?
 
     var body: some View {
         ScrollView {
-            if isLoading {
+            if let vm = viewModel {
+                if vm.isLoading {
+                    ProgressView()
+                        .padding(.top, 100)
+                } else {
+                    VStack(alignment: .leading, spacing: 20) {
+                        // Tag filter
+                        tagFilterSection(vm: vm)
+
+                        // Grouped tracks
+                        ForEach(vm.groupedByRagam, id: \.ragam.id) { group in
+                            VStack(alignment: .leading, spacing: 12) {
+                                Text(group.ragam.name)
+                                    .font(.title3)
+                                    .fontWeight(.semibold)
+                                    .padding(.horizontal)
+
+                                if let description = group.ragam.description as String?, !description.isEmpty {
+                                    Text(description)
+                                        .font(.caption)
+                                        .foregroundStyle(.secondary)
+                                        .padding(.horizontal)
+                                }
+
+                                ForEach(group.tracks) { track in
+                                    NavigationLink(value: PlayerDestination(
+                                        trackId: track.id,
+                                        scenario: track.scenarios.first ?? .focus,
+                                        duration: nil
+                                    )) {
+                                        TrackCard(
+                                            track: track,
+                                            ragamName: nil,
+                                            isFavorite: vm.favorites.contains(track.id),
+                                            scenario: nil,
+                                            onToggleFavorite: {
+                                                Task { await vm.toggleFavorite(trackId: track.id) }
+                                            }
+                                        )
+                                    }
+                                    .buttonStyle(.plain)
+                                    .padding(.horizontal)
+                                }
+                            }
+                            .padding(.bottom, 8)
+                        }
+
+                        if vm.groupedByRagam.isEmpty {
+                            Text("No tracks match the selected tags")
+                                .foregroundStyle(.secondary)
+                                .frame(maxWidth: .infinity)
+                                .padding(.top, 40)
+                        }
+                    }
+                    .padding(.vertical, 16)
+                }
+            } else {
                 ProgressView()
                     .padding(.top, 100)
-            } else {
-                VStack(alignment: .leading, spacing: 20) {
-                    // Tag filter
-                    tagFilterSection
-
-                    // Grouped tracks
-                    ForEach(groupedByRagam, id: \.ragam.id) { group in
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text(group.ragam.name)
-                                .font(.title3)
-                                .fontWeight(.semibold)
-                                .padding(.horizontal)
-
-                            if let description = group.ragam.description as String?, !description.isEmpty {
-                                Text(description)
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                                    .padding(.horizontal)
-                            }
-
-                            ForEach(group.tracks) { track in
-                                NavigationLink(value: PlayerDestination(
-                                    trackId: track.id,
-                                    scenario: track.scenarios.first ?? .focus,
-                                    duration: nil
-                                )) {
-                                    TrackCard(
-                                        track: track,
-                                        ragamName: nil, // Already shown in group header
-                                        isFavorite: favorites.contains(track.id),
-                                        scenario: nil,
-                                        onToggleFavorite: {
-                                            Task { await toggleFavorite(trackId: track.id) }
-                                        }
-                                    )
-                                }
-                                .buttonStyle(.plain)
-                                .padding(.horizontal)
-                            }
-                        }
-                        .padding(.bottom, 8)
-                    }
-
-                    if groupedByRagam.isEmpty {
-                        Text("No tracks match the selected tags")
-                            .foregroundStyle(.secondary)
-                            .frame(maxWidth: .infinity)
-                            .padding(.top, 40)
-                    }
-                }
-                .padding(.vertical, 16)
             }
         }
         .navigationTitle("Explore")
         .navigationBarTitleDisplayMode(.large)
-        .task {
-            await loadData()
+        .onAppear {
+            if viewModel == nil {
+                let vm = ExploreViewModel(supabase: supabase)
+                viewModel = vm
+                Task { await vm.loadData() }
+            }
         }
     }
 
     @ViewBuilder
-    private var tagFilterSection: some View {
+    private func tagFilterSection(vm: ExploreViewModel) -> some View {
         VStack(alignment: .leading, spacing: 8) {
             Button {
-                withAnimation { tagsExpanded.toggle() }
+                withAnimation { vm.tagsExpanded.toggle() }
             } label: {
                 HStack(spacing: 4) {
                     Text("Filter by tag")
                         .font(.subheadline)
                         .fontWeight(.medium)
-                    Image(systemName: tagsExpanded ? "chevron.up" : "chevron.down")
+                    Image(systemName: vm.tagsExpanded ? "chevron.up" : "chevron.down")
                         .font(.caption)
-                    if !selectedTags.isEmpty {
-                        Text("(\(selectedTags.count))")
+                    if !vm.selectedTags.isEmpty {
+                        Text("(\(vm.selectedTags.count))")
                             .font(.caption)
-                            .foregroundStyle(Color(red: 0.72, green: 0.52, blue: 0.35)) // tan
+                            .foregroundStyle(Color(red: 0.72, green: 0.52, blue: 0.35))
                     }
                 }
                 .foregroundStyle(.secondary)
             }
             .padding(.horizontal)
 
-            if tagsExpanded {
+            if vm.tagsExpanded {
                 FlowLayout(spacing: 6) {
-                    ForEach(allTags, id: \.self) { tag in
+                    ForEach(vm.allTags, id: \.self) { tag in
                         Button {
-                            if selectedTags.contains(tag) {
-                                selectedTags.remove(tag)
-                            } else {
-                                selectedTags.insert(tag)
-                            }
+                            vm.toggleTag(tag)
                         } label: {
                             Text(tag)
                                 .font(.caption)
                                 .padding(.horizontal, 10)
                                 .padding(.vertical, 5)
-                                .background(selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.3) : Color(.systemGray5))
-                                .foregroundStyle(selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35) : .secondary)
+                                .background(vm.selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.3) : Color(.systemGray5))
+                                .foregroundStyle(vm.selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35) : .secondary)
                                 .clipShape(Capsule())
                         }
                     }
                 }
                 .padding(.horizontal)
 
-                if !selectedTags.isEmpty {
+                if !vm.selectedTags.isEmpty {
                     Button("Clear filters") {
-                        selectedTags.removeAll()
+                        vm.clearFilters()
                     }
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -154,28 +129,6 @@ struct ExploreView: View {
                 }
             }
         }
-    }
-
-    private func loadData() async {
-        do {
-            async let tracksResult = supabase.fetchAllTracks()
-            async let ragamsResult = supabase.fetchAllRagams()
-            async let rasikaResult = supabase.fetchRasika()
-
-            let (fetchedTracks, fetchedRagams, rasika) = try await (tracksResult, ragamsResult, rasikaResult)
-
-            tracks = fetchedTracks
-            ragams = Dictionary(uniqueKeysWithValues: fetchedRagams.map { ($0.id, $0) })
-            favorites = Set(rasika?.favoriteTracks ?? [])
-        } catch {}
-        isLoading = false
-    }
-
-    private func toggleFavorite(trackId: String) async {
-        do {
-            let updated = try await supabase.toggleFavoriteTrack(trackId: trackId)
-            favorites = Set(updated)
-        } catch {}
     }
 }
 

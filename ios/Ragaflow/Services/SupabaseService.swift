@@ -2,13 +2,14 @@ import Foundation
 import Supabase
 
 @Observable
-final class SupabaseService {
+final class SupabaseService: SupabaseServiceProtocol {
     static let shared = SupabaseService()
 
     let client: SupabaseClient
 
     private(set) var currentUser: User?
     private(set) var isLoading = true
+    var isAuthenticated: Bool { currentUser != nil }
 
     private init() {
         guard
