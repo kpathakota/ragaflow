@@ -69,6 +69,10 @@ Two Supabase projects: **production** and **staging**.
 **Certification** — per ragam per rasika achievement:
 - rasika_id, ragam_id, level (1–4), total_seconds
 
+**AnalyticsEvent** — general-purpose event log (shared by web + iOS):
+- anonymous_id (per-session UUID), rasika_id (nullable), event_type, platform (web/ios), metadata (jsonb), created_at
+- Event types: `app_open`, `scenario_view`, `auth_error`, `playback_error`
+
 Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed data in `supabase/seed.sql`. Data access via `web/lib/data.ts` (web) and `ios/Ragaflow/Services/SupabaseService.swift` (iOS).
 
 ## Key files
@@ -76,6 +80,7 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 ### Shared
 - `supabase/migrations/` — DDL + RLS policies (run in order)
 - `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
+- `supabase/analytics-queries.sql` — ad-hoc SQL queries for analytics (DAU/WAU, errors, session quality)
 - `docs/spec.md` — product specification
 - `docs/dev-design.md` — development design & execution plan
 - `docs/ios-plan.md` — iOS implementation plan (milestones M0–M5)
@@ -108,12 +113,14 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 - `web/lib/favorites.ts` — toggle favorite tracks/ragams (client-side)
 - `web/lib/preferences.ts` — set default track per scenario (client-side)
 - `web/lib/sessions.ts` — start/end listening session logging (client-side)
+- `web/lib/analytics.ts` — event tracking with per-session anonymous UUID (client-side)
 
 ### Web components
 - `web/components/scenario-config.ts` — scenario labels, colors, subtitles (single source of truth)
 - `web/components/track-card.tsx` — reusable track card with heart icon
 - `web/components/nav-header.tsx` — reusable back-link + title header
 - `web/components/user-badge.tsx` — top-right user initial badge linking to /profile
+- `web/components/analytics-provider.tsx` — fires `app_open` event on page load
 
 ### Web pages
 - `web/app/page.tsx` — homepage (personalized defaults + scenario cards + explore + auth link + user badge)
@@ -203,8 +210,17 @@ See `docs/dev-design.md` § "Git & Pull Request Workflow" for the full branch/PR
 - **One PR per logical task** — smaller PRs are easier to review and less likely to conflict
 - **Human merges PRs** — Claude Code pushes branches and opens PRs; human reviews and merges
 - **Production deploys from `main`** — human merges `dev` → `main` when ready
-- **Clean up branches after merge** — `git fetch --prune origin`, then delete local branches marked `gone`
+- **Clean up branches after merge** — use `/cleanup-branches` skill
 - **Rebase frequently** — rebase `dev` onto `main` every few tasks, not in big batches
 - **Clean up large files at deletion time** — when removing binary files from the repo, run `git filter-repo` in the same task
 - **Gitignore new tools immediately** — add local state directories to `.gitignore` before the first commit
+- **Test coverage for diffs** — use `/test-gaps` skill to analyze and fill coverage gaps before merging
 - Update this file each conversation with new context
+
+## No one-off work
+
+You are not allowed to do one-off work. If I ask you to do something and it's the kind of thing that will need to happen again, you must:
+
+1. Do it manually the first time on 3 to 10 items
+2. Show me the output
+3. If I approve, codify it into a skill file

@@ -36,6 +36,10 @@ vi.mock("@/lib/certifications", () => ({
   }),
 }));
 
+vi.mock("@/lib/analytics", () => ({
+  trackEvent: vi.fn(),
+}));
+
 // Mock next/link
 vi.mock("next/link", () => ({
   default: ({ children, href, ...props }: any) => (

@@ -6,66 +6,73 @@ struct SessionPlayerView: View {
     let initialDuration: Int? // minutes
 
     @Environment(SupabaseService.self) private var supabase
+    @Environment(\.horizontalSizeClass) private var horizontalSizeClass
 
-    @State private var track: Track?
-    @State private var ragam: Ragam?
-    @State private var isFavorite = false
-    @State private var isLoading = true
+    @State private var viewModel: SessionPlayerViewModel?
 
-    // Timer state
-    @State private var duration: Int = 25 // minutes
-    @State private var remaining: Int = 0 // seconds
-    @State private var sessionState: SessionState = .idle
-    @State private var sessionId: String?
-    @State private var startedAt: Date?
-    @State private var elapsedBeforePause: TimeInterval = 0
-    @State private var noteExpanded = false
-    @State private var showDefaultPrompt = false
-    @State private var defaultSet = false
-    @State private var customDuration: Int?
+    @Environment(\.dismiss) private var dismiss
 
-    private let fixedDurations = [25, 45]
-
-    enum SessionState {
-        case idle, running, paused, complete
-    }
+    private var playButtonSize: CGFloat { horizontalSizeClass == .regular ? 88 : 64 }
+    private var checkmarkSize: CGFloat { horizontalSizeClass == .regular ? 112 : 80 }
 
     var body: some View {
         Group {
-            if isLoading {
+            if let vm = viewModel {
+                if vm.isLoading {
+                    ProgressView()
+                        .frame(maxWidth: .infinity, maxHeight: .infinity)
+                } else if let track = vm.track {
+                    playerContent(track: track, vm: vm)
+                } else {
+                    Text("Track not found")
+                        .foregroundStyle(.secondary)
+                }
+            } else {
                 ProgressView()
                     .frame(maxWidth: .infinity, maxHeight: .infinity)
-            } else if let track {
-                playerContent(track: track)
-            } else {
-                Text("Track not found")
-                    .foregroundStyle(.secondary)
             }
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if supabase.currentUser != nil {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
-                        Task { await toggleFavorite() }
-                    } label: {
-                        Image(systemName: isFavorite ? "heart.fill" : "heart")
-                            .foregroundStyle(isFavorite ? .red : .secondary)
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    if let vm = viewModel {
+                        Task { await vm.toggleFavorite() }
                     }
+                } label: {
+                    Image(systemName: viewModel?.isFavorite == true ? "heart.fill" : "heart")
+                        .foregroundStyle(viewModel?.isFavorite == true ? .red : .secondary)
                 }
+                .accessibilityLabel(viewModel?.isFavorite == true ? "Unfavorite" : "Favorite")
+                .opacity(supabase.currentUser != nil ? 1 : 0)
+                .disabled(supabase.currentUser == nil)
             }
         }
-        .task {
-            await loadData()
+        .onAppear {
+            if viewModel == nil {
+                let vm = SessionPlayerViewModel(
+                    trackId: trackId,
+                    scenario: scenario,
+                    initialDuration: initialDuration,
+                    supabase: supabase,
+                    audio: AudioService.shared
+                )
+                viewModel = vm
+                vm.setupRemoteCommands()
+                Task { await vm.loadData() }
+            }
+        }
+        .onDisappear {
+            viewModel?.teardownRemoteCommands()
         }
     }
 
     @ViewBuilder
-    private func playerContent(track: Track) -> some View {
+    private func playerContent(track: Track, vm: SessionPlayerViewModel) -> some View {
         VStack(spacing: 0) {
             // Track info
             VStack(alignment: .leading, spacing: 8) {
-                Text(ragam?.name ?? track.displayName)
+                Text(vm.displayName)
                     .font(.title2)
                     .fontWeight(.semibold)
                 Text(track.description)
@@ -83,17 +90,22 @@ struct SessionPlayerView: View {
             ZStack {
                 Circle()
                     .fill(scenario.accentColor.opacity(0.15))
-                    .frame(width: 220, height: 220)
+                    .containerRelativeFrame([.horizontal, .vertical]) { length, axis in
+                        if horizontalSizeClass == .regular {
+                            return length * 0.35
+                        }
+                        return 220
+                    }
                     .blur(radius: 60)
 
                 // Artist note
-                if let note = track.artistNote, sessionState != .complete {
+                if let note = track.artistNote, vm.sessionState != .complete {
                     VStack(alignment: .leading, spacing: 8) {
                         Button {
-                            withAnimation { noteExpanded.toggle() }
+                            withAnimation { vm.noteExpanded.toggle() }
                         } label: {
                             HStack(spacing: 4) {
-                                Image(systemName: noteExpanded ? "chevron.up" : "chevron.down")
+                                Image(systemName: vm.noteExpanded ? "chevron.up" : "chevron.down")
                                     .font(.caption2)
                                 Text("From the session")
                                     .font(.caption)
@@ -101,7 +113,7 @@ struct SessionPlayerView: View {
                             .foregroundStyle(.tertiary)
                         }
 
-                        if noteExpanded {
+                        if vm.noteExpanded {
                             Text(note)
                                 .font(.subheadline)
                                 .italic()
@@ -111,91 +123,122 @@ struct SessionPlayerView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .offset(y: 80)
+                    .offset(y: horizontalSizeClass == .regular ? 140 : 80)
                 }
             }
 
             Spacer()
 
             // Controls
-            controlsSection(track: track)
+            controlsSection(track: track, vm: vm)
                 .padding(.bottom, 32)
         }
     }
 
     @ViewBuilder
-    private func controlsSection(track: Track) -> some View {
+    private func controlsSection(track: Track, vm: SessionPlayerViewModel) -> some View {
         VStack(spacing: 20) {
-            switch sessionState {
+            switch vm.sessionState {
             case .idle:
                 // Duration picker
                 HStack(spacing: 8) {
-                    ForEach(fixedDurations, id: \.self) { d in
-                        durationPill(d, isSelected: duration == d)
+                    ForEach(vm.fixedDurations, id: \.self) { d in
+                        durationPill("\(d)m", isSelected: vm.duration == d && !vm.isFullTrack) {
+                            vm.selectFixedDuration(d)
+                        }
                     }
-                    if let custom = customDuration, !fixedDurations.contains(custom) {
-                        durationPill(custom, isSelected: duration == custom)
+                    // Full track pill
+                    if track.duration > 0 {
+                        durationPill("Full track", isSelected: vm.isFullTrack) {
+                            vm.selectFullTrack()
+                        }
+                    }
+                    // Custom pill
+                    durationPill(
+                        vm.customDuration != nil && !vm.fixedDurations.contains(vm.customDuration!) ? "\(vm.customDuration!)m" : "...",
+                        isSelected: !vm.isFullTrack && vm.customDuration != nil && vm.duration == vm.customDuration && !vm.fixedDurations.contains(vm.duration)
+                    ) {
+                        vm.showCustomInput.toggle()
+                    }
+                }
+
+                // Custom duration input
+                if vm.showCustomInput {
+                    HStack(spacing: 8) {
+                        TextField("1–120", text: Bindable(vm).customInputText)
+                            .keyboardType(.numberPad)
+                            .textFieldStyle(.roundedBorder)
+                            .frame(width: horizontalSizeClass == .regular ? 120 : 80)
+                        Text("min")
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Button("Set") {
+                            vm.applyCustomDuration()
+                        }
+                        .font(.subheadline)
+                        .foregroundStyle(scenario.accentColor)
                     }
                 }
 
                 // Play button
                 Button {
-                    Task { await startSession(track: track) }
+                    Task { await vm.startSession() }
                 } label: {
                     Circle()
                         .fill(scenario.accentColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: playButtonSize, height: playButtonSize)
                         .overlay {
                             Image(systemName: "play.fill")
-                                .font(.title2)
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
                                 .foregroundStyle(.white)
                         }
                 }
 
+                // Invisible spacer to match "reset" text height
+                Text("reset")
+                    .font(.subheadline)
+                    .hidden()
+
             case .running, .paused:
                 // Timer display
-                Text(timerDisplay)
+                Text(vm.timerDisplay)
                     .font(.caption)
                     .monospacedDigit()
                     .foregroundStyle(.tertiary)
 
-                HStack(spacing: 24) {
-                    // Play/Pause
-                    Button {
-                        if sessionState == .running { pause() }
-                        else { resume() }
-                    } label: {
-                        Circle()
-                            .fill(scenario.accentColor)
-                            .frame(width: 64, height: 64)
-                            .overlay {
-                                Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
-                                    .font(.title2)
-                                    .foregroundStyle(.white)
-                            }
-                    }
+                // Play/Pause button
+                Button {
+                    if vm.sessionState == .running { vm.pause() }
+                    else { vm.resume() }
+                } label: {
+                    Circle()
+                        .fill(scenario.accentColor)
+                        .frame(width: playButtonSize, height: playButtonSize)
+                        .overlay {
+                            Image(systemName: vm.sessionState == .running ? "pause.fill" : "play.fill")
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
+                                .foregroundStyle(.white)
+                        }
+                }
 
-                    // Stop
-                    Button {
-                        Task { await stop(track: track) }
-                    } label: {
-                        Text("stop")
-                            .font(.subheadline)
-                            .foregroundStyle(.tertiary)
-                    }
+                // Reset
+                Button {
+                    Task { await vm.stop() }
+                } label: {
+                    Text("reset")
+                        .font(.subheadline)
+                        .foregroundStyle(.tertiary)
                 }
 
             case .complete:
-                completionView(track: track)
+                completionView(track: track, vm: vm)
             }
         }
     }
 
-    private func durationPill(_ minutes: Int, isSelected: Bool) -> some View {
-        Button {
-            duration = minutes
-        } label: {
-            Text("\(minutes)m")
+    private func durationPill(_ label: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
                 .font(.subheadline)
                 .fontWeight(.medium)
                 .padding(.horizontal, 16)
@@ -207,27 +250,27 @@ struct SessionPlayerView: View {
     }
 
     @ViewBuilder
-    private func completionView(track: Track) -> some View {
+    private func completionView(track: Track, vm: SessionPlayerViewModel) -> some View {
         VStack(spacing: 24) {
             Circle()
                 .fill(scenario.accentColor.opacity(0.2))
-                .frame(width: 80, height: 80)
+                .frame(width: checkmarkSize, height: checkmarkSize)
                 .overlay {
                     Image(systemName: "checkmark")
-                        .font(.title)
+                        .font(horizontalSizeClass == .regular ? .largeTitle : .title)
                         .foregroundStyle(scenario.accentColorLight)
                 }
 
             VStack(spacing: 4) {
-                Text("\(duration) minutes of \(scenario.label.lowercased())")
+                Text("\(vm.duration) minutes of \(scenario.label.lowercased())")
                     .font(.headline)
                     .foregroundStyle(scenario.accentColorLight)
-                Text(ragam?.name ?? track.displayName)
+                Text(vm.displayName)
                     .font(.subheadline)
                     .foregroundStyle(.secondary)
             }
 
-            if showDefaultPrompt && !defaultSet {
+            if vm.showDefaultPrompt && !vm.defaultSet {
                 VStack(spacing: 12) {
                     Text("Set as your default for \(scenario.label)?")
                         .font(.subheadline)
@@ -235,13 +278,13 @@ struct SessionPlayerView: View {
 
                     HStack(spacing: 12) {
                         Button("Yes") {
-                            Task { await setDefault(track: track) }
+                            Task { await vm.setDefault() }
                         }
                         .buttonStyle(.borderedProminent)
                         .tint(scenario.accentColor)
 
                         Button("No thanks") {
-                            showDefaultPrompt = false
+                            vm.showDefaultPrompt = false
                         }
                         .buttonStyle(.bordered)
                     }
@@ -251,7 +294,7 @@ struct SessionPlayerView: View {
                 .clipShape(RoundedRectangle(cornerRadius: 16))
             }
 
-            if defaultSet {
+            if vm.defaultSet {
                 Text("Default set! Quick-play from home.")
                     .font(.subheadline)
                     .foregroundStyle(.green)
@@ -259,147 +302,16 @@ struct SessionPlayerView: View {
 
             HStack(spacing: 16) {
                 Button("New session") {
-                    restart()
+                    vm.restart()
                 }
                 .buttonStyle(.borderedProminent)
                 .tint(scenario.accentColor)
-            }
-        }
-    }
 
-    // MARK: - Timer
-
-    private var timerDisplay: String {
-        let mins = remaining / 60
-        let secs = remaining % 60
-        return String(format: "%02d:%02d", mins, secs)
-    }
-
-    // MARK: - Actions
-
-    private func loadData() async {
-        do {
-            track = try await supabase.fetchTrack(id: trackId)
-            if let track {
-                ragam = try await supabase.fetchRagam(id: track.ragamId)
-                let rasika = try await supabase.fetchRasika()
-                isFavorite = rasika?.favoriteTracks.contains(track.id) ?? false
-                if let custom = rasika?.customDuration {
-                    customDuration = custom
+                Button("Back to list") {
+                    dismiss()
                 }
-            }
-            if let initialDuration {
-                duration = initialDuration
-            }
-        } catch {}
-        isLoading = false
-    }
-
-    private func startSession(track: Track) async {
-        remaining = duration * 60
-        startedAt = Date()
-        elapsedBeforePause = 0
-        sessionState = .running
-
-        // TODO M2: Start audio playback here
-
-        if supabase.currentUser != nil {
-            sessionId = try? await supabase.startListeningSession(
-                trackId: track.id,
-                scenario: scenario,
-                intendedDurationSeconds: duration * 60
-            )
-        }
-
-        // Start timer
-        startTimer()
-    }
-
-    private func startTimer() {
-        Task {
-            while sessionState == .running {
-                try? await Task.sleep(for: .seconds(1))
-                guard sessionState == .running, let startedAt else { break }
-
-                let elapsed = elapsedBeforePause + Date().timeIntervalSince(startedAt)
-                let left = max(0, Int(Double(duration * 60) - elapsed))
-                remaining = left
-
-                if left <= 0 {
-                    await complete()
-                    break
-                }
+                .buttonStyle(.bordered)
             }
         }
-    }
-
-    private func pause() {
-        guard let startedAt else { return }
-        elapsedBeforePause += Date().timeIntervalSince(startedAt)
-        sessionState = .paused
-        // TODO M2: Pause audio
-    }
-
-    private func resume() {
-        startedAt = Date()
-        sessionState = .running
-        startTimer()
-        // TODO M2: Resume audio
-    }
-
-    private func stop(track: Track) async {
-        guard let startedAt else { return }
-        let elapsed = Int(elapsedBeforePause + Date().timeIntervalSince(startedAt))
-        sessionState = .idle
-        remaining = 0
-        // TODO M2: Stop audio
-
-        if let sessionId {
-            try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: elapsed, completed: false)
-            self.sessionId = nil
-        }
-
-        let countable = computeCountableSeconds(scenario: scenario, durationSeconds: elapsed, completed: false)
-        if countable > 0 {
-            try? await supabase.upsertCertification(ragamId: track.ragamId, additionalSeconds: countable)
-        }
-    }
-
-    private func complete() async {
-        sessionState = .complete
-        // TODO M2: Stop audio
-
-        if let sessionId {
-            try? await supabase.endListeningSession(sessionId: sessionId, durationSeconds: duration * 60, completed: true)
-            self.sessionId = nil
-        }
-
-        if supabase.currentUser != nil {
-            showDefaultPrompt = true
-            if let track {
-                try? await supabase.upsertCertification(ragamId: track.ragamId, additionalSeconds: duration * 60)
-            }
-        }
-    }
-
-    private func restart() {
-        sessionState = .idle
-        remaining = 0
-        showDefaultPrompt = false
-        defaultSet = false
-    }
-
-    private func toggleFavorite() async {
-        guard track != nil else { return }
-        do {
-            let updated = try await supabase.toggleFavoriteTrack(trackId: trackId)
-            isFavorite = updated.contains(trackId)
-        } catch {}
-    }
-
-    private func setDefault(track: Track) async {
-        try? await supabase.setDefaultTrack(scenario: scenario, trackId: track.id, durationSeconds: duration * 60)
-        defaultSet = true
-        showDefaultPrompt = false
     }
 }

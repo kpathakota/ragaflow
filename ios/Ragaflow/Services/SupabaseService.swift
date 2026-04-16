@@ -2,13 +2,14 @@ import Foundation
 import Supabase
 
 @Observable
-final class SupabaseService {
+final class SupabaseService: SupabaseServiceProtocol {
     static let shared = SupabaseService()
 
     let client: SupabaseClient
 
     private(set) var currentUser: User?
     private(set) var isLoading = true
+    var isAuthenticated: Bool { currentUser != nil }
 
     private init() {
         guard
@@ -19,7 +20,11 @@ final class SupabaseService {
             fatalError("Missing SUPABASE_URL or SUPABASE_PUBLISHABLE_KEY in Info.plist")
         }
 
-        client = SupabaseClient(supabaseURL: url, supabaseKey: key)
+        client = SupabaseClient(
+            supabaseURL: url,
+            supabaseKey: key,
+            options: .init(auth: .init(emitLocalSessionAsInitialSession: true))
+        )
     }
 
     // MARK: - Auth
@@ -35,8 +40,9 @@ final class SupabaseService {
         // Listen for auth state changes
         Task {
             for await (event, session) in client.auth.authStateChanges {
+                let validUser = session.flatMap { $0.isExpired ? nil : $0.user }
                 await MainActor.run {
-                    self.currentUser = session?.user
+                    self.currentUser = validUser
                 }
                 if event == .signedIn, let userId = session?.user.id {
                     try? await ensureRasika(userId: userId)
@@ -130,7 +136,7 @@ final class SupabaseService {
     func toggleFavoriteTrack(trackId: String) async throws -> [String] {
         guard let userId = currentUser?.id else { return [] }
 
-        var rasika = try await fetchRasika()
+        let rasika = try await fetchRasika()
         guard var favorites = rasika?.favoriteTracks else { return [] }
 
         if let index = favorites.firstIndex(of: trackId) {

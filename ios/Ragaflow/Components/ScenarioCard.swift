@@ -38,7 +38,7 @@ struct ExploreCard: View {
                 Text("Explore")
                     .font(.title3)
                     .fontWeight(.medium)
-                    .foregroundStyle(Color.green.opacity(0.8))
+                    .foregroundStyle(Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.8)) // tan
                 Text("Browse all tracks by ragam, tag, or mood")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -52,7 +52,7 @@ struct ExploreCard: View {
                 .fill(Color(.systemGray6).opacity(0.6))
                 .overlay(
                     RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(Color.green.opacity(0.4), lineWidth: 1)
+                        .strokeBorder(Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.4), lineWidth: 1)
                 )
         )
     }

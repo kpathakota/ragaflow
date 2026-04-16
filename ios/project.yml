@@ -1,0 +1,114 @@
+name: Ragaflow
+options:
+  bundleIdPrefix: com.ragaflow
+  deploymentTarget:
+    iOS: "17.0"
+  xcodeVersion: "16.0"
+
+settings:
+  base:
+    ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+    SWIFT_VERSION: "5.0"
+
+configFiles:
+  Debug: Ragaflow/Configuration/Debug.xcconfig
+  Release: Ragaflow/Configuration/Release.xcconfig
+
+configs:
+  Debug: debug
+  Release: release
+
+targets:
+  Ragaflow:
+    type: application
+    platform: iOS
+    sources:
+      - path: Ragaflow
+        excludes:
+          - "Configuration/*.xcconfig"
+          - "Configuration/*.example"
+          - "Resources/Package.swift.reference"
+          - "Resources/Info.plist"
+          - "Services/Mocks/**"
+    info:
+      path: Ragaflow/Resources/Info.plist
+      properties:
+        CFBundleName: Ragaflow
+        CFBundleDisplayName: Ragaflow
+        CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
+        CFBundleVersion: "1"
+        CFBundleShortVersionString: "0.1.0"
+        CFBundlePackageType: APPL
+        CFBundleExecutable: $(EXECUTABLE_NAME)
+        LSRequiresIPhoneOS: true
+        UILaunchScreen: {}
+        UIRequiredDeviceCapabilities:
+          - armv7
+        UISupportedInterfaceOrientations:
+          - UIInterfaceOrientationPortrait
+        UISupportedInterfaceOrientations~ipad:
+          - UIInterfaceOrientationPortrait
+          - UIInterfaceOrientationPortraitUpsideDown
+          - UIInterfaceOrientationLandscapeLeft
+          - UIInterfaceOrientationLandscapeRight
+        UIUserInterfaceStyle: Dark
+        UIBackgroundModes:
+          - audio
+        SUPABASE_URL: $(SUPABASE_URL)
+        SUPABASE_PUBLISHABLE_KEY: $(SUPABASE_PUBLISHABLE_KEY)
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.ragaflow.app
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        TARGETED_DEVICE_FAMILY: "1,2"
+        GENERATE_INFOPLIST_FILE: false
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+    entitlements:
+      path: Ragaflow/Ragaflow.entitlements
+      properties:
+        com.apple.security.application-groups: []
+    dependencies:
+      - package: supabase-swift
+        product: Supabase
+    postCompileScripts: []
+
+  RagaflowTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: RagaflowTests
+      - path: Ragaflow/Services/Mocks
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+
+  RagaflowUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RagaflowUITests
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+
+packages:
+  supabase-swift:
+    url: https://github.com/supabase/supabase-swift
+    from: "2.0.0"

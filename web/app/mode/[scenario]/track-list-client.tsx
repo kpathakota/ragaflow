@@ -1,10 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 import type { Track, Ragam, Scenario } from "@/lib/types";
 import { TrackCard } from "@/components/track-card";
 import { useAuth } from "@/lib/auth/auth-context";
 import { getPreferencesClient, toggleFavoriteTrackClient } from "@/lib/favorites";
+import { trackEvent } from "@/lib/analytics";
 
 export function TrackListClient({
   tracks,
@@ -17,6 +18,14 @@ export function TrackListClient({
 }) {
   const { user } = useAuth();
   const [favoriteIds, setFavoriteIds] = useState<string[]>([]);
+  const hasFiredView = useRef(false);
+
+  useEffect(() => {
+    if (!hasFiredView.current) {
+      hasFiredView.current = true;
+      trackEvent("scenario_view", { scenario }, user?.id);
+    }
+  }, [scenario, user?.id]);
 
   useEffect(() => {
     if (!user) return;

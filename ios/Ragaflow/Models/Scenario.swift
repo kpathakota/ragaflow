@@ -23,19 +23,21 @@ enum Scenario: String, Codable, CaseIterable, Identifiable {
         }
     }
 
+    /// Matches web scenario-config.ts accent colors
     var accentColor: Color {
         switch self {
-        case .focus: .blue
-        case .sleep: .indigo
-        case .meditate: Color(red: 0.96, green: 0.75, blue: 0.03) // amber
+        case .focus: Color(red: 0.79, green: 0.65, blue: 0.30)    // #C9A54C gold
+        case .sleep: Color(red: 0.69, green: 0.53, blue: 0.47)    // #B08878 brown
+        case .meditate: Color(red: 0.54, green: 0.61, blue: 0.45) // #8A9B72 sage
         }
     }
 
+    /// Lighter variant for text on dark backgrounds
     var accentColorLight: Color {
         switch self {
-        case .focus: Color(red: 0.38, green: 0.65, blue: 1.0) // blue-400
-        case .sleep: Color(red: 0.51, green: 0.51, blue: 1.0) // indigo-400
-        case .meditate: Color(red: 0.98, green: 0.82, blue: 0.28) // amber-400
+        case .focus: Color(red: 0.85, green: 0.72, blue: 0.40)    // lighter gold
+        case .sleep: Color(red: 0.78, green: 0.62, blue: 0.56)    // lighter brown
+        case .meditate: Color(red: 0.64, green: 0.71, blue: 0.55) // lighter sage
         }
     }
 }
