@@ -135,7 +135,7 @@ final class SupabaseService {
     func toggleFavoriteTrack(trackId: String) async throws -> [String] {
         guard let userId = currentUser?.id else { return [] }
 
-        var rasika = try await fetchRasika()
+        let rasika = try await fetchRasika()
         guard var favorites = rasika?.favoriteTracks else { return [] }
 
         if let index = favorites.firstIndex(of: trackId) {
