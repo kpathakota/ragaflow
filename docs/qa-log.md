@@ -6,6 +6,33 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Feature — Analytics Events (Alpha)
+**Date:** 2026-04-16
+**Status:** Pending verification
+
+### What changed
+- New `analytics_events` table (migration 009) with anonymous_id, rasika_id, event_type, platform, metadata
+- New `web/lib/analytics.ts` — thin event logger with per-session anonymous UUID
+- `AnalyticsProvider` fires `app_open` on every page load (added to root layout)
+- `TrackListClient` fires `scenario_view` when a scenario track list is viewed
+- `AuthForm` fires `auth_error` on sign-in/sign-up failures
+- `SessionPlayer` fires `playback_error` on audio load failures
+- New `supabase/analytics-queries.sql` with 10 ad-hoc SQL queries (DAU/WAU, browse-without-play, completion rate, error rates, etc.)
+- Types added to `web/lib/types.ts` for iOS parity
+- 8 new unit tests for the analytics module
+
+### Manual checks
+- [ ] Run migration 009 on staging Supabase
+- [ ] Open the app — verify `app_open` row appears in `analytics_events` table
+- [ ] Navigate to a scenario (e.g., /mode/focus) — verify `scenario_view` row with correct scenario
+- [ ] Attempt sign-in with wrong password — verify `auth_error` row with method and error message
+- [ ] Load a track with a broken audio URL — verify `playback_error` row
+- [ ] Verify `anonymous_id` is consistent across events within the same tab
+- [ ] Open a new tab — verify a different `anonymous_id` is generated
+- [ ] Sign in and repeat — verify `rasika_id` is populated on subsequent events
+
+---
+
 ## Fix — Create rasika row on sign-in
 **Commit:** f78a0b7
 **Date:** 2026-03-26
