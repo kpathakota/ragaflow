@@ -5,9 +5,9 @@ CREATE TABLE analytics_events (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   anonymous_id uuid NOT NULL,
   rasika_id uuid REFERENCES auth.users(id),
-  event_type text NOT NULL,
+  event_type text NOT NULL CHECK (event_type IN ('app_open', 'scenario_view', 'auth_error', 'playback_error')),
   platform text NOT NULL CHECK (platform IN ('web', 'ios')),
-  metadata jsonb DEFAULT '{}',
+  metadata jsonb DEFAULT '{}' CHECK (pg_column_size(metadata) < 4096),
   created_at timestamptz DEFAULT now()
 );
 
@@ -22,7 +22,7 @@ ALTER TABLE analytics_events ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Anyone can insert analytics events"
   ON analytics_events FOR INSERT
-  WITH CHECK (true);
+  WITH CHECK (rasika_id IS NULL OR rasika_id = auth.uid());
 
 CREATE POLICY "Authenticated users can read own events"
   ON analytics_events FOR SELECT

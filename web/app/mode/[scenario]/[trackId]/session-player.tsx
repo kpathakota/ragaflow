@@ -453,10 +453,12 @@ export function SessionPlayer({
         src={track.audio_url}
         loop
         preload="auto"
-        onError={() => {
+        onError={(e) => {
+          const mediaError = (e.target as HTMLAudioElement).error;
           trackEvent("playback_error", {
             track_id: track.id,
-            error: "Audio failed to load",
+            error: mediaError?.message ?? "Unknown playback error",
+            code: mediaError?.code,
           }, user?.id);
         }}
       />
