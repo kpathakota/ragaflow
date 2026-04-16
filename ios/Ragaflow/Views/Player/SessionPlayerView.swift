@@ -33,6 +33,8 @@ struct SessionPlayerView: View {
 
     private let audio = AudioService.shared
     private let fixedDurations = [25, 45]
+    private var playButtonSize: CGFloat { horizontalSizeClass == .regular ? 88 : 64 }
+    private var checkmarkSize: CGFloat { horizontalSizeClass == .regular ? 112 : 80 }
     /// Seconds before session end to begin sleep volume fade
     private let sleepFadeDuration: TimeInterval = 120
 
@@ -109,16 +111,15 @@ struct SessionPlayerView: View {
             Spacer()
 
             ZStack {
-                GeometryReader { geo in
-                    let size = horizontalSizeClass == .regular
-                        ? min(geo.size.width, geo.size.height) * 0.55
-                        : 220.0
-                    Circle()
-                        .fill(scenario.accentColor.opacity(0.15))
-                        .frame(width: size, height: size)
-                        .blur(radius: 60)
-                        .frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+                Circle()
+                    .fill(scenario.accentColor.opacity(0.15))
+                    .containerRelativeFrame([.horizontal, .vertical]) { length, axis in
+                        if horizontalSizeClass == .regular {
+                            return length * 0.35
+                        }
+                        return 220
+                    }
+                    .blur(radius: 60)
 
                 // Artist note
                 if let note = track.artistNote, sessionState != .complete {
@@ -145,7 +146,7 @@ struct SessionPlayerView: View {
                     }
                     .frame(maxWidth: .infinity, alignment: .leading)
                     .padding(.horizontal)
-                    .offset(y: 80)
+                    .offset(y: horizontalSizeClass == .regular ? 140 : 80)
                 }
             }
 
@@ -217,10 +218,10 @@ struct SessionPlayerView: View {
                 } label: {
                     Circle()
                         .fill(scenario.accentColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: playButtonSize, height: playButtonSize)
                         .overlay {
                             Image(systemName: "play.fill")
-                                .font(.title2)
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
                                 .foregroundStyle(.white)
                         }
                 }
@@ -244,10 +245,10 @@ struct SessionPlayerView: View {
                 } label: {
                     Circle()
                         .fill(scenario.accentColor)
-                        .frame(width: 64, height: 64)
+                        .frame(width: playButtonSize, height: playButtonSize)
                         .overlay {
                             Image(systemName: sessionState == .running ? "pause.fill" : "play.fill")
-                                .font(.title2)
+                                .font(horizontalSizeClass == .regular ? .title : .title2)
                                 .foregroundStyle(.white)
                         }
                 }
@@ -285,10 +286,10 @@ struct SessionPlayerView: View {
         VStack(spacing: 24) {
             Circle()
                 .fill(scenario.accentColor.opacity(0.2))
-                .frame(width: 80, height: 80)
+                .frame(width: checkmarkSize, height: checkmarkSize)
                 .overlay {
                     Image(systemName: "checkmark")
-                        .font(.title)
+                        .font(horizontalSizeClass == .regular ? .largeTitle : .title)
                         .foregroundStyle(scenario.accentColorLight)
                 }
 
