@@ -8,18 +8,31 @@
 
 /* Begin PBXBuildFile section */
 		061DE32159153681129D770B /* AudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F553F2A3FAA2EB99A237D85 /* AudioService.swift */; };
+		0D213C247B37DE5797FAA53B /* SessionPlayerViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 701119E2DCD9717D68C246A5 /* SessionPlayerViewModel.swift */; };
+		14137FF3DB2FCD1D81F39E59 /* AuthFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328BC7944D33337C863D49A /* AuthFlowTests.swift */; };
+		17355608DF872ACD2F94C59C /* FavoriteFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C224B13724E5BD78E37E3393 /* FavoriteFlowTests.swift */; };
+		1C986489B933099D758A7594 /* PlayerFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */; };
+		2227E0D7EE3CA50E1E98B255 /* ExploreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D75F5631269100D96A2CB44 /* ExploreViewModel.swift */; };
+		2D07FF82E95E813F1CA2BAB1 /* AudioServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D7463D158D12F63BF3E377 /* AudioServiceProtocol.swift */; };
+		3A41C1ADE647D2D18586015B /* SessionPlayerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */; };
 		3CC2CD850C5685E2CE1C1E3A /* UserBadge.swift in Sources */ = {isa = PBXBuildFile; fileRef = A31E631D3ED8FB54ADFFC744 /* UserBadge.swift */; };
 		4C6D0BFF2B952A24EEB84B67 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E281ED4D732131448A16A649 /* Assets.xcassets */; };
 		4F881DB4BA2E1E016EA155E8 /* TrackCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5EA826FFC2335ABAE273E179 /* TrackCard.swift */; };
 		52747B8BCD8711297560511C /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5BF83213E88EF5298667C21D /* ContentView.swift */; };
 		54D90DD8442AEDA180525228 /* AuthView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 26DC56A75637E4572BF38ED6 /* AuthView.swift */; };
+		78F0BA14E149526C0EF1A51A /* MockSupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = B15FDDE719E127B4FBA36B2C /* MockSupabaseService.swift */; };
 		7AF416BFE0D2D3D53BDD0427 /* Rasika.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6AFC357E623E6A41EDF2308A /* Rasika.swift */; };
+		91A6A4E7C13C2A79237431C9 /* SupabaseServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = ED512E620EBA6000EE3EDF29 /* SupabaseServiceProtocol.swift */; };
 		A80400460E8848EBA3F2DE9A /* SessionPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */; };
 		B57C95892743755334E44F6F /* RagaflowApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */; };
 		B7CB4BC48DC30632E9A4EBF5 /* Supabase in Frameworks */ = {isa = PBXBuildFile; productRef = 0DDD1A2D8EFDACE46E102DDA /* Supabase */; };
 		BCD4E2CEFF56E52CF0CEA6A9 /* Certification.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA469ECB10ACA244F775C6CD /* Certification.swift */; };
 		BE873BFF738B3B194B6B8EFA /* Scenario.swift in Sources */ = {isa = PBXBuildFile; fileRef = 15E0989A03D3CEAA59863D64 /* Scenario.swift */; };
+		C1A96C00FF6ADB3811DA7CEE /* RagaflowUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 660487D5240F7DF7F328F157 /* RagaflowUITests.swift */; };
+		C26AE6030BF2C21FB86F33C2 /* ExploreViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 03225E59A85E33C9FE134C9D /* ExploreViewModelTests.swift */; };
 		C5C74E0C25F736309A049D56 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743CEC8E8EBA3D278D7E3DA /* Track.swift */; };
+		CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */; };
+		CED328D86937BE8E91CAA6A8 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23EF28FD95CB4D54DEF1DD /* ProfileViewModel.swift */; };
 		D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966A1852C0B156E908F43DDF /* Ragam.swift */; };
 		D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA77D1F146B22E3A514E3E61 /* ExploreView.swift */; };
 		D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29F8271D78294D42B4E57AF /* ProfileView.swift */; };
@@ -27,32 +40,66 @@
 		E642F3DFC3D3EE0ED50527AA /* HomeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8F2F6EDB47FF81A2A8E50C59 /* HomeView.swift */; };
 		E9AA430C81C6ACDC204926FB /* SupabaseService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */; };
 		EFEC4E5E41F1583EC4BA0C77 /* ScenarioCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = A4379B8E57D55C4808164A3C /* ScenarioCard.swift */; };
+		FD0569E3DA39978F322B12AC /* MockAudioService.swift in Sources */ = {isa = PBXBuildFile; fileRef = 848C4150399E089EF4A4F667 /* MockAudioService.swift */; };
 		FD095D31A41B791A161E2569 /* TrackListView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB24971D8ADA94B5CDE50676 /* TrackListView.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		D5F4FD1BAFA896A42FF77C46 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E0C306B38989B229D1AF6A69 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5724ACFD42D87003ECEA88E5;
+			remoteInfo = Ragaflow;
+		};
+		F2F67910EDC6816BD07129A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E0C306B38989B229D1AF6A69 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 5724ACFD42D87003ECEA88E5;
+			remoteInfo = Ragaflow;
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXFileReference section */
+		00D7463D158D12F63BF3E377 /* AudioServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioServiceProtocol.swift; sourceTree = "<group>"; };
+		03225E59A85E33C9FE134C9D /* ExploreViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewModelTests.swift; sourceTree = "<group>"; };
+		15292F57544C41411DBB4B42 /* RagaflowTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RagaflowTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		15E0989A03D3CEAA59863D64 /* Scenario.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Scenario.swift; sourceTree = "<group>"; };
 		16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ragaflow.entitlements; sourceTree = "<group>"; };
 		26DC56A75637E4572BF38ED6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
+		35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
 		40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		44EFE15DB19746626C260B83 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowApp.swift; sourceTree = "<group>"; };
 		4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseService.swift; sourceTree = "<group>"; };
+		4D75F5631269100D96A2CB44 /* ExploreViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreViewModel.swift; sourceTree = "<group>"; };
+		4E23EF28FD95CB4D54DEF1DD /* ProfileViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModel.swift; sourceTree = "<group>"; };
 		5624C1B358A1D80AF543E647 /* SessionPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPlayerView.swift; sourceTree = "<group>"; };
 		5743CEC8E8EBA3D278D7E3DA /* Track.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Track.swift; sourceTree = "<group>"; };
 		5BF83213E88EF5298667C21D /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		5EA826FFC2335ABAE273E179 /* TrackCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackCard.swift; sourceTree = "<group>"; };
+		660487D5240F7DF7F328F157 /* RagaflowUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowUITests.swift; sourceTree = "<group>"; };
 		6AFC357E623E6A41EDF2308A /* Rasika.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Rasika.swift; sourceTree = "<group>"; };
+		701119E2DCD9717D68C246A5 /* SessionPlayerViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPlayerViewModel.swift; sourceTree = "<group>"; };
+		7328BC7944D33337C863D49A /* AuthFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthFlowTests.swift; sourceTree = "<group>"; };
+		7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SessionPlayerViewModelTests.swift; sourceTree = "<group>"; };
+		848C4150399E089EF4A4F667 /* MockAudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockAudioService.swift; sourceTree = "<group>"; };
 		8F2F6EDB47FF81A2A8E50C59 /* HomeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeView.swift; sourceTree = "<group>"; };
 		8F553F2A3FAA2EB99A237D85 /* AudioService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AudioService.swift; sourceTree = "<group>"; };
 		966A1852C0B156E908F43DDF /* Ragam.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Ragam.swift; sourceTree = "<group>"; };
+		9854E77BB7F238ABAD1F3086 /* RagaflowUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = RagaflowUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		A31E631D3ED8FB54ADFFC744 /* UserBadge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UserBadge.swift; sourceTree = "<group>"; };
 		A4379B8E57D55C4808164A3C /* ScenarioCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScenarioCard.swift; sourceTree = "<group>"; };
 		AB24971D8ADA94B5CDE50676 /* TrackListView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TrackListView.swift; sourceTree = "<group>"; };
+		B15FDDE719E127B4FBA36B2C /* MockSupabaseService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MockSupabaseService.swift; sourceTree = "<group>"; };
+		C224B13724E5BD78E37E3393 /* FavoriteFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FavoriteFlowTests.swift; sourceTree = "<group>"; };
 		C29F8271D78294D42B4E57AF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		DA469ECB10ACA244F775C6CD /* Certification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Certification.swift; sourceTree = "<group>"; };
+		E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerFlowTests.swift; sourceTree = "<group>"; };
 		E281ED4D732131448A16A649 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E67C11CB71736E44DA9D4390 /* Ragaflow.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Ragaflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		ED512E620EBA6000EE3EDF29 /* SupabaseServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseServiceProtocol.swift; sourceTree = "<group>"; };
 		FA77D1F146B22E3A514E3E61 /* ExploreView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExploreView.swift; sourceTree = "<group>"; };
 		FB5F841227FE20D91CD25B61 /* ListeningSession.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ListeningSession.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -87,9 +134,20 @@
 				BC6DE9EA88DAD5475951AEF1 /* Models */,
 				CF03BFB97C452863805041F0 /* Resources */,
 				64F0EC6FDD90EA4E2FED33CA /* Services */,
+				AE3A40DC321ABE1A47448E62 /* ViewModels */,
 				B0083D73166943BEE40E3BDB /* Views */,
 			);
 			path = Ragaflow;
+			sourceTree = "<group>";
+		};
+		2BD4274FDEDC38FD16BA9678 /* RagaflowTests */ = {
+			isa = PBXGroup;
+			children = (
+				03225E59A85E33C9FE134C9D /* ExploreViewModelTests.swift */,
+				35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */,
+				7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */,
+			);
+			path = RagaflowTests;
 			sourceTree = "<group>";
 		};
 		337E1C9E6E86F5FFAD205B93 /* Explore */ = {
@@ -121,6 +179,8 @@
 			children = (
 				8F553F2A3FAA2EB99A237D85 /* AudioService.swift */,
 				4C864EB6C3FBA20C00F88CEB /* SupabaseService.swift */,
+				FE10A9C99E0B4C641A94459B /* Mocks */,
+				69519E978F83439A8CE285B7 /* Protocols */,
 			);
 			path = Services;
 			sourceTree = "<group>";
@@ -129,8 +189,19 @@
 			isa = PBXGroup;
 			children = (
 				E67C11CB71736E44DA9D4390 /* Ragaflow.app */,
+				15292F57544C41411DBB4B42 /* RagaflowTests.xctest */,
+				9854E77BB7F238ABAD1F3086 /* RagaflowUITests.xctest */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		69519E978F83439A8CE285B7 /* Protocols */ = {
+			isa = PBXGroup;
+			children = (
+				00D7463D158D12F63BF3E377 /* AudioServiceProtocol.swift */,
+				ED512E620EBA6000EE3EDF29 /* SupabaseServiceProtocol.swift */,
+			);
+			path = Protocols;
 			sourceTree = "<group>";
 		};
 		6C8EC38CF67BD3BDE7C40892 = {
@@ -138,6 +209,8 @@
 			children = (
 				9386B0A09D7E7A652EF44715 /* Configuration */,
 				11613A7A0340A002FAC7A468 /* Ragaflow */,
+				2BD4274FDEDC38FD16BA9678 /* RagaflowTests */,
+				9FF89FCB78F6FC07794AA0AB /* RagaflowUITests */,
 				69120638EEAE6DE2AF2AEBFC /* Products */,
 			);
 			sourceTree = "<group>";
@@ -150,6 +223,27 @@
 			);
 			name = Configuration;
 			path = Ragaflow/Configuration;
+			sourceTree = "<group>";
+		};
+		9FF89FCB78F6FC07794AA0AB /* RagaflowUITests */ = {
+			isa = PBXGroup;
+			children = (
+				7328BC7944D33337C863D49A /* AuthFlowTests.swift */,
+				C224B13724E5BD78E37E3393 /* FavoriteFlowTests.swift */,
+				E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */,
+				660487D5240F7DF7F328F157 /* RagaflowUITests.swift */,
+			);
+			path = RagaflowUITests;
+			sourceTree = "<group>";
+		};
+		AE3A40DC321ABE1A47448E62 /* ViewModels */ = {
+			isa = PBXGroup;
+			children = (
+				4D75F5631269100D96A2CB44 /* ExploreViewModel.swift */,
+				4E23EF28FD95CB4D54DEF1DD /* ProfileViewModel.swift */,
+				701119E2DCD9717D68C246A5 /* SessionPlayerViewModel.swift */,
+			);
+			path = ViewModels;
 			sourceTree = "<group>";
 		};
 		B0083D73166943BEE40E3BDB /* Views */ = {
@@ -220,9 +314,36 @@
 			path = Components;
 			sourceTree = "<group>";
 		};
+		FE10A9C99E0B4C641A94459B /* Mocks */ = {
+			isa = PBXGroup;
+			children = (
+				848C4150399E089EF4A4F667 /* MockAudioService.swift */,
+				B15FDDE719E127B4FBA36B2C /* MockSupabaseService.swift */,
+			);
+			path = Mocks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		272D86D1B857E7A422792E5B /* RagaflowTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 87980F614E4420C2B01C7DAC /* Build configuration list for PBXNativeTarget "RagaflowTests" */;
+			buildPhases = (
+				D5142FC7CC50C3E915B56D9A /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				185CE54171AC2B071988C3F6 /* PBXTargetDependency */,
+			);
+			name = RagaflowTests;
+			packageProductDependencies = (
+			);
+			productName = RagaflowTests;
+			productReference = 15292F57544C41411DBB4B42 /* RagaflowTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		5724ACFD42D87003ECEA88E5 /* Ragaflow */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = F444CC0438CA806414620E76 /* Build configuration list for PBXNativeTarget "Ragaflow" */;
@@ -243,6 +364,24 @@
 			productReference = E67C11CB71736E44DA9D4390 /* Ragaflow.app */;
 			productType = "com.apple.product-type.application";
 		};
+		6C00723E4E01702F367F0784 /* RagaflowUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FC870C4616262224582F9676 /* Build configuration list for PBXNativeTarget "RagaflowUITests" */;
+			buildPhases = (
+				89A146C86AD9F06CB3D0D4B5 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				C665A7DB0803B274FE279206 /* PBXTargetDependency */,
+			);
+			name = RagaflowUITests;
+			packageProductDependencies = (
+			);
+			productName = RagaflowUITests;
+			productReference = 9854E77BB7F238ABAD1F3086 /* RagaflowUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -252,6 +391,19 @@
 				BuildIndependentTargetsInParallel = YES;
 				LastUpgradeCheck = 1600;
 				TargetAttributes = {
+					272D86D1B857E7A422792E5B = {
+						DevelopmentTeam = A2S25D7DN9;
+						ProvisioningStyle = Automatic;
+					};
+					5724ACFD42D87003ECEA88E5 = {
+						DevelopmentTeam = A2S25D7DN9;
+						ProvisioningStyle = Automatic;
+					};
+					6C00723E4E01702F367F0784 = {
+						DevelopmentTeam = A2S25D7DN9;
+						ProvisioningStyle = Automatic;
+						TestTargetID = 5724ACFD42D87003ECEA88E5;
+					};
 				};
 			};
 			buildConfigurationList = FF03F4D6898CCC379D0A7D55 /* Build configuration list for PBXProject "Ragaflow" */;
@@ -272,6 +424,8 @@
 			projectRoot = "";
 			targets = (
 				5724ACFD42D87003ECEA88E5 /* Ragaflow */,
+				272D86D1B857E7A422792E5B /* RagaflowTests */,
+				6C00723E4E01702F367F0784 /* RagaflowUITests */,
 			);
 		};
 /* End PBXProject section */
@@ -288,25 +442,43 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		89A146C86AD9F06CB3D0D4B5 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14137FF3DB2FCD1D81F39E59 /* AuthFlowTests.swift in Sources */,
+				17355608DF872ACD2F94C59C /* FavoriteFlowTests.swift in Sources */,
+				1C986489B933099D758A7594 /* PlayerFlowTests.swift in Sources */,
+				C1A96C00FF6ADB3811DA7CEE /* RagaflowUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9E25855472412755434B5B2B /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 				061DE32159153681129D770B /* AudioService.swift in Sources */,
+				2D07FF82E95E813F1CA2BAB1 /* AudioServiceProtocol.swift in Sources */,
 				54D90DD8442AEDA180525228 /* AuthView.swift in Sources */,
 				BCD4E2CEFF56E52CF0CEA6A9 /* Certification.swift in Sources */,
 				52747B8BCD8711297560511C /* ContentView.swift in Sources */,
 				D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */,
+				2227E0D7EE3CA50E1E98B255 /* ExploreViewModel.swift in Sources */,
 				E642F3DFC3D3EE0ED50527AA /* HomeView.swift in Sources */,
 				D9ED2C5370200C3061C4DC40 /* ListeningSession.swift in Sources */,
+				FD0569E3DA39978F322B12AC /* MockAudioService.swift in Sources */,
+				78F0BA14E149526C0EF1A51A /* MockSupabaseService.swift in Sources */,
 				D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */,
+				CED328D86937BE8E91CAA6A8 /* ProfileViewModel.swift in Sources */,
 				B57C95892743755334E44F6F /* RagaflowApp.swift in Sources */,
 				D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */,
 				7AF416BFE0D2D3D53BDD0427 /* Rasika.swift in Sources */,
 				BE873BFF738B3B194B6B8EFA /* Scenario.swift in Sources */,
 				EFEC4E5E41F1583EC4BA0C77 /* ScenarioCard.swift in Sources */,
 				A80400460E8848EBA3F2DE9A /* SessionPlayerView.swift in Sources */,
+				0D213C247B37DE5797FAA53B /* SessionPlayerViewModel.swift in Sources */,
 				E9AA430C81C6ACDC204926FB /* SupabaseService.swift in Sources */,
+				91A6A4E7C13C2A79237431C9 /* SupabaseServiceProtocol.swift in Sources */,
 				C5C74E0C25F736309A049D56 /* Track.swift in Sources */,
 				4F881DB4BA2E1E016EA155E8 /* TrackCard.swift in Sources */,
 				FD095D31A41B791A161E2569 /* TrackListView.swift in Sources */,
@@ -314,9 +486,72 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		D5142FC7CC50C3E915B56D9A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C26AE6030BF2C21FB86F33C2 /* ExploreViewModelTests.swift in Sources */,
+				CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */,
+				3A41C1ADE647D2D18586015B /* SessionPlayerViewModelTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		185CE54171AC2B071988C3F6 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5724ACFD42D87003ECEA88E5 /* Ragaflow */;
+			targetProxy = D5F4FD1BAFA896A42FF77C46 /* PBXContainerItemProxy */;
+		};
+		C665A7DB0803B274FE279206 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 5724ACFD42D87003ECEA88E5 /* Ragaflow */;
+			targetProxy = F2F67910EDC6816BD07129A0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
+		1C184D62A03AB7631A406403 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A2S25D7DN9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Ragaflow;
+			};
+			name = Debug;
+		};
+		2CCC520D5FDDFF88321491E5 /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A2S25D7DN9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Ragaflow;
+			};
+			name = Release;
+		};
 		36903ABA96C261E15FC3E32D /* Release */ = {
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
@@ -382,6 +617,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A2S25D7DN9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
@@ -467,6 +703,7 @@
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = Ragaflow/Ragaflow.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = A2S25D7DN9;
 				GENERATE_INFOPLIST_FILE = NO;
 				INFOPLIST_FILE = Ragaflow/Resources/Info.plist;
@@ -480,14 +717,72 @@
 			};
 			name = Debug;
 		};
+		A9F31C1465BA89561A4E92B2 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A2S25D7DN9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ragaflow.app/Ragaflow";
+			};
+			name = Debug;
+		};
+		DA9ED8170FE85DE70F6B491B /* Release */ = {
+			isa = XCBuildConfiguration;
+			baseConfigurationReference = 44EFE15DB19746626C260B83 /* Release.xcconfig */;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = A2S25D7DN9;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ragaflow.app/Ragaflow";
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		87980F614E4420C2B01C7DAC /* Build configuration list for PBXNativeTarget "RagaflowTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				A9F31C1465BA89561A4E92B2 /* Debug */,
+				DA9ED8170FE85DE70F6B491B /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
 		F444CC0438CA806414620E76 /* Build configuration list for PBXNativeTarget "Ragaflow" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				820A978EDF1DA558B06B3B24 /* Debug */,
 				754B154AE5DB14A03A8CB9CC /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		FC870C4616262224582F9676 /* Build configuration list for PBXNativeTarget "RagaflowUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1C184D62A03AB7631A406403 /* Debug */,
+				2CCC520D5FDDFF88321491E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Debug;

@@ -74,6 +74,38 @@ targets:
         product: Supabase
     postCompileScripts: []
 
+  RagaflowTests:
+    type: bundle.unit-test
+    platform: iOS
+    sources:
+      - path: RagaflowTests
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+
+  RagaflowUITests:
+    type: bundle.ui-testing
+    platform: iOS
+    sources:
+      - path: RagaflowUITests
+    dependencies:
+      - target: Ragaflow
+    settings:
+      base:
+        DEVELOPMENT_TEAM: A2S25D7DN9
+        CODE_SIGN_STYLE: Automatic
+        GENERATE_INFOPLIST_FILE: true
+    configFiles:
+      Debug: Ragaflow/Configuration/Debug.xcconfig
+      Release: Ragaflow/Configuration/Release.xcconfig
+
 packages:
   supabase-swift:
     url: https://github.com/supabase/supabase-swift

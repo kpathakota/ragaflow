@@ -2,7 +2,7 @@ import AVFoundation
 import MediaPlayer
 
 @Observable
-final class AudioService {
+final class AudioService: AudioServiceProtocol {
     static let shared = AudioService()
 
     private(set) var isPlaying = false
