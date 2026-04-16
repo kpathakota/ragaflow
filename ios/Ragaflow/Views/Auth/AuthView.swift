@@ -10,6 +10,8 @@ struct AuthView: View {
     @State private var errorMessage: String?
     @State private var confirmationSent = false
 
+    @Environment(\.dismiss) private var dismiss
+
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
@@ -103,6 +105,7 @@ struct AuthView: View {
                 confirmationSent = true
             } else {
                 try await supabase.signIn(email: email, password: password)
+                dismiss()
             }
         } catch {
             errorMessage = error.localizedDescription

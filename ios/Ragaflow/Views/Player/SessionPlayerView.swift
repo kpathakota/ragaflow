@@ -34,15 +34,18 @@ struct SessionPlayerView: View {
         }
         .navigationBarTitleDisplayMode(.inline)
         .toolbar {
-            if let vm = viewModel, vm.isLoggedIn {
-                ToolbarItem(placement: .topBarTrailing) {
-                    Button {
+            ToolbarItem(placement: .topBarTrailing) {
+                Button {
+                    if let vm = viewModel {
                         Task { await vm.toggleFavorite() }
-                    } label: {
-                        Image(systemName: vm.isFavorite ? "heart.fill" : "heart")
-                            .foregroundStyle(vm.isFavorite ? .red : .secondary)
                     }
+                } label: {
+                    Image(systemName: viewModel?.isFavorite == true ? "heart.fill" : "heart")
+                        .foregroundStyle(viewModel?.isFavorite == true ? .red : .secondary)
                 }
+                .accessibilityLabel(viewModel?.isFavorite == true ? "Unfavorite" : "Favorite")
+                .opacity(supabase.currentUser != nil ? 1 : 0)
+                .disabled(supabase.currentUser == nil)
             }
         }
         .onAppear {
