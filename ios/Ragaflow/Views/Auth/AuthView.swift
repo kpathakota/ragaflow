@@ -55,7 +55,7 @@ struct AuthView: View {
 
                 if isSignUp {
                     SecureField("Confirm password", text: $confirmPassword)
-                        .textContentType(.newPassword)
+                        .textContentType(.init(rawValue: ""))
                         .padding()
                         .background(Color(.systemGray6))
                         .clipShape(RoundedRectangle(cornerRadius: 12))
