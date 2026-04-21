@@ -13,9 +13,13 @@ export function AuthForm() {
   const [isSignUp, setIsSignUp] = useState(reason === "favorites");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
+
+  const passwordsMatch = !isSignUp || password === confirmPassword;
+  const showMismatch = isSignUp && confirmPassword.length > 0 && password !== confirmPassword;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -91,12 +95,29 @@ export function AuthForm() {
           className="rounded-lg border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-stone-500 focus:outline-none"
         />
 
+        {isSignUp && (
+          <>
+            <input
+              type="password"
+              placeholder="Confirm password"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              minLength={6}
+              className="rounded-lg border border-stone-700 bg-stone-900 px-4 py-3 text-sm text-stone-100 placeholder:text-stone-500 focus:border-stone-500 focus:outline-none"
+            />
+            {showMismatch && (
+              <p className="text-sm text-red-400">Passwords do not match</p>
+            )}
+          </>
+        )}
+
         {error && <p className="text-sm text-red-400">{error}</p>}
         {message && <p className="text-sm text-[#8A9B72]">{message}</p>}
 
         <button
           type="submit"
-          disabled={submitting}
+          disabled={submitting || !passwordsMatch}
           className="rounded-lg bg-stone-100 px-4 py-3 text-sm font-medium text-stone-900 transition-opacity hover:opacity-90 disabled:opacity-50"
         >
           {submitting
@@ -112,6 +133,7 @@ export function AuthForm() {
             setIsSignUp(!isSignUp);
             setError(null);
             setMessage(null);
+            setConfirmPassword("");
           }}
           className="text-sm text-stone-400 transition-colors hover:text-stone-200"
         >
