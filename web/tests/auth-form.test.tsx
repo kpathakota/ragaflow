@@ -209,15 +209,11 @@ describe("AuthForm password confirmation", () => {
     expect(screen.queryByText("Passwords do not match")).not.toBeInTheDocument();
   });
 
-  it("does not show mismatch when only confirm is filled", () => {
+  it("does not show mismatch when only confirm is filled (password empty)", () => {
     render(<AuthForm />);
     fireEvent.change(screen.getByPlaceholderText("Confirm password"), { target: { value: "password1" } });
 
-    // Password is empty, confirm is not — mismatch should show since they differ
-    // But password="" and confirm="password1" → both non-empty? No, password is empty.
-    // showMismatch = isSignUp && confirmPassword.length > 0 && password !== confirmPassword
-    // password="" !== "password1" → true, so mismatch shows. This is correct behavior.
-    expect(screen.getByText("Passwords do not match")).toBeInTheDocument();
+    expect(screen.queryByText("Passwords do not match")).not.toBeInTheDocument();
   });
 
   it("does not show mismatch when passwords match", () => {

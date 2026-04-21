@@ -19,42 +19,45 @@ export function AuthForm() {
   const [submitting, setSubmitting] = useState(false);
 
   const passwordsMatch = !isSignUp || password === confirmPassword;
-  const showMismatch = isSignUp && confirmPassword.length > 0 && password !== confirmPassword;
+  const showMismatch = isSignUp && password.length > 0 && confirmPassword.length > 0 && password !== confirmPassword;
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!passwordsMatch) return;
     setError(null);
     setMessage(null);
     setSubmitting(true);
 
-    const sb = createClient()!;
+    try {
+      const sb = createClient()!;
 
-    if (isSignUp) {
-      const { error: err } = await sb.auth.signUp({
-        email,
-        password,
-        options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
-      });
-      if (err) {
-        setError(err.message);
-        trackEvent("auth_error", { method: "sign_up", error: err.message });
+      if (isSignUp) {
+        const { error: err } = await sb.auth.signUp({
+          email,
+          password,
+          options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+        });
+        if (err) {
+          setError(err.message);
+          trackEvent("auth_error", { method: "sign_up", error: err.message });
+        } else {
+          setMessage("Check your email for a confirmation link.");
+        }
       } else {
-        setMessage("Check your email for a confirmation link.");
+        const { error: err } = await sb.auth.signInWithPassword({
+          email,
+          password,
+        });
+        if (err) {
+          setError(err.message);
+          trackEvent("auth_error", { method: "sign_in", error: err.message });
+        } else {
+          router.replace("/");
+        }
       }
-    } else {
-      const { error: err } = await sb.auth.signInWithPassword({
-        email,
-        password,
-      });
-      if (err) {
-        setError(err.message);
-        trackEvent("auth_error", { method: "sign_in", error: err.message });
-      } else {
-        router.replace("/");
-      }
+    } finally {
+      setSubmitting(false);
     }
-
-    setSubmitting(false);
   }
 
   return (
