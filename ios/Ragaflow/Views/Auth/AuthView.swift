@@ -116,6 +116,7 @@ struct AuthView: View {
             Spacer()
         }
         .padding()
+        .ignoresSafeArea(.keyboard)
     }
 
     private func submit() async {
