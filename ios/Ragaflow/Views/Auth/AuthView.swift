@@ -5,12 +5,21 @@ struct AuthView: View {
 
     @State private var email = ""
     @State private var password = ""
+    @State private var confirmPassword = ""
     @State private var isSignUp = false
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var confirmationSent = false
 
     @Environment(\.dismiss) private var dismiss
+
+    private var passwordsMatch: Bool {
+        !isSignUp || password == confirmPassword
+    }
+
+    private var showMismatch: Bool {
+        isSignUp && !password.isEmpty && !confirmPassword.isEmpty && password != confirmPassword
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -44,6 +53,20 @@ struct AuthView: View {
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                if isSignUp {
+                    SecureField("Confirm password", text: $confirmPassword)
+                        .textContentType(.newPassword)
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    if showMismatch {
+                        Text("Passwords do not match")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.caption)
@@ -74,12 +97,13 @@ struct AuthView: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .disabled(isLoading || email.isEmpty || password.isEmpty)
+                .disabled(isLoading || email.isEmpty || password.isEmpty || !passwordsMatch)
 
                 Button {
                     isSignUp.toggle()
                     errorMessage = nil
                     confirmationSent = false
+                    confirmPassword = ""
                 } label: {
                     Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
                         .font(.caption)
@@ -95,6 +119,7 @@ struct AuthView: View {
     }
 
     private func submit() async {
+        guard passwordsMatch else { return }
         isLoading = true
         errorMessage = nil
         confirmationSent = false
