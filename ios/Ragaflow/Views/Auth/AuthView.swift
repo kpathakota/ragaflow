@@ -21,6 +21,10 @@ struct AuthView: View {
         isSignUp && !password.isEmpty && !confirmPassword.isEmpty && password != confirmPassword
     }
 
+    private var passwordTooShort: Bool {
+        isSignUp && !password.isEmpty && password.count < 6
+    }
+
     var body: some View {
         VStack(spacing: 32) {
             Spacer()
@@ -52,6 +56,12 @@ struct AuthView: View {
                     .padding()
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                if passwordTooShort {
+                    Text("Password must be at least 6 characters")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
 
                 if isSignUp {
                     SecureField("Confirm password", text: $confirmPassword)
@@ -97,7 +107,7 @@ struct AuthView: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .disabled(isLoading || email.isEmpty || password.isEmpty || !passwordsMatch)
+                .disabled(isLoading || email.isEmpty || password.isEmpty || passwordTooShort || !passwordsMatch)
 
                 Button {
                     isSignUp.toggle()
@@ -129,6 +139,8 @@ struct AuthView: View {
             if isSignUp {
                 try await supabase.signUp(email: email, password: password)
                 confirmationSent = true
+                password = ""
+                confirmPassword = ""
             } else {
                 try await supabase.signIn(email: email, password: password)
                 dismiss()
