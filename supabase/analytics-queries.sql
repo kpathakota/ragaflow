@@ -155,7 +155,29 @@ GROUP BY platform
 ORDER BY total_events DESC;
 
 -- ============================================================
--- 10. Error Rate Overview — last 7 days
+-- 10. Most Popular Tracks — last 30 days
+-- ============================================================
+SELECT
+  t.id,
+  t.title,
+  r.name AS ragam,
+  COUNT(*) AS total_plays,
+  COUNT(DISTINCT ls.rasika_id) AS unique_listeners,
+  ROUND(AVG(ls.duration_seconds)) AS avg_duration_secs,
+  ROUND(
+    100.0 * COUNT(*) FILTER (WHERE ls.completed = true) / NULLIF(COUNT(*), 0),
+    1
+  ) AS completion_pct
+FROM listening_sessions ls
+JOIN tracks t ON t.id = ls.track_id
+JOIN ragams r ON r.id = t.ragam_id
+WHERE ls.started_at >= now() - interval '30 days'
+GROUP BY t.id, t.title, r.name
+ORDER BY total_plays DESC
+LIMIT 20;
+
+-- ============================================================
+-- 11. Error Rate Overview — last 7 days
 -- ============================================================
 SELECT
   event_type,
