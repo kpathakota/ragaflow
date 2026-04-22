@@ -6,6 +6,49 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Feature — iOS Auth Password Confirmation
+**Date:** 2026-04-21
+**Status:** Pending verification
+
+### What changed
+- Added "Confirm password" SecureField to AuthView sign-up flow (hidden during sign-in)
+- Real-time mismatch indicator when both passwords are non-empty and don't match
+- Submit button disabled when passwords don't match
+- `submit()` guard for password mismatch (defense in depth)
+- Confirm password cleared when toggling between sign-in/sign-up
+- Added 3 new UI tests: confirm password visibility, toggle-back hiding, mismatch disables submit
+
+### Manual testing checklist
+- [ ] iOS sign-up: confirm password field visible; sign-in: hidden
+- [ ] Type mismatched passwords → red "Passwords do not match" appears, Sign Up disabled
+- [ ] Correct the mismatch → indicator disappears, Sign Up enabled
+- [ ] Complete sign-up with matching passwords → confirmation message
+- [ ] Toggle sign-in ↔ sign-up → confirm password resets
+- [ ] Sign-in flow still works (no regressions)
+
+---
+
+## Feature — Auth Password Confirmation & Test Hardening
+**Date:** 2026-04-21
+**Status:** Pending verification
+
+### What changed
+- Added "Confirm password" field to sign-up flow (hidden during sign-in)
+- Real-time mismatch indicator when passwords differ
+- Submit button disabled when passwords don't match in sign-up mode
+- Confirm password cleared when toggling between sign-in/sign-up modes
+- Expanded auth-form tests from 15 to 46: password confirmation, negative cases, analytics, submitting state, form validation
+
+### Manual testing checklist
+- [ ] Sign-up: confirm password field visible, sign-in: hidden
+- [ ] Type mismatched passwords → red "Passwords do not match" appears, submit disabled
+- [ ] Correct the mismatch → indicator disappears, submit enabled
+- [ ] Complete sign-up with matching passwords → confirmation message appears
+- [ ] Toggle sign-in ↔ sign-up → confirm password field resets, errors/messages clear
+- [ ] Sign-in flow still works (no regressions)
+
+---
+
 ## Feature — Analytics Events (Alpha)
 **Date:** 2026-04-16
 **Status:** Pending verification

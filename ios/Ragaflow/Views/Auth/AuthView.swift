@@ -5,12 +5,25 @@ struct AuthView: View {
 
     @State private var email = ""
     @State private var password = ""
+    @State private var confirmPassword = ""
     @State private var isSignUp = false
     @State private var isLoading = false
     @State private var errorMessage: String?
     @State private var confirmationSent = false
 
     @Environment(\.dismiss) private var dismiss
+
+    private var passwordsMatch: Bool {
+        !isSignUp || password == confirmPassword
+    }
+
+    private var showMismatch: Bool {
+        isSignUp && !password.isEmpty && !confirmPassword.isEmpty && password != confirmPassword
+    }
+
+    private var passwordTooShort: Bool {
+        isSignUp && !password.isEmpty && password.count < 6
+    }
 
     var body: some View {
         VStack(spacing: 32) {
@@ -44,6 +57,26 @@ struct AuthView: View {
                     .background(Color(.systemGray6))
                     .clipShape(RoundedRectangle(cornerRadius: 12))
 
+                if passwordTooShort {
+                    Text("Password must be at least 6 characters")
+                        .font(.caption)
+                        .foregroundStyle(.red)
+                }
+
+                if isSignUp {
+                    SecureField("Confirm password", text: $confirmPassword)
+                        .textContentType(.init(rawValue: ""))
+                        .padding()
+                        .background(Color(.systemGray6))
+                        .clipShape(RoundedRectangle(cornerRadius: 12))
+
+                    if showMismatch {
+                        Text("Passwords do not match")
+                            .font(.caption)
+                            .foregroundStyle(.red)
+                    }
+                }
+
                 if let errorMessage {
                     Text(errorMessage)
                         .font(.caption)
@@ -74,12 +107,13 @@ struct AuthView: View {
                     .foregroundStyle(.white)
                     .clipShape(RoundedRectangle(cornerRadius: 12))
                 }
-                .disabled(isLoading || email.isEmpty || password.isEmpty)
+                .disabled(isLoading || email.isEmpty || password.isEmpty || passwordTooShort || !passwordsMatch)
 
                 Button {
                     isSignUp.toggle()
                     errorMessage = nil
                     confirmationSent = false
+                    confirmPassword = ""
                 } label: {
                     Text(isSignUp ? "Already have an account? Sign In" : "Don't have an account? Sign Up")
                         .font(.caption)
@@ -92,9 +126,11 @@ struct AuthView: View {
             Spacer()
         }
         .padding()
+        .ignoresSafeArea(.keyboard)
     }
 
     private func submit() async {
+        guard passwordsMatch else { return }
         isLoading = true
         errorMessage = nil
         confirmationSent = false
@@ -103,6 +139,8 @@ struct AuthView: View {
             if isSignUp {
                 try await supabase.signUp(email: email, password: password)
                 confirmationSent = true
+                password = ""
+                confirmPassword = ""
             } else {
                 try await supabase.signIn(email: email, password: password)
                 dismiss()

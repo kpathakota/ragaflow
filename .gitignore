@@ -87,5 +87,8 @@ ios/Pods/
 # track upload staging folder
 uploads/
 
+# local audio archive (hosted on Cloudflare R2)
+audio/
+
 # integration test screenshots
 tests/integration/screenshots/
