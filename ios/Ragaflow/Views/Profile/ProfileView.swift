@@ -3,6 +3,7 @@ import SwiftUI
 struct ProfileView: View {
     @Environment(SupabaseService.self) private var supabase
 
+    @Environment(\.dismiss) private var dismiss
     @State private var viewModel: ProfileViewModel?
 
     var body: some View {
@@ -29,7 +30,10 @@ struct ProfileView: View {
 
                         // Sign out
                         Button(role: .destructive) {
-                            Task { await vm.signOut() }
+                            Task {
+                                await vm.signOut()
+                                dismiss()
+                            }
                         } label: {
                             Text("Sign Out")
                                 .frame(maxWidth: .infinity)
