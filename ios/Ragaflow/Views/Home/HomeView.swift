@@ -9,11 +9,16 @@ struct HomeView: View {
     @State private var allTracks: [Track] = []
     @State private var ragams: [String: Ragam] = [:]
 
-    private var greeting: String {
-        if let name = rasika?.displayName, !name.isEmpty {
-            return "Welcome, \(name)"
+    /// Authenticated: "Welcome, <name>" or "Welcome"
+    /// Anonymous: tagline so first-time visitors know what Ragaflow is
+    private var subtitle: String {
+        if supabase.currentUser != nil {
+            if let name = rasika?.displayName, !name.isEmpty {
+                return "Welcome, \(name)"
+            }
+            return "Welcome"
         }
-        return "Welcome"
+        return "Indian classical ragas for focus, sleep & meditation"
     }
 
     var body: some View {
@@ -25,7 +30,7 @@ struct HomeView: View {
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                         .tracking(-0.5)
-                    Text(greeting)
+                    Text(subtitle)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }

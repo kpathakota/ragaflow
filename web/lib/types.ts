@@ -22,7 +22,7 @@ export type Track = {
   download_url: string | null;
   free: boolean;
   featured: boolean;
-  featured_scenarios: string[];
+  featured_scenarios: Scenario[];
   created_at: string;
 };
 

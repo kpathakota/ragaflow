@@ -92,6 +92,7 @@ final class SupabaseService: SupabaseServiceProtocol {
         try await client.from("tracks")
             .select()
             .eq("featured", value: true)
+            .order("created_at")
             .execute()
             .value
     }

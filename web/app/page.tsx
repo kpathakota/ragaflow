@@ -53,10 +53,11 @@ export default async function Home() {
 
   const ragamMap = new Map<string, Ragam>(ragams.map((r) => [r.id, r]));
 
-  // Greeting: "Welcome, <display_name>" or just "Welcome"
-  const greeting = prefs?.display_name
-    ? `Welcome, ${prefs.display_name}`
-    : "Welcome";
+  // Authenticated: "Welcome, <display_name>" or "Welcome"
+  // Anonymous: show the tagline so first-time visitors know what Ragaflow is
+  const subtitle = user
+    ? (prefs?.display_name ? `Welcome, ${prefs.display_name}` : "Welcome")
+    : "Indian classical ragas for focus, sleep & meditation";
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-6 py-16">
@@ -74,7 +75,7 @@ export default async function Home() {
       </div>
       <header className="mb-12 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Ragaflow</h1>
-        <p className="mt-3 text-lg text-stone-400">{greeting}</p>
+        <p className="mt-3 text-lg text-stone-400">{subtitle}</p>
       </header>
 
       <main className="flex w-full max-w-sm flex-col gap-4">
@@ -121,7 +122,7 @@ export default async function Home() {
             </h2>
             {featuredTracks.map((track) => {
               const scenario = track.scenarios[0] ?? "focus";
-              const cfg = scenarios.find((s) => s.key === scenario)!;
+              const cfg = scenarios.find((s) => s.key === scenario) ?? scenarios[0];
               const ragam = ragamMap.get(track.ragam_id);
               return (
                 <Link

@@ -63,7 +63,7 @@ export async function getTracksByScenario(scenario: Scenario): Promise<Track[]> 
 export async function getFeaturedTracks(): Promise<Track[]> {
   const sb = await supabaseClient();
   if (sb) {
-    const { data } = await sb.from("tracks").select("*").eq("featured", true);
+    const { data } = await sb.from("tracks").select("*").eq("featured", true).order("created_at");
     if (data && data.length > 0) return data as Track[];
   }
   return [];

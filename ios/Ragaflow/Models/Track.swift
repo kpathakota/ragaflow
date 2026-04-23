@@ -14,8 +14,8 @@ struct Track: Codable, Identifiable, Equatable {
     let audioUrl: String
     let downloadUrl: String?
     let free: Bool
-    let featured: Bool
-    let featuredScenarios: [String]
+    var featured: Bool = false
+    var featuredScenarios: [String] = []
     let createdAt: String
 
     enum CodingKeys: String, CodingKey {
@@ -28,6 +28,42 @@ struct Track: Codable, Identifiable, Equatable {
         case downloadUrl = "download_url"
         case featuredScenarios = "featured_scenarios"
         case createdAt = "created_at"
+    }
+
+    init(
+        id: String, title: String?, ragamId: String, scenarios: [Scenario],
+        tags: [String], description: String, artistNote: String?,
+        recordedDate: String?, location: String?, duration: Int,
+        audioUrl: String, downloadUrl: String?, free: Bool,
+        featured: Bool = false, featuredScenarios: [String] = [],
+        createdAt: String
+    ) {
+        self.id = id; self.title = title; self.ragamId = ragamId
+        self.scenarios = scenarios; self.tags = tags; self.description = description
+        self.artistNote = artistNote; self.recordedDate = recordedDate
+        self.location = location; self.duration = duration; self.audioUrl = audioUrl
+        self.downloadUrl = downloadUrl; self.free = free; self.featured = featured
+        self.featuredScenarios = featuredScenarios; self.createdAt = createdAt
+    }
+
+    init(from decoder: Decoder) throws {
+        let c = try decoder.container(keyedBy: CodingKeys.self)
+        id = try c.decode(String.self, forKey: .id)
+        title = try c.decodeIfPresent(String.self, forKey: .title)
+        ragamId = try c.decode(String.self, forKey: .ragamId)
+        scenarios = try c.decode([Scenario].self, forKey: .scenarios)
+        tags = try c.decode([String].self, forKey: .tags)
+        description = try c.decode(String.self, forKey: .description)
+        artistNote = try c.decodeIfPresent(String.self, forKey: .artistNote)
+        recordedDate = try c.decodeIfPresent(String.self, forKey: .recordedDate)
+        location = try c.decodeIfPresent(String.self, forKey: .location)
+        duration = try c.decode(Int.self, forKey: .duration)
+        audioUrl = try c.decode(String.self, forKey: .audioUrl)
+        downloadUrl = try c.decodeIfPresent(String.self, forKey: .downloadUrl)
+        free = try c.decode(Bool.self, forKey: .free)
+        featured = try c.decodeIfPresent(Bool.self, forKey: .featured) ?? false
+        featuredScenarios = try c.decodeIfPresent([String].self, forKey: .featuredScenarios) ?? []
+        createdAt = try c.decode(String.self, forKey: .createdAt)
     }
 
     /// Display name: title if available, otherwise "recorded date · location"
