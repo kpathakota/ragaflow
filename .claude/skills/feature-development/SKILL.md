@@ -46,7 +46,10 @@ Act as the Dev agent (read `.claude/commands/dev.md` for full context).
    - Unit tests for new logic (data transforms, helpers, state).
    - Component tests for new UI (render, interaction, edge cases).
    - Update existing tests that break due to the changes.
-4. Run `npm test` (vitest) from `web/` after implementation. **All tests must pass before proceeding.**
+4. Run the appropriate test suite based on which platform was changed. **All tests must pass before proceeding.**
+   - **Web changes** (`web/`): Run `npm test` (vitest) from `web/`.
+   - **iOS changes** (`ios/`): Run `swift build && swift test` from `ios/` (SPM unit tests), then run `xcodebuild test -scheme Ragaflow -destination 'platform=iOS Simulator,name=iPhone 16' -only-testing RagaflowUITests` for UI/integration tests.
+   - **Both platforms changed**: Run both test suites.
    - If tests fail, fix the issues and re-run until green.
 5. Append a QA log entry to `docs/qa-log.md` (see Dev agent format).
 6. Commit all changes with a clear message.
@@ -65,7 +68,7 @@ Act as the QA agent (read `.claude/commands/qa.md` for full context).
    - **Manual testing needed** — things that can't be automated (audio, layout, real device). Provide a concrete checklist.
 4. If there are automated testing gaps:
    - Switch back to Dev mode and write the missing tests.
-   - Run `npm test` again — all tests must pass.
+   - Run the appropriate test suite again (web, iOS, or both) — all tests must pass.
    - Repeat QA assessment on the new tests until satisfied.
 5. Present the final manual testing checklist to the user (they'll verify these on the preview later).
 
@@ -77,12 +80,13 @@ Act as the QA agent (read `.claude/commands/qa.md` for full context).
    - Body: `## Summary` with bullet points, `## Test plan` with the manual testing checklist from Phase 3, and the Claude Code attribution footer.
 3. **Launch a separate agent to critique the PR** (review the diff for bugs, UX issues, accessibility, code quality, test gaps). The agent should return a numbered list of issues ranked by severity.
 4. Address any critical or high-severity feedback from the review:
-   - Make fixes, run tests, push to the same branch.
+   - Make fixes, run the appropriate test suite (web, iOS, or both), push to the same branch.
    - Only address items that are actual bugs, accessibility issues, or semantic mismatches. Cosmetic nits and style preferences can be noted but skipped.
 5. Wait for all CI checks to pass (use `gh pr checks --watch`).
 6. Present to the user:
    - The PR URL
-   - The Vercel preview URL (`https://ragaflow-git-<branch>-kpathakota.vercel.app`, with `/` replaced by `-`)
+   - The Vercel preview URL (`https://ragaflow-git-<branch>-kpathakota.vercel.app`, with `/` replaced by `-`) — web changes only
+   - For iOS changes: remind user to build and test on simulator/device locally
    - The manual testing checklist from Phase 3
    - A summary of what the critique agent flagged and what was addressed
 
@@ -97,7 +101,7 @@ Tell the user:
 
 ### If the user reports issues:
 1. Make the requested changes (Dev mode)
-2. Run tests — must pass
+2. Run the appropriate test suite (web, iOS, or both) — must pass
 3. Commit, push to the same branch
 4. Wait for checks to pass
 5. Go back to waiting for user review
@@ -107,6 +111,15 @@ Tell the user:
 2. Confirm the merge succeeded
 3. Report the merged PR URL
 4. Clean up: `git checkout dev && git pull origin dev`
+
+## Phase 6: Update Specs
+
+After merge, update project documentation to reflect the completed work:
+
+1. **`docs/dev-design.md`** — mark the relevant task(s) as ✅ complete. If the work closes a deferred item, update the "What Remains" section.
+2. **`docs/issues.md`** — mark any issues resolved by this feature as **Status: Fixed** with the date.
+3. **`docs/ios-plan.md`** — if iOS milestones were completed, mark them as done.
+4. Commit the doc updates to `dev` directly (doc-only change, per CLAUDE.md conventions).
 
 ## Rules
 
