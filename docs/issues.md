@@ -4,10 +4,10 @@ A record of bugs and issues encountered, why they mattered, and how they were re
 
 ## 2026-04-12
 
-- The artist note reads "From the session" and doesn't feel clickable. Have it be expanded to begin with and with larger padding between that and the buttons. 
-- Can we have one option be the "full-track" which would just play the thing from beginning to end on the session screen. That would effectively pre-set the length to the entire length of the track. 
-- Instead of stop, it should be called reset and be under the play button in the session screen. 
-- 
+- The artist note reads "From the session" and doesn't feel clickable. Have it be expanded to begin with and with larger padding between that and the buttons. **Status: Fixed**
+- Can we have one option be the "full-track" which would just play the thing from beginning to end on the session screen. That would effectively pre-set the length to the entire length of the track. **Status: Fixed**
+- Instead of stop, it should be called reset and be under the play button in the session screen. **Status: Fixed**
+-
 
 ## 2026-04-09
 
@@ -41,7 +41,7 @@ A record of bugs and issues encountered, why they mattered, and how they were re
 - Session player: Show `track.title` as the primary heading when present, with ragam name as a subtitle. Fall back to ragam name when title is null.
 - Track card: Show `track.title` prominently when present. Date/location can remain as secondary info.
 
-**Status:** Open
+**Status:** Fixed
 
 ---
 
@@ -182,7 +182,7 @@ This defers the navigation call to after render, satisfying React's rules while 
 -  We need to do a pass on the session timer complete screen. It looks okay for now but should be better. I need it to really show completion. Also when saving the default, the entire "session" should be captured (track and duration) so that it's easy from the home screen to start the default duration. 
 - In the profile screen, once someone has achieved a certification, I want to actually design real badges. So that's going to be work. The progress bar should change color to highlight the current tier. For example, Bronze should be bronze, Silver should be silver etc. 
 - Need a better word than Certifications
-- When we expand the artist note, the graphic resizes and looks weird (no longer blends properly with the surrounding frame). How can we fix that? 
+- When we expand the artist note, the graphic resizes and looks weird (no longer blends properly with the surrounding frame). How can we fix that? **Status: Fixed**
 - Why is the password manager asking me to save new details every time I favorite a track? That seems like something we're doing ... 
 
 ## 2026-02-20

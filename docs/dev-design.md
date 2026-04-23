@@ -41,10 +41,13 @@
 
 **Phase 2+ — Future**
 - ~~Polar.sh payments + subscription tiers~~ ✅ (Task 2.6)
+- ~~Circular audio (Task 2.4b)~~ ✅
+- ~~iOS M2 (Audio Playback) + M3 (Feature Parity)~~ ✅ (Tasks 3.1, 3.2)
+- ~~Track titles, artist note, full-track duration, reset rename~~ ✅ (April 12 issues)
 - Track variant switching (percussion toggle, frequency selector). This won't be a thing. Tracks will just be tagged when there's no percussion vs. percussion.
 - Access control enforcement (Task 2.5 — 10-hour listening gate)
 - Premium track downloads (Task 2.8 — deferred to iOS)
-- iOS native app (Phase 3)
+- iOS native app — M4 (StoreKit 2) and M5 (Launch) remain
 
 ---
 
@@ -528,7 +531,7 @@ The session timer uses `setInterval` to count down, which drifts when the browse
 - Audio completion chime deferred — requires an audio asset, separate task
 - Tasks are layered: 2.4a-1 is the core fix, 2.4a-2 and 2.4a-3 add background UX on top
 
-**Task 2.4b: Circular Audio — Preserve Playback Position Across Sessions**
+**Task 2.4b: Circular Audio — Preserve Playback Position Across Sessions** ✅
 
 Audio currently resets to 0:00 on every session end (completion, stop, restart). Since `<audio loop>` already makes the track a continuous loop, we just need to stop rewinding it. This lets a rasika complete a session, start another, and hear a different section of the same raga — no repetitive beginnings.
 
@@ -598,11 +601,13 @@ Audio currently resets to 0:00 on every session end (completion, stop, restart).
 
 ### Phase 3: iOS App
 
-**Task 3.1: SwiftUI + AVFoundation**
+**Task 3.1: SwiftUI + AVFoundation** ✅
 - Native playback, background audio, lock screen controls
+- iOS M2 (Audio Playback) complete — AVFoundation streaming, background audio, lock screen controls, Now Playing integration
 
-**Task 3.2: Feature Parity**
+**Task 3.2: Feature Parity** ✅
 - Scenario selection, track browsing, timers, favorites, progress tracking
+- iOS M3 (Feature Parity) complete — favorites, defaults, session logging, certifications, explore, profile
 
 ### Phase 4: Polish & Launch
 
