@@ -5,7 +5,16 @@ struct HomeView: View {
 
     @State private var rasika: Rasika?
     @State private var defaultTracks: [(scenario: Scenario, track: Track, durationSeconds: Int?)] = []
+    @State private var featuredTracks: [Track] = []
     @State private var allTracks: [Track] = []
+    @State private var ragams: [String: Ragam] = [:]
+
+    private var greeting: String {
+        if let name = rasika?.displayName, !name.isEmpty {
+            return "Welcome, \(name)"
+        }
+        return "Welcome"
+    }
 
     var body: some View {
         ScrollView {
@@ -16,7 +25,7 @@ struct HomeView: View {
                         .font(.largeTitle)
                         .fontWeight(.semibold)
                         .tracking(-0.5)
-                    Text("Indian classical ragas for focus, sleep & meditation")
+                    Text(greeting)
                         .font(.subheadline)
                         .foregroundStyle(.secondary)
                 }
@@ -46,6 +55,30 @@ struct HomeView: View {
                     .padding(.bottom, 8)
                 }
 
+                // Featured tracks
+                if !featuredTracks.isEmpty {
+                    VStack(alignment: .leading, spacing: 12) {
+                        Text("FEATURED")
+                            .font(.caption)
+                            .fontWeight(.medium)
+                            .tracking(1)
+                            .foregroundStyle(.secondary)
+
+                        ForEach(featuredTracks) { track in
+                            let scenario = track.scenarios.first ?? .focus
+                            NavigationLink(value: PlayerDestination(
+                                trackId: track.id,
+                                scenario: scenario,
+                                duration: nil
+                            )) {
+                                FeaturedTrackRow(track: track, scenario: scenario, ragamName: ragams[track.ragamId]?.name)
+                            }
+                        }
+                    }
+                    .padding(.horizontal)
+                    .padding(.bottom, 8)
+                }
+
                 // Scenario cards
                 VStack(spacing: 12) {
                     ForEach(Scenario.allCases) { scenario in
@@ -60,23 +93,6 @@ struct HomeView: View {
                     }
                 }
                 .padding(.horizontal)
-
-                // Favorites count
-                if let rasika, !rasika.favoriteTracks.isEmpty {
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text("FAVORITES")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .tracking(1)
-                            .foregroundStyle(.secondary)
-                        Text("\(rasika.favoriteTracks.count) favorited track\(rasika.favoriteTracks.count == 1 ? "" : "s")")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(.horizontal)
-                    .padding(.top, 8)
-                }
             }
             .padding(.bottom, 32)
         }
@@ -118,8 +134,18 @@ struct HomeView: View {
 
     private func loadData() async {
         do {
-            rasika = try await supabase.fetchRasika()
-            allTracks = try await supabase.fetchAllTracks()
+            async let rasikaResult = supabase.fetchRasika()
+            async let allTracksResult = supabase.fetchAllTracks()
+            async let featuredResult = supabase.fetchFeaturedTracks()
+            async let ragamsResult = supabase.fetchAllRagams()
+
+            let (fetchedRasika, fetchedAllTracks, fetchedFeatured, fetchedRagams) =
+                try await (rasikaResult, allTracksResult, featuredResult, ragamsResult)
+
+            rasika = fetchedRasika
+            allTracks = fetchedAllTracks
+            featuredTracks = fetchedFeatured
+            ragams = Dictionary(uniqueKeysWithValues: fetchedRagams.map { ($0.id, $0) })
 
             guard let rasika else { return }
 
@@ -140,6 +166,60 @@ struct HomeView: View {
         } catch {
             // Data loads silently fail — same as web behavior
         }
+    }
+}
+
+// MARK: - Featured Track Row
+
+struct FeaturedTrackRow: View {
+    let track: Track
+    let scenario: Scenario
+    let ragamName: String?
+
+    var body: some View {
+        HStack(spacing: 12) {
+            Circle()
+                .fill(scenario.accentColor)
+                .frame(width: 40, height: 40)
+                .overlay {
+                    Image(systemName: "play.fill")
+                        .font(.system(size: 14))
+                        .foregroundStyle(.white)
+                }
+
+            VStack(alignment: .leading, spacing: 2) {
+                Text(track.title ?? ragamName ?? "Untitled")
+                    .font(.subheadline)
+                    .fontWeight(.medium)
+                    .foregroundStyle(scenario.accentColorLight)
+                    .lineLimit(1)
+                HStack(spacing: 4) {
+                    if let ragamName, track.title != nil {
+                        Text(ragamName)
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                        Text("·")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                    Text("\(track.duration / 60)m")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                }
+            }
+
+            Spacer()
+        }
+        .padding(.horizontal, 20)
+        .padding(.vertical, 16)
+        .background(
+            RoundedRectangle(cornerRadius: 16)
+                .fill(Color(.systemGray6).opacity(0.6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 16)
+                        .strokeBorder(scenario.accentColor.opacity(0.4), lineWidth: 1)
+                )
+        )
     }
 }
 

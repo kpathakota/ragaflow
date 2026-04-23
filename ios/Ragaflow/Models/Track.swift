@@ -14,16 +14,19 @@ struct Track: Codable, Identifiable, Equatable {
     let audioUrl: String
     let downloadUrl: String?
     let free: Bool
+    let featured: Bool
+    let featuredScenarios: [String]
     let createdAt: String
 
     enum CodingKeys: String, CodingKey {
-        case id, title, scenarios, tags, description, duration, free
+        case id, title, scenarios, tags, description, duration, free, featured
         case ragamId = "ragam_id"
         case artistNote = "artist_note"
         case recordedDate = "recorded_date"
         case location
         case audioUrl = "audio_url"
         case downloadUrl = "download_url"
+        case featuredScenarios = "featured_scenarios"
         case createdAt = "created_at"
     }
 

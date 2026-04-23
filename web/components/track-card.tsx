@@ -12,6 +12,7 @@ type TrackCardProps = {
   ragamName?: string;
   favoriteTrackIds?: string[];
   onToggleFavorite?: (trackId: string) => void;
+  isFeatured?: boolean;
 };
 
 export function TrackCard({
@@ -20,6 +21,7 @@ export function TrackCard({
   ragamName,
   favoriteTrackIds = [],
   onToggleFavorite,
+  isFeatured = false,
 }: TrackCardProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -71,6 +73,11 @@ export function TrackCard({
           <p className="mt-0.5 text-xs text-stone-500">{subtitle}</p>
         )}
         <p className="mt-1 text-xs text-stone-500">
+          {isFeatured && (
+            <span className="mr-2 rounded-full bg-[#C9A54C]/15 px-2 py-0.5 text-[10px] font-medium text-[#C9A54C]">
+              Featured
+            </span>
+          )}
           {durationMin} min
           {ragamName && <span> · {ragamName}</span>}
           {track.tags.slice(0, 3).map((tag) => (

@@ -12,7 +12,7 @@ private func makeTracks() -> [Track] {
             description: "A morning session", artistNote: nil,
             recordedDate: "2026-01-15", location: "Portland",
             duration: 1800, audioUrl: "https://example.com/t1.m4a",
-            downloadUrl: nil, free: true, createdAt: "2026-01-15T00:00:00Z"
+            downloadUrl: nil, free: true, featured: false, featuredScenarios: [], createdAt: "2026-01-15T00:00:00Z"
         ),
         Track(
             id: "t2", title: "Evening Raga", ragamId: "r2",
@@ -20,7 +20,7 @@ private func makeTracks() -> [Track] {
             description: "An evening session", artistNote: nil,
             recordedDate: "2026-02-10", location: "Home studio",
             duration: 2700, audioUrl: "https://example.com/t2.m4a",
-            downloadUrl: nil, free: true, createdAt: "2026-02-10T00:00:00Z"
+            downloadUrl: nil, free: true, featured: false, featuredScenarios: [], createdAt: "2026-02-10T00:00:00Z"
         ),
         Track(
             id: "t3", title: "Deep Focus", ragamId: "r1",
@@ -28,7 +28,7 @@ private func makeTracks() -> [Track] {
             description: "Deep work session", artistNote: nil,
             recordedDate: "2026-03-01", location: "Portland",
             duration: 3600, audioUrl: "https://example.com/t3.m4a",
-            downloadUrl: nil, free: false, createdAt: "2026-03-01T00:00:00Z"
+            downloadUrl: nil, free: false, featured: false, featuredScenarios: [], createdAt: "2026-03-01T00:00:00Z"
         ),
     ]
 }
@@ -42,7 +42,7 @@ private func makeRagams() -> [Ragam] {
 
 private func makeRasika(favorites: [String] = []) -> Rasika {
     Rasika(
-        id: "rasika-1", rasikaId: "user-uuid",
+        id: "rasika-1", rasikaId: "user-uuid", displayName: nil,
         favoriteTracks: favorites, favoriteRagams: [],
         defaultFocusTrack: nil, defaultSleepTrack: nil, defaultMeditateTrack: nil,
         defaultFocusDuration: nil, defaultSleepDuration: nil, defaultMeditateDuration: nil,

@@ -5,6 +5,7 @@ struct TrackCard: View {
     let ragamName: String?
     let isFavorite: Bool
     let scenario: Scenario?
+    var isFeatured: Bool = false
     var onToggleFavorite: (() -> Void)?
 
     /// Headline: title if present, otherwise "date · location" fallback
@@ -55,8 +56,20 @@ struct TrackCard: View {
                 }
             }
 
-            // Metadata line: duration · ragam · tags (first 3) · Premium
+            // Metadata line: Featured badge · duration · ragam · tags (first 3) · Premium
             HStack(spacing: 4) {
+                if isFeatured {
+                    Text("Featured")
+                        .font(.caption2)
+                        .fontWeight(.medium)
+                        .foregroundStyle(Color(red: 0.79, green: 0.65, blue: 0.30)) // gold
+                        .padding(.horizontal, 6)
+                        .padding(.vertical, 2)
+                        .background(
+                            Capsule()
+                                .fill(Color(red: 0.79, green: 0.65, blue: 0.30).opacity(0.15))
+                        )
+                }
                 Text("\(track.duration / 60)min")
                     .font(.caption)
                     .foregroundStyle(.secondary)

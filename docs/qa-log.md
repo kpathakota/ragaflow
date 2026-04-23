@@ -6,6 +6,33 @@ Format: newest entries at top. Check `[ ]` boxes as verified, mark with date.
 
 ---
 
+## Feature — Featured Tracks + Home Screen Refresh
+**Date:** 2026-04-23
+**Branch:** feat/featured-tracks
+**Changes:**
+- Added `featured` (bool) and `featured_scenarios` (text[]) columns to tracks table
+- Added `display_name` (text, nullable) column to rasikas table
+- Home screen: replaced tagline with "Welcome" greeting (uses display_name when set)
+- Home screen: added Featured section showing globally featured tracks as 1-tap play cards
+- Home screen: removed favorites count section
+- Scenario track lists: featured_scenarios tracks pinned to top with "Featured" badge
+- Both web and iOS updated in parallel
+- Migration: `supabase/migrations/010_featured_and_display_name.sql`
+- Sync SQL: `uploads/sync.sql`
+
+**Tests:** Web 214 passed, iOS SPM 53 passed, iOS Xcode 44 passed
+
+**Manual verification needed:**
+- [ ] Run sync.sql on staging Supabase
+- [ ] Web: Home shows "Welcome" (no name), Featured section with 3 tracks, no favorites count
+- [ ] Web: Focus/Sleep/Meditate track lists show Featured badge on pinned track at top
+- [ ] Web: Featured cards on Home navigate to correct session player
+- [ ] iOS: Home shows "Welcome", Featured section, no favorites count
+- [ ] iOS: Track lists show Featured badge on pinned track at top
+- [ ] iOS: Featured cards navigate to correct session player
+
+---
+
 ## Feature — iOS Auth Password Confirmation
 **Date:** 2026-04-21
 **Status:** Pending verification

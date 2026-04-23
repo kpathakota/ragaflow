@@ -6,7 +6,7 @@ import Foundation
 
 private func makeRasika(status: SubscriptionStatus = .free) -> Rasika {
     Rasika(
-        id: "rasika-1", rasikaId: "user-uuid",
+        id: "rasika-1", rasikaId: "user-uuid", displayName: nil,
         favoriteTracks: ["t1", "t2"], favoriteRagams: ["r1"],
         defaultFocusTrack: "t1", defaultSleepTrack: nil, defaultMeditateTrack: nil,
         defaultFocusDuration: 1500, defaultSleepDuration: nil, defaultMeditateDuration: nil,

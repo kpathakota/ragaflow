@@ -60,3 +60,11 @@ insert into tracks (id, title, ragam_id, scenarios, tags, description, artist_no
   ('todi-focus-01', null, 'todi', '{focus}', '{deliberate,deep,saturday}', 'A quiet Saturday Todi. The deliberate pace creates a container for deep, sustained work — not background music, but a companion.', 'Todi on a Saturday morning is my version of going to the gym. It''s demanding, it requires your full attention, and you feel completely different afterward.', '2025-01-18', 'Quiet Saturday, Portland', 2700, 'https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/Bhairavi_440Hz_with_percussion.m4a', true, '2025-01-18T00:00:00Z'),
   ('todi-meditate-02', null, 'todi', '{meditate,focus}', '{temple bells,morning,sacred}', 'Todi after the morning temple bells in Mylapore. The raga carries the weight of centuries of morning practice in this neighborhood.', 'Mylapore mornings are sacred. Musicians have been playing Todi at this hour in this neighborhood for hundreds of years. I''m just the latest in a long line.', '2025-02-22', 'After temple bells, Mylapore', 3600, 'https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/deepwaters01232026audioexport.m4a', false, '2025-02-22T00:00:00Z'),
   ('todi-sleep-01', null, 'todi', '{sleep}', '{midnight,sparse,dissolving}', 'A midnight Todi — unusual for a morning raga, but the sparse phrasing and long silences work beautifully for winding down.', 'My teacher would say you shouldn''t play Todi at midnight. But rules in music are just suggestions once you''ve internalized them. This one wanted to be played.', '2024-12-15', 'Midnight session, home studio', 5400, 'https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/tracks/deepwaters011526audioexport.m4a', true, '2024-12-15T00:00:00Z');
+
+-- Featured tracks (globally featured on Home)
+update tracks set featured = true where id in ('bhairavi-focus-01', 'neelambari-sleep-01', 'sahana-meditate-01');
+
+-- Featured per scenario (pinned to top of scenario lists)
+update tracks set featured_scenarios = '{focus}' where id = 'bhairavi-focus-01';
+update tracks set featured_scenarios = '{sleep}' where id = 'neelambari-sleep-01';
+update tracks set featured_scenarios = '{meditate}' where id = 'sahana-meditate-01';
