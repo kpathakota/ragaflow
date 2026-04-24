@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Track, Scenario } from "@/lib/types";
+import { scenarioMap } from "@/components/scenario-config";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useCallback, useState } from "react";
 
@@ -12,6 +13,7 @@ type TrackCardProps = {
   ragamName?: string;
   favoriteTrackIds?: string[];
   onToggleFavorite?: (trackId: string) => void;
+  isFeatured?: boolean;
 };
 
 export function TrackCard({
@@ -20,6 +22,7 @@ export function TrackCard({
   ragamName,
   favoriteTrackIds = [],
   onToggleFavorite,
+  isFeatured = false,
 }: TrackCardProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -63,7 +66,11 @@ export function TrackCard({
   return (
     <Link
       href={`/mode/${scenario}/${track.id}`}
-      className="group flex items-center justify-between rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4 transition-colors hover:border-stone-600 hover:bg-stone-800/60"
+      className={`group flex items-center justify-between rounded-xl border bg-stone-900/60 px-5 py-4 transition-colors hover:bg-stone-800/60 ${
+        isFeatured
+          ? `${scenarioMap[scenario].accent.border} ${scenarioMap[scenario].accent.borderHover}`
+          : "border-stone-800 hover:border-stone-600"
+      }`}
     >
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-stone-200">{headline}</p>

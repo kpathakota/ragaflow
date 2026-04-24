@@ -4,6 +4,7 @@ struct SessionPlayerView: View {
     let trackId: String
     let scenario: Scenario
     let initialDuration: Int? // minutes
+    var autoplay: Bool = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
@@ -54,6 +55,7 @@ struct SessionPlayerView: View {
                     trackId: trackId,
                     scenario: scenario,
                     initialDuration: initialDuration,
+                    autoplay: autoplay,
                     supabase: supabase,
                     audio: AudioService.shared
                 )

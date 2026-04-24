@@ -5,6 +5,7 @@ struct TrackCard: View {
     let ragamName: String?
     let isFavorite: Bool
     let scenario: Scenario?
+    var isFeatured: Bool = false
     var onToggleFavorite: (() -> Void)?
 
     /// Headline: title if present, otherwise "date · location" fallback
@@ -101,8 +102,8 @@ struct TrackCard: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(
-                            (scenario?.accentColor ?? Color.gray).opacity(0.2),
-                            lineWidth: 1
+                            (scenario?.accentColor ?? Color.gray).opacity(isFeatured ? 0.5 : 0.2),
+                            lineWidth: isFeatured ? 1.5 : 1
                         )
                 )
         )

@@ -94,6 +94,8 @@ struct TrackTests {
             "audio_url": "https://example.com/track.opus",
             "download_url": null,
             "free": true,
+            "featured": true,
+            "featured_scenarios": ["focus"],
             "created_at": "2025-01-15T08:00:00Z"
         }
         """.data(using: .utf8)!
@@ -109,6 +111,8 @@ struct TrackTests {
         #expect(track.location == "Portland, OR")
         #expect(track.duration == 2700)
         #expect(track.free == true)
+        #expect(track.featured == true)
+        #expect(track.featuredScenarios == ["focus"])
         #expect(track.downloadUrl == nil)
     }
 
@@ -129,6 +133,8 @@ struct TrackTests {
             "audio_url": "https://example.com/track2.opus",
             "download_url": null,
             "free": false,
+            "featured": false,
+            "featured_scenarios": [],
             "created_at": "2025-02-01T20:00:00Z"
         }
         """.data(using: .utf8)!
@@ -139,6 +145,8 @@ struct TrackTests {
         #expect(track.recordedDate == nil)
         #expect(track.location == nil)
         #expect(track.free == false)
+        #expect(track.featured == false)
+        #expect(track.featuredScenarios.isEmpty)
     }
 
     // MARK: - Helpers
@@ -163,6 +171,8 @@ struct TrackTests {
             audioUrl: "https://example.com/audio.opus",
             downloadUrl: nil,
             free: true,
+            featured: false,
+            featuredScenarios: [],
             createdAt: "2025-01-01T00:00:00Z"
         )
     }

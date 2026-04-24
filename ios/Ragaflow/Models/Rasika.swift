@@ -3,6 +3,7 @@ import Foundation
 struct Rasika: Codable, Identifiable, Equatable {
     let id: String
     let rasikaId: String
+    var displayName: String?
     var favoriteTracks: [String]
     var favoriteRagams: [String]
     var defaultFocusTrack: String?
@@ -18,6 +19,7 @@ struct Rasika: Codable, Identifiable, Equatable {
     enum CodingKeys: String, CodingKey {
         case id
         case rasikaId = "rasika_id"
+        case displayName = "display_name"
         case favoriteTracks = "favorite_tracks"
         case favoriteRagams = "favorite_ragams"
         case defaultFocusTrack = "default_focus_track"

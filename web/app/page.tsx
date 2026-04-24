@@ -1,9 +1,9 @@
 import Link from "next/link";
 import { scenarios } from "@/components/scenario-config";
 import { createClient } from "@/lib/supabase/server";
-import { getTrackById } from "@/lib/data";
+import { getTrackById, getFeaturedTracks, getAllRagams } from "@/lib/data";
 import { UserBadge } from "@/components/user-badge";
-import type { Rasika, Track, Scenario } from "@/lib/types";
+import type { Rasika, Track, Ragam, Scenario } from "@/lib/types";
 
 async function getPreferencesAndFavorites(): Promise<{
   prefs: Rasika | null;
@@ -45,7 +45,19 @@ async function getPreferencesAndFavorites(): Promise<{
 }
 
 export default async function Home() {
-  const { defaults, user, prefs } = await getPreferencesAndFavorites();
+  const [{ defaults, user, prefs }, featuredTracks, ragams] = await Promise.all([
+    getPreferencesAndFavorites(),
+    getFeaturedTracks(),
+    getAllRagams(),
+  ]);
+
+  const ragamMap = new Map<string, Ragam>(ragams.map((r) => [r.id, r]));
+
+  // Authenticated: "Welcome, <display_name>" or "Welcome"
+  // Anonymous: show the tagline so first-time visitors know what Ragaflow is
+  const subtitle = user
+    ? (prefs?.display_name ? `Welcome, ${prefs.display_name}` : "Welcome")
+    : "Indian classical ragas for focus, sleep & meditation";
 
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center px-6 py-16">
@@ -63,9 +75,7 @@ export default async function Home() {
       </div>
       <header className="mb-12 text-center">
         <h1 className="text-4xl font-semibold tracking-tight">Ragaflow</h1>
-        <p className="mt-3 text-lg text-stone-400">
-          Indian classical ragas for focus, sleep &amp; meditation
-        </p>
+        <p className="mt-3 text-lg text-stone-400">{subtitle}</p>
       </header>
 
       <main className="flex w-full max-w-sm flex-col gap-4">
@@ -104,6 +114,42 @@ export default async function Home() {
           </section>
         )}
 
+        {/* Featured tracks */}
+        {featuredTracks.length > 0 && (
+          <section className="mb-4 flex flex-col gap-3">
+            <h2 className="text-xs font-medium uppercase tracking-wide text-stone-500">
+              Featured
+            </h2>
+            {featuredTracks.map((track) => {
+              const scenario = track.scenarios[0] ?? "focus";
+              const cfg = scenarios.find((s) => s.key === scenario) ?? scenarios[0];
+              const ragam = ragamMap.get(track.ragam_id);
+              return (
+                <Link
+                  key={track.id}
+                  href={`/mode/${scenario}/${track.id}?autoplay=1`}
+                  className={`flex items-center gap-3 rounded-xl border ${cfg.accent.border} bg-stone-900/60 px-5 py-4 transition-colors ${cfg.accent.borderHover}`}
+                >
+                  <span
+                    className={`flex h-10 w-10 items-center justify-center rounded-full ${cfg.accent.bg} text-white text-lg`}
+                  >
+                    ▶
+                  </span>
+                  <div>
+                    <p className={`text-sm font-medium ${cfg.accent.text}`}>
+                      {track.title ?? ragam?.name ?? "Untitled"}
+                    </p>
+                    <p className="text-xs text-stone-400">
+                      {ragam?.name && track.title ? ragam.name + " · " : ""}
+                      {Math.round(track.duration / 60)}m
+                    </p>
+                  </div>
+                </Link>
+              );
+            })}
+          </section>
+        )}
+
         {/* Scenario cards */}
         {scenarios.map((s) => (
           <Link
@@ -128,22 +174,6 @@ export default async function Home() {
             Browse all tracks by ragam, tag, or mood
           </p>
         </Link>
-
-        {/* Favorites section */}
-        {prefs && prefs.favorite_tracks.length > 0 && (
-          <section className="mt-4">
-            <h2 className="mb-2 text-xs font-medium uppercase tracking-wide text-stone-500">
-              Favorites
-            </h2>
-            <p className="text-sm text-stone-400">
-              {prefs.favorite_tracks.length} favorited track
-              {prefs.favorite_tracks.length !== 1 ? "s" : ""} —{" "}
-              <Link href="/explore" className="underline hover:text-stone-200">
-                view in Explore
-              </Link>
-            </p>
-          </section>
-        )}
       </main>
     </div>
   );

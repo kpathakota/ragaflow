@@ -25,6 +25,8 @@ private func makeTrack(
         audioUrl: audioUrl,
         downloadUrl: nil,
         free: true,
+        featured: false,
+        featuredScenarios: [],
         createdAt: "2026-01-15T00:00:00Z"
     )
 }
@@ -37,6 +39,7 @@ private func makeRasika(favoriteTracks: [String] = [], customDuration: Int? = ni
     Rasika(
         id: "rasika-1",
         rasikaId: "user-uuid",
+        displayName: nil,
         favoriteTracks: favoriteTracks,
         favoriteRagams: [],
         defaultFocusTrack: nil,

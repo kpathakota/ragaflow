@@ -51,12 +51,17 @@ export function TrackListClient({
 
   const sorted = useMemo(() => {
     return [...tracks].sort((a, b) => {
+      // Pin featured_scenarios tracks to top
+      const aFeatured = a.featured_scenarios?.includes(scenario) ? 1 : 0;
+      const bFeatured = b.featured_scenarios?.includes(scenario) ? 1 : 0;
+      if (aFeatured !== bFeatured) return bFeatured - aFeatured;
+
       if (!a.recorded_date && !b.recorded_date) return 0;
       if (!a.recorded_date) return 1;
       if (!b.recorded_date) return -1;
       return b.recorded_date.localeCompare(a.recorded_date);
     });
-  }, [tracks]);
+  }, [tracks, scenario]);
 
   return (
     <>
@@ -69,6 +74,7 @@ export function TrackListClient({
             ragamName={ragamMap.get(t.ragam_id)?.name}
             favoriteTrackIds={favoriteIds}
             onToggleFavorite={user ? handleToggleFavorite : undefined}
+            isFeatured={t.featured_scenarios?.includes(scenario)}
           />
         ))}
       </div>
