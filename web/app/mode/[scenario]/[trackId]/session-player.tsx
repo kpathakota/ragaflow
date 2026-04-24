@@ -33,11 +33,13 @@ export function SessionPlayer({
   ragam,
   scenario,
   initialDuration,
+  autoplay = false,
 }: {
   track: Track;
   ragam: Ragam | undefined;
   scenario: Scenario;
   initialDuration?: number;
+  autoplay?: boolean;
 }) {
   const config = scenarioMap[scenario];
   const accent = config.accent;
@@ -65,7 +67,8 @@ export function SessionPlayer({
   });
   const [showCustomInput, setShowCustomInput] = useState(false);
   const [customInputValue, setCustomInputValue] = useState("");
-  const [isFullTrack, setIsFullTrack] = useState(false);
+  const [isFullTrack, setIsFullTrack] = useState(autoplay);
+  const autoplayFired = useRef(false);
   const fullTrackMinutes = Math.round(track.duration / 60);
 
   useEffect(() => {
@@ -99,6 +102,13 @@ export function SessionPlayer({
       if (id) setSessionId(id);
     }
   }, [duration, isFullTrack, track.duration, user, track.id, scenario]);
+
+  useEffect(() => {
+    if (autoplay && !autoplayFired.current) {
+      autoplayFired.current = true;
+      startSessionHandler();
+    }
+  }, [autoplay, startSessionHandler]);
 
   const pause = useCallback(() => {
     elapsedBeforePauseRef.current += (Date.now() - startedAtRef.current) / 1000;

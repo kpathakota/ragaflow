@@ -11,10 +11,10 @@ export default async function SessionPage({
   searchParams,
 }: {
   params: Promise<{ scenario: string; trackId: string }>;
-  searchParams: Promise<{ d?: string }>;
+  searchParams: Promise<{ d?: string; autoplay?: string }>;
 }) {
   const { scenario, trackId } = await params;
-  const { d } = await searchParams;
+  const { d, autoplay } = await searchParams;
 
   if (!validScenarios.includes(scenario as Scenario)) notFound();
 
@@ -30,6 +30,7 @@ export default async function SessionPage({
       ragam={ragam}
       scenario={scenario as Scenario}
       initialDuration={initialDuration && !isNaN(initialDuration) ? initialDuration : undefined}
+      autoplay={autoplay === "1"}
     />
   );
 }

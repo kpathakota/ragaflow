@@ -74,7 +74,8 @@ struct HomeView: View {
                             NavigationLink(value: PlayerDestination(
                                 trackId: track.id,
                                 scenario: scenario,
-                                duration: nil
+                                duration: nil,
+                                autoplay: true
                             )) {
                                 FeaturedTrackRow(track: track, scenario: scenario, ragamName: ragams[track.ragamId]?.name)
                             }
@@ -110,7 +111,7 @@ struct HomeView: View {
             }
         }
         .navigationDestination(for: PlayerDestination.self) { dest in
-            SessionPlayerView(trackId: dest.trackId, scenario: dest.scenario, initialDuration: dest.duration)
+            SessionPlayerView(trackId: dest.trackId, scenario: dest.scenario, initialDuration: dest.duration, autoplay: dest.autoplay)
         }
         .toolbar {
             ToolbarItem(placement: .topBarTrailing) {
@@ -234,4 +235,5 @@ struct PlayerDestination: Hashable {
     let trackId: String
     let scenario: Scenario
     let duration: Int? // minutes
+    var autoplay: Bool = false
 }

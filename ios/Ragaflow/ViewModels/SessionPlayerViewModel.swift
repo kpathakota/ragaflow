@@ -8,6 +8,7 @@ final class SessionPlayerViewModel {
     let trackId: String
     let scenario: Scenario
     let initialDuration: Int? // minutes
+    let autoplay: Bool
 
     private let supabase: SupabaseServiceProtocol
     private let audio: AudioServiceProtocol
@@ -64,12 +65,14 @@ final class SessionPlayerViewModel {
         trackId: String,
         scenario: Scenario,
         initialDuration: Int?,
+        autoplay: Bool = false,
         supabase: SupabaseServiceProtocol,
         audio: AudioServiceProtocol
     ) {
         self.trackId = trackId
         self.scenario = scenario
         self.initialDuration = initialDuration
+        self.autoplay = autoplay
         self.supabase = supabase
         self.audio = audio
     }
@@ -92,6 +95,12 @@ final class SessionPlayerViewModel {
             }
         } catch {}
         isLoading = false
+
+        if autoplay, track != nil {
+            isFullTrack = true
+            duration = track!.duration / 60
+            await startSession()
+        }
     }
 
     // MARK: - Session Actions

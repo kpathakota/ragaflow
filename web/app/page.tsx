@@ -127,7 +127,7 @@ export default async function Home() {
               return (
                 <Link
                   key={track.id}
-                  href={`/mode/${scenario}/${track.id}`}
+                  href={`/mode/${scenario}/${track.id}?autoplay=1`}
                   className={`flex items-center gap-3 rounded-xl border ${cfg.accent.border} bg-stone-900/60 px-5 py-4 transition-colors ${cfg.accent.borderHover}`}
                 >
                   <span

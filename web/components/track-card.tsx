@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import type { Track, Scenario } from "@/lib/types";
+import { scenarioMap } from "@/components/scenario-config";
 import { useAuth } from "@/lib/auth/auth-context";
 import { useCallback, useState } from "react";
 
@@ -67,7 +68,7 @@ export function TrackCard({
       href={`/mode/${scenario}/${track.id}`}
       className={`group flex items-center justify-between rounded-xl border bg-stone-900/60 px-5 py-4 transition-colors hover:bg-stone-800/60 ${
         isFeatured
-          ? "border-[#C9A54C]/40 hover:border-[#C9A54C]/60"
+          ? `${scenarioMap[scenario].accent.border} ${scenarioMap[scenario].accent.borderHover}`
           : "border-stone-800 hover:border-stone-600"
       }`}
     >

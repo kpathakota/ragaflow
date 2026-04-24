@@ -102,9 +102,7 @@ struct TrackCard: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(
-                            isFeatured
-                                ? Color(red: 0.79, green: 0.65, blue: 0.30).opacity(0.4)
-                                : (scenario?.accentColor ?? Color.gray).opacity(0.2),
+                            (scenario?.accentColor ?? Color.gray).opacity(isFeatured ? 0.5 : 0.2),
                             lineWidth: isFeatured ? 1.5 : 1
                         )
                 )
