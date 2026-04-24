@@ -96,9 +96,9 @@ final class SessionPlayerViewModel {
         } catch {}
         isLoading = false
 
-        if autoplay, track != nil {
+        if autoplay, let track {
             isFullTrack = true
-            duration = track!.duration / 60
+            duration = track.duration / 60
             await startSession()
         }
     }

@@ -95,7 +95,15 @@ export function SessionPlayer({
     setSession("running");
     if (audioRef.current) {
       audioRef.current.loop = !isFullTrack;
-      audioRef.current.play();
+      try {
+        await audioRef.current.play();
+      } catch {
+        // Browser blocked autoplay (no prior user interaction).
+        // Reset to idle so the user can tap play manually.
+        setSession("idle");
+        setRemaining(0);
+        return;
+      }
     }
     if (user) {
       const id = await startListeningSession(track.id, scenario, totalSeconds);
