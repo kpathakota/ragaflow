@@ -56,20 +56,8 @@ struct TrackCard: View {
                 }
             }
 
-            // Metadata line: Featured badge · duration · ragam · tags (first 3) · Premium
+            // Metadata line: duration · ragam · tags (first 3) · Premium
             HStack(spacing: 4) {
-                if isFeatured {
-                    Text("Featured")
-                        .font(.caption2)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color(red: 0.79, green: 0.65, blue: 0.30)) // gold
-                        .padding(.horizontal, 6)
-                        .padding(.vertical, 2)
-                        .background(
-                            Capsule()
-                                .fill(Color(red: 0.79, green: 0.65, blue: 0.30).opacity(0.15))
-                        )
-                }
                 Text("\(track.duration / 60)min")
                     .font(.caption)
                     .foregroundStyle(.secondary)
@@ -114,8 +102,10 @@ struct TrackCard: View {
                 .overlay(
                     RoundedRectangle(cornerRadius: 12)
                         .strokeBorder(
-                            (scenario?.accentColor ?? Color.gray).opacity(0.2),
-                            lineWidth: 1
+                            isFeatured
+                                ? Color(red: 0.79, green: 0.65, blue: 0.30).opacity(0.4)
+                                : (scenario?.accentColor ?? Color.gray).opacity(0.2),
+                            lineWidth: isFeatured ? 1.5 : 1
                         )
                 )
         )

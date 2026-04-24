@@ -65,7 +65,11 @@ export function TrackCard({
   return (
     <Link
       href={`/mode/${scenario}/${track.id}`}
-      className="group flex items-center justify-between rounded-xl border border-stone-800 bg-stone-900/60 px-5 py-4 transition-colors hover:border-stone-600 hover:bg-stone-800/60"
+      className={`group flex items-center justify-between rounded-xl border bg-stone-900/60 px-5 py-4 transition-colors hover:bg-stone-800/60 ${
+        isFeatured
+          ? "border-[#C9A54C]/40 hover:border-[#C9A54C]/60"
+          : "border-stone-800 hover:border-stone-600"
+      }`}
     >
       <div className="min-w-0 flex-1">
         <p className="text-sm font-medium text-stone-200">{headline}</p>
@@ -73,11 +77,6 @@ export function TrackCard({
           <p className="mt-0.5 text-xs text-stone-500">{subtitle}</p>
         )}
         <p className="mt-1 text-xs text-stone-500">
-          {isFeatured && (
-            <span className="mr-2 rounded-full bg-[#C9A54C]/15 px-2 py-0.5 text-[10px] font-medium text-[#C9A54C]">
-              Featured
-            </span>
-          )}
           {durationMin} min
           {ragamName && <span> · {ragamName}</span>}
           {track.tags.slice(0, 3).map((tag) => (
