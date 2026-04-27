@@ -69,6 +69,18 @@ export async function getFeaturedTracks(): Promise<Track[]> {
   return [];
 }
 
+export async function getFeaturedSleepTracks(): Promise<Track[]> {
+  const sb = await supabaseClient();
+  if (sb) {
+    const { data } = await sb
+      .from("tracks")
+      .select("*")
+      .contains("featured_scenarios", ["sleep"]);
+    if (data && data.length > 0) return data as Track[];
+  }
+  return [];
+}
+
 export async function getTrackById(id: string): Promise<Track | undefined> {
   const sb = await supabaseClient();
   if (sb) {
