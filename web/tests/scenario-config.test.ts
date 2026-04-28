@@ -17,10 +17,17 @@ describe("scenario-config", () => {
 
   it("each scenario has required accent colors", () => {
     for (const s of scenarios) {
+      expect(s.accent).toHaveProperty("hex");
       expect(s.accent).toHaveProperty("text");
       expect(s.accent).toHaveProperty("border");
       expect(s.accent).toHaveProperty("borderHover");
       expect(s.accent).toHaveProperty("bg");
+    }
+  });
+
+  it("each scenario hex is a valid hex color", () => {
+    for (const s of scenarios) {
+      expect(s.accent.hex).toMatch(/^#[A-Fa-f0-9]{6}$/);
     }
   });
 
