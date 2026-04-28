@@ -2,33 +2,10 @@ import Link from "next/link";
 import { scenarios } from "@/components/scenario-config";
 import { createClient } from "@/lib/supabase/server";
 import { getTrackById, getFeaturedTracks, getFeaturedSleepTracks } from "@/lib/data";
+import { getTimeOfDay, getTimeConfig } from "@/lib/time-of-day";
 import { UserBadge } from "@/components/user-badge";
 import { TonightInvitation } from "@/components/tonight-invitation";
 import type { Rasika, Track, Scenario } from "@/lib/types";
-
-// ---------------------------------------------------------------------------
-// Time-of-day logic
-// ---------------------------------------------------------------------------
-
-type TimeOfDay = "morning" | "midday" | "evening" | "night";
-
-const TIME_CONFIG: Record<
-  TimeOfDay,
-  { label: string; scenario: Scenario; accent: string; accentLight: string }
-> = {
-  morning: { label: "This morning", scenario: "focus", accent: "#C9A54C", accentLight: "#D9B866" },
-  midday: { label: "A pause", scenario: "meditate", accent: "#8A9B72", accentLight: "#A2B48A" },
-  evening: { label: "Tonight", scenario: "sleep", accent: "#B08878", accentLight: "#C49C8B" },
-  night: { label: "Wind down", scenario: "sleep", accent: "#B08878", accentLight: "#C49C8B" },
-};
-
-function getTimeOfDay(): TimeOfDay {
-  const hour = new Date().getHours();
-  if (hour >= 5 && hour < 12) return "morning";
-  if (hour >= 12 && hour < 17) return "midday";
-  if (hour >= 17 && hour < 21) return "evening";
-  return "night";
-}
 
 // ---------------------------------------------------------------------------
 // Data fetching
@@ -40,10 +17,9 @@ async function getHomeData(): Promise<{
   favoritesCount: number;
   suggestedTrack: Track | null;
   defaultDurationMin: number | null;
-  timeConfig: (typeof TIME_CONFIG)[TimeOfDay];
+  timeConfig: ReturnType<typeof getTimeConfig>;
 }> {
-  const tod = getTimeOfDay();
-  const config = TIME_CONFIG[tod];
+  const config = getTimeConfig();
   const isSleepTime = config.scenario === "sleep";
 
   // Pick the featured track based on time of day
