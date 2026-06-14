@@ -28,16 +28,19 @@ Goal: get Ragaflow into the hands of ~30 people to find who it actually works fo
 
 ## Sequence
 
-1. Color pass with Supriya (April 25 weekend)
-2. Apply new palette to web + iOS
-3. Build landing page with new palette
-4. Draft invite email
-5. Send invites
+See `docs/automation-rollout.md` for the orchestration plan; this is the user-facing rollout:
+
+1. Lock per-screen JTBDs into `docs/screens/` (decisions A1–A5)
+2. Wing an initial palette + typography lock, apply to web + iOS
+3. Modernize screens via the automation loop — one PR per screen, in priority order from `design-critique-20260423.md`
+4. Build landing page
+5. Draft invite email
+6. Send invites
+7. **Later:** color tuning pass with Supriya once she can use the Beta build
 
 ## People
 
-- **Gautam** — need to chat with him, check how he's feeling about the project. Also: does he have more material in progress? More tracks would help variety per scenario.
-- **Supriya** — color/branding session this weekend. Playfair Display direction is set; need to nail the palette.
+- **Supriya** — color tuning happens *after* Beta is in her hands, not before. Playfair Display direction is set; palette will be tuned against real screens.
 
 ## Design Critique Checklist (per-screen sign-off before wider rollout)
 

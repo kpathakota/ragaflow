@@ -77,9 +77,9 @@ ios/.build/
 ios/.swiftpm/
 
 # Secrets (real values, not the .example)
-ios/Ragaflow/Configuration/Secrets.xcconfig
-ios/Ragaflow/Configuration/Debug.xcconfig
-ios/Ragaflow/Configuration/Release.xcconfig
+ios/Ragaflow/Configuration/Secrets.xcconfig*
+ios/Ragaflow/Configuration/Debug.xcconfig*
+ios/Ragaflow/Configuration/Release.xcconfig*
 
 # CocoaPods (if ever used)
 ios/Pods/
@@ -92,3 +92,4 @@ audio/
 
 # integration test screenshots
 tests/integration/screenshots/
+.vercel
