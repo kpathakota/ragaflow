@@ -57,13 +57,13 @@ These lock the contract the worker agent operates from. Without them the agent w
 
 - [x] **A1. Lock the JTBD per screen.** *Done 2026-06-14.* Six files written under `docs/screens/`; see `docs/screens/README.md` for the index. Five JTBDs ratified verbatim from the critique; Auth tightened. Cross-screen principles also captured (ragam-learning-via-achievements, confirm-password kept, Player is highest-leverage).
 
-- [ ] **A2. Decide screen rollout order.** Critique's "Top 5 Priorities" suggests: Home featured → Player running state → Editor's pick → OAuth → Search. Confirm or rewrite. Why: the queue.
+- [x] **A2. Decide screen rollout order.** *Locked 2026-06-23: unblocked-first.* Order: **Player → Explore → Track List → Profile → Auth** (Home already shipped via PR #48/#49). Front-loads screens with zero external blockers so the loop never stalls; Auth is last because it waits on Google/Apple OAuth provisioning (C1/C2), which can proceed async.
 
-- [ ] **A3. Web↔iOS parity policy.** Must-match per PR, or web-leads-iOS-follows, or screen-by-screen choice? Why: tells the worker whether to block on one platform or ship asymmetric and queue the catch-up.
+- [x] **A3. Web↔iOS parity policy.** *Locked 2026-06-23: web-leads, iOS-follows.* Worker ships the web change first (instant Vercel preview for phone review), then queues a matching iOS PR. Aligns with C3 (iOS tested post-merge only, so it can't be reviewed on a PR anyway). The worker opens the iOS catch-up PR as a separate queue item.
 
-- [ ] **A4. Subscription tier UX.** Currently one-click subscribe with no tier choice. Pick: tier-select modal vs. tier-select page vs. status quo. Why: blocks Profile screen.
+- [x] **A4. Subscription tier UX.** *Locked 2026-06-23: tier-select page.* Dedicated `/subscribe` page listing all 4 tiers ($5/mo, $30/yr — "most popular", $100 lifetime, $300 sponsor), then checkout. Easiest to review on phone and gives room for 4 tiers with descriptions. Blocks Profile screen.
 
-- [ ] **A5. "Editor's pick" mechanism.** Manual flag on `tracks` (`editors_pick boolean`)? Per-scenario via a new table? Tag-based (`tags: ["editor"]`)? Why: blocks Track List screen.
+- [x] **A5. "Editor's pick" mechanism.** *Locked 2026-06-23: boolean column.* Add `editors_pick boolean DEFAULT false` to the `tracks` table (one migration). Clear semantics, trivial to query and to toggle in the upload flow; keeps curation separate from content `tags[]`. Blocks Track List screen.
 
 ## B. External coordination (asynchronous, start now)
 

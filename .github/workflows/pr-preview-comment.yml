@@ -1,0 +1,65 @@
+name: PR Preview Comment
+
+# Automation D3 — posts (and keeps updated) a single sticky comment on every PR
+# targeting `dev` with the Vercel preview URL, so a phone reviewer has one tap to
+# the live build. Before/after screenshots are added separately by the
+# /modernize-screen worker (it has Supabase env + a local server to render real
+# content); this job owns only the parts that belong in CI and need no secrets.
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+    branches: [dev]
+
+permissions:
+  pull-requests: write
+  contents: read
+
+jobs:
+  comment:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post or update preview comment
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          HEAD_REF: ${{ github.event.pull_request.head.ref }}
+        run: |
+          set -euo pipefail
+
+          # Vercel preview URL pattern for this project (see deploy skill, step 3):
+          # branch "/" replaced with "-".
+          SLUG=$(echo "$HEAD_REF" | sed 's#/#-#g')
+          PREVIEW_URL="https://ragaflow-git-${SLUG}-kpathakota.vercel.app"
+
+          MARKER="<!-- pr-preview-comment -->"
+
+          BODY=$(cat <<EOF
+          $MARKER
+          ## 📱 Preview
+
+          | | |
+          |---|---|
+          | **Web (Vercel)** | [$PREVIEW_URL]($PREVIEW_URL) |
+          | **iOS (TestFlight)** | post-merge to \`dev\` (per automation-rollout C3) |
+
+          Branch: \`$HEAD_REF\`
+
+          _Before/after screenshots are posted by the \`/modernize-screen\` worker as a separate comment._
+          _Auto-updated by \`.github/workflows/pr-preview-comment.yml\`._
+          EOF
+          )
+
+          # Find an existing sticky comment by marker and update it; else create one.
+          EXISTING=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+            --jq "map(select(.body | contains(\"$MARKER\"))) | .[0].id // empty")
+
+          if [ -n "$EXISTING" ]; then
+            gh api -X PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING}" \
+              -f body="$BODY" >/dev/null
+            echo "Updated preview comment $EXISTING on PR #$PR_NUMBER"
+          else
+            gh api -X POST "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" \
+              -f body="$BODY" >/dev/null
+            echo "Created preview comment on PR #$PR_NUMBER"
+          fi
