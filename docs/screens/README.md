@@ -8,15 +8,15 @@ Status lifecycle: `locked-jtbd` → `queued` → `active` → `shipped`.
 
 ## Queue order
 
-Not yet decided (A2). Critique's "Top 5 Priorities" suggests:
+**Locked 2026-06-23 (A2): unblocked-first.** Home is already shipped (PR #48/#49). Remaining order:
 
-1. Home — featured track for 1-tap play *(largely shipped via PR #48, #49 — confirm and close out)*
-2. Player — running-state upgrade *(highest attention budget per session)*
-3. Track List — editor's pick + decision-fatigue cleanup *(blocked on A5)*
-4. Auth — Google/Apple OAuth *(blocked on C1/C2 provisioning)*
-5. Explore — search bar
+1. **Player** — running-state upgrade *(no blockers; highest attention budget per session)*
+2. **Explore** — search bar *(no blockers)*
+3. **Track List** — editor's pick + decision-fatigue cleanup *(A5 resolved: `editors_pick` boolean column)*
+4. **Profile** — parity + tier selection *(A3/A4 resolved: web-leads parity, `/subscribe` tier page)*
+5. **Auth** — Google/Apple OAuth *(last; waits on C1/C2 OAuth provisioning, which proceeds async)*
 
-Profile is the canonical test case for A3 (parity policy), so it should be ordered after that's decided.
+Parity policy (A3): **web leads, iOS follows.** The worker ships each screen's web change first, then queues a matching iOS PR as a separate item.
 
 ## Screens
 
@@ -37,10 +37,10 @@ Profile is the canonical test case for A3 (parity policy), so it should be order
 
 ## Open dependencies that block specific deltas
 
-| Delta | Blocked on |
-|---|---|
-| Track List editor's pick badge | A5 (mechanism decision) |
-| Profile tier selection before subscribe | A4 (UX decision) |
-| Profile parity rollout | A3 (parity policy) |
-| Auth Google button | C1 (Google OAuth provisioning) |
-| Auth Apple button | C2 (Apple Sign-In provisioning) |
+| Delta | Blocked on | Status |
+|---|---|---|
+| Track List editor's pick badge | A5 (mechanism decision) | ✅ resolved — `editors_pick` boolean column |
+| Profile tier selection before subscribe | A4 (UX decision) | ✅ resolved — `/subscribe` tier-select page |
+| Profile parity rollout | A3 (parity policy) | ✅ resolved — web leads, iOS follows |
+| Auth Google button | C1 (Google OAuth provisioning) | ⏳ pending — manual Supabase setup |
+| Auth Apple button | C2 (Apple Sign-In provisioning) | ⏳ pending — manual Supabase setup |

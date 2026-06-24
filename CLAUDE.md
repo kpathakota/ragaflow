@@ -37,20 +37,19 @@ Both clients share the same Supabase backend. No shared code between web and iOS
 
 ## Supabase setup
 
-Two Supabase projects: **production** and **staging**.
+**Single Supabase project: production** (`mkikuyxvabhbaxspoiay`). The staging project was removed 2026-06-23 — everything points at production now, including local dev and Vercel previews. There is no throwaway DB; treat the database as live (no bulk/destructive test writes).
 
 | Environment | Supabase project | How env vars are set |
 |---|---|---|
-| Web local dev (`cd web && npm run dev`) | staging | `web/.env.local` |
-| Vercel preview (branch pushes) | staging | Vercel "Preview" env vars |
+| Web local dev (`cd web && npm run dev`) | production | `web/.env.local` (pull with `vercel env pull .env.local --environment=production`) |
+| Vercel preview (branch pushes) | production | Vercel "Preview" env vars |
 | Vercel production (main) | production | Vercel "Production" env vars |
-| iOS debug | staging | `ios/Ragaflow/Configuration/Debug.xcconfig` |
+| iOS debug | ⚠️ still points at the removed staging ref — repoint `Debug.xcconfig` to production | `ios/Ragaflow/Configuration/Debug.xcconfig` |
 | iOS release | production | `ios/Ragaflow/Configuration/Release.xcconfig` |
 
-1. Copy `web/.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
-2. Run all migrations in `supabase/migrations/` in order in the SQL editor
-3. Run `supabase/seed.sql` to insert starter data
-4. Supabase is required — without env vars the app renders empty (no local seed fallback)
+1. Pull `web/.env.local` from Vercel: `cd web && vercel env pull .env.local --environment=production` (or copy from another dev)
+2. Migrations in `supabase/migrations/` are already applied on production; run new ones in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
+3. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
 

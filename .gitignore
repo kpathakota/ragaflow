@@ -22,6 +22,12 @@ web/.yarn/*
 # testing
 web/coverage/
 
+# automation — local screenshot capture (D4 harness) + worker scratch
+.automation/
+web/.automation/
+web/test-results/
+web/playwright-report/
+
 # next.js
 web/.next/
 web/out/

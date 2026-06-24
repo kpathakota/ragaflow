@@ -10,7 +10,8 @@
     "test": "vitest run",
     "test:watch": "vitest",
     "test:smoke": "../tests/integration/smoke-test.sh",
-    "test:billing": "../tests/integration/billing-test.sh"
+    "test:billing": "../tests/integration/billing-test.sh",
+    "screenshot": "node scripts/screenshot.mjs"
   },
   "dependencies": {
     "@polar-sh/nextjs": "^0.9.4",
@@ -28,6 +29,7 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "@playwright/test": "^1.49.1",
     "@vitejs/plugin-react": "^6.0.1",
     "eslint": "^9",
     "eslint-config-next": "^16.2.2",
