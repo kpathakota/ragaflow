@@ -76,7 +76,7 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 - [x] Port sleep volume fade to web *(web — #52)*
 - [x] Add "Back to list" to web session player completion state *(web — already present)*
 - [x] Unify favorite button placement (inline vs toolbar) *(web — #52)*
-- [ ] **iOS catch-up: player** — mirror the above on `SessionPlayerView.swift` (parity policy A3: web leads, iOS follows). Tested post-merge to dev (C3).
+- [x] **iOS catch-up: player** — mirrored the above on `SessionPlayerView.swift` (parity policy A3: web leads, iOS follows): large accent-colored timer, ragam name below timer, circular progress ring around play/pause, breathing orb for meditate/sleep (reduce-motion aware). Sleep fade + "Back to list" already present. Tested post-merge to dev (C3).
 
 ### Screen 5: Explore
 
