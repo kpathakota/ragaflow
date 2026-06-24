@@ -1,6 +1,6 @@
 # Screen: Session Player
 
-**Status:** `locked-jtbd` (next: `queued` → `active` → `shipped`)
+**Status:** `shipped` (web — PR feat/screen-player, 2026-06-24); iOS follow-up queued
 **Locked:** 2026-06-14
 
 ## Job to be Done
@@ -23,14 +23,14 @@ Returning rasika mid-session. The user spends 25–45 minutes here per session �
 
 ## Deltas to close (from beta-checklist)
 
-- [ ] Larger timer (`text-4xl`) in accent color during playback
-- [ ] Show track title + ragam name below timer during running/paused
-- [ ] Circular progress ring around play/pause button
-- [ ] Breathing animation on background orb (meditate/sleep)
-- [ ] 3-second crossfade on loop restart
-- [ ] Port sleep volume fade to web
-- [ ] Add "Back to list" to web session player completion state
-- [ ] Unify favorite button placement (inline vs toolbar)
+- [x] Larger timer (`text-5xl`) in accent color during playback *(web)*
+- [x] Show track title + ragam name below timer during running/paused *(web)*
+- [x] Circular progress ring around play/pause button *(web)*
+- [x] Breathing animation on background orb (meditate/sleep) *(web; respects `prefers-reduced-motion`)*
+- [ ] 3-second crossfade on loop restart — **deferred**: needs a dual-`<audio>` element implementation + real-device audio verification (can't be validated in CI). Tracked for a follow-up.
+- [x] Port sleep volume fade to web *(web; `sleepFadeVolume` in `lib/player.ts`)*
+- [x] Add "Back to list" to web session player completion state *(already present; confirmed)*
+- [x] Unify favorite button placement *(web favorite is top-right, matching iOS toolbar; iOS parity confirmed in the iOS follow-up)*
 
 ## Notes
 

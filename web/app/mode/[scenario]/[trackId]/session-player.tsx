@@ -11,6 +11,7 @@ import { setDefaultTrackClient, setCustomDurationClient } from "@/lib/preference
 import { startListeningSession, endListeningSession } from "@/lib/sessions";
 import { computeCountableSeconds, upsertCertificationClient } from "@/lib/certifications";
 import { trackEvent } from "@/lib/analytics";
+import { sleepFadeVolume, progressFraction } from "@/lib/player";
 
 const FIXED_DURATIONS = [25, 45];
 const LAST_DURATION_KEY = "ragaflow:lastDuration";
@@ -43,6 +44,7 @@ export function SessionPlayer({
 }) {
   const config = scenarioMap[scenario];
   const accent = config.accent;
+  const breathing = scenario === "meditate" || scenario === "sleep";
   const audioRef = useRef<HTMLAudioElement>(null);
   const { user } = useAuth();
   const router = useRouter();
@@ -187,6 +189,16 @@ export function SessionPlayer({
     }
   }, [session, remaining, pauseAudio, sessionId, duration, isFullTrack, track.duration, user, track.ragam_id]);
 
+  // Sleep scenario fades audio to silence over the final stretch (ported from iOS).
+  useEffect(() => {
+    if (!audioRef.current) return;
+    if (session === "running" || session === "paused") {
+      audioRef.current.volume = sleepFadeVolume(scenario, remaining);
+    } else {
+      audioRef.current.volume = 1;
+    }
+  }, [scenario, remaining, session]);
+
   const handleToggleFavorite = useCallback(async () => {
     if (!user) {
       router.push("/auth?reason=favorites");
@@ -246,7 +258,11 @@ export function SessionPlayer({
 
       {/* Visual zone — fixed height so artist note doesn't resize it */}
       <div className="relative flex flex-1 items-center justify-center overflow-hidden">
-        <div className={`h-56 w-56 rounded-full ${accent.bg} opacity-20 blur-3xl`} />
+        <div
+          className={`h-56 w-56 rounded-full ${accent.bg} blur-3xl ${
+            breathing ? "animate-breathe" : "opacity-20"
+          }`}
+        />
 
         {/* Artist note — overlays bottom of visual zone */}
         {track.artist_note && session !== "complete" && (
@@ -366,31 +382,68 @@ export function SessionPlayer({
           </>
         )}
 
-        {(session === "running" || session === "paused") && (
+        {(session === "running" || session === "paused") && (() => {
+          const totalSeconds = isFullTrack ? track.duration : duration * 60;
+          const ringR = 44;
+          const ringC = 2 * Math.PI * ringR;
+          const ringOffset = ringC * (1 - progressFraction(totalSeconds, remaining));
+          return (
           <>
-            <span className="text-xs tabular-nums text-stone-600">{display}</span>
-            {session === "running" ? (
-              <button
-                type="button"
-                onClick={pause}
-                aria-label="Pause session"
-                className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
-              >
-                <span aria-hidden="true" className="flex gap-[3px]">
-                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                  <span className="block h-5 w-[3px] rounded-sm bg-white" />
-                </span>
-              </button>
-            ) : (
-              <button
-                type="button"
-                onClick={resume}
-                aria-label="Resume session"
-                className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
-              >
-                ▶
-              </button>
+            {/* Large timer in accent color */}
+            <span className={`text-5xl font-light tabular-nums ${accent.text}`}>
+              {display}
+            </span>
+
+            {/* Ragam name beneath the timer (title stays at the top only) */}
+            {ragam?.name && (
+              <p className="text-sm font-medium text-stone-300">{ragam.name}</p>
             )}
+
+            {/* Play/pause with circular progress ring */}
+            <div className="relative flex items-center justify-center">
+              <svg
+                className="pointer-events-none absolute -rotate-90"
+                width="96"
+                height="96"
+                viewBox="0 0 96 96"
+                aria-hidden="true"
+              >
+                <circle cx="48" cy="48" r={ringR} fill="none" stroke="#44403c" strokeWidth="3" />
+                <circle
+                  cx="48"
+                  cy="48"
+                  r={ringR}
+                  fill="none"
+                  stroke={accent.hex}
+                  strokeWidth="3"
+                  strokeLinecap="round"
+                  strokeDasharray={ringC}
+                  strokeDashoffset={ringOffset}
+                />
+              </svg>
+              {session === "running" ? (
+                <button
+                  type="button"
+                  onClick={pause}
+                  aria-label="Pause session"
+                  className={`flex h-16 w-16 appearance-none items-center justify-center rounded-full ${accent.bg} text-white transition-opacity hover:opacity-80`}
+                >
+                  <span aria-hidden="true" className="flex gap-[3px]">
+                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                    <span className="block h-5 w-[3px] rounded-sm bg-white" />
+                  </span>
+                </button>
+              ) : (
+                <button
+                  type="button"
+                  onClick={resume}
+                  aria-label="Resume session"
+                  className={`flex h-16 w-16 items-center justify-center rounded-full ${accent.bg} text-2xl text-white transition-opacity hover:opacity-80`}
+                >
+                  ▶
+                </button>
+              )}
+            </div>
             <button
               type="button"
               onClick={restart}
@@ -399,7 +452,8 @@ export function SessionPlayer({
               reset
             </button>
           </>
-        )}
+          );
+        })()}
 
         {session === "complete" && (
           <div className="flex flex-col items-center gap-6 text-center">

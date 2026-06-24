@@ -44,6 +44,34 @@ throwaway environment, the worker must treat the database as live:
 - **No destructive or bulk writes** during a run. Reads for rendering are fine.
 - **Never commit `.env.local`** or any pulled prod credentials.
 
+## Screenshot hosting & cleanup (R2)
+
+PR screenshots are hosted on the public R2 bucket (`ragaflow-audio`) under the
+`screenshots/pr<N>/` prefix, because the GitHub repo is private and release/raw
+URLs won't render inline. Two things keep this from accumulating:
+
+- **Lifecycle rule (primary, set-and-forget):** the bucket has a lifecycle rule
+  expiring everything under `screenshots/` after **14 days**. Screenshots only need
+  to live as long as a PR is in review. One-time setup:
+  ```bash
+  npx wrangler r2 bucket lifecycle add ragaflow-audio \
+    --prefix screenshots/ --expire-days 14 --name screenshots-expiry
+  ```
+- **Per-merge sweep (best-effort):** on entry (Step 0), the worker deletes the R2
+  prefix for any screen PR that has since merged/closed:
+  ```bash
+  npx wrangler r2 object delete "ragaflow-audio/screenshots/pr<N>/<name>.png" --remote
+  ```
+  (R2 has no recursive prefix delete via wrangler — list the known asset names and
+  delete each, or just rely on the lifecycle rule.)
+
+Cost is negligible: ~1 MB per PR, R2 storage is $0.015/GB-month with **zero egress
+fees**, so even hundreds of PRs cost fractions of a cent. The lifecycle rule means
+it never grows unbounded regardless.
+
+Requires `CLOUDFLARE_API_TOKEN` (R2 read/write) in the environment — wrangler's
+interactive OAuth does not work in the non-interactive cron/worker context.
+
 ## Step 0: Early-exit + overlap lock (C5)
 
 Before doing any expensive work, probe state and bail fast so cron noops are cheap (~30s):
@@ -118,17 +146,28 @@ First run only: `npx playwright install chromium`.
      mirroring the spec showing done vs deferred, and the Claude Code footer.
    - Include the marker `<!-- screen: <name> -->` in the body so the loop can map
      the PR back to its screen.
-3. **Upload screenshots** to the PR using the `upload-images` skill's release-asset
-   mechanism (do NOT commit PNGs to the repo — `.automation/` is gitignored):
-   - Upload `before/*` and `after/*` as a temp pre-release.
-   - Post a PR comment with a before/after table per viewport:
+3. **Upload screenshots to R2**, then embed the public URLs in a PR comment.
+   **Do NOT use GitHub release assets or committed `raw` URLs** — this repo is
+   **private**, so those 404 through GitHub's image proxy (camo) and render blank.
+   R2 is a public bucket, so its URLs render inline (works on phone). Requires
+   `CLOUDFLARE_API_TOKEN` in the env (wrangler can't use interactive OAuth in the
+   autonomous loop — see Screenshot hosting & cleanup below).
+   - Upload each PNG under a per-PR prefix:
+     ```bash
+     npx wrangler r2 object put "ragaflow-audio/screenshots/pr<N>/<name>.png" \
+       --file <path> --content-type image/png --remote
+     ```
+   - Public URL: `https://pub-1a2eea0965e14d279ebdbbe8bd7c34bf.r2.dev/screenshots/pr<N>/<name>.png`
+   - Capture both **running** and **idle** states (the player's key deltas are in the
+     running state). Post a before/after table per viewport:
      ```
      ## Before / After — <screen>
      | | Before | After |
      |---|---|---|
-     | Mobile  | ![](before-mobile-url)  | ![](after-mobile-url)  |
-     | Desktop | ![](before-desktop-url) | ![](after-desktop-url) |
+     | Mobile  | ![](.../before-running-mobile.png)  | ![](.../after-running-mobile.png)  |
+     | Desktop | ![](.../before-running-desktop.png) | ![](.../after-running-desktop.png) |
      ```
+   - Do NOT commit PNGs to the repo (`.automation/` is gitignored).
    - The D3 workflow (`pr-preview-comment.yml`) auto-posts the Vercel preview URL
      separately; don't duplicate it.
 4. Set the spec status to `shipped` once the PR is open (it still needs human merge).
