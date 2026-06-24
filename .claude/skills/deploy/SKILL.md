@@ -28,6 +28,18 @@ Automates the Ragaflow git workflow: feature branch → PR against `dev` → Ver
    - Body: `## Summary` with bullet points, `## Test plan` with checklist, and the Claude Code attribution footer.
 4. Output the PR URL.
 
+## Step 2.5: Attach screenshots (default for UI changes)
+
+If the diff touches UI (`web/` or `ios/` view code), run the **`pr-screenshots`**
+skill to capture the changed surface running (web via Playwright, iOS via the
+simulator) and post them as a PR comment. This is the default — every UI PR
+should show the change running, not just describe it.
+
+Skip only when the diff is docs/config/tests with no UI change (the skill
+self-detects this and no-ops). If screenshot capture fails (e.g. no simulator or
+missing Supabase env), surface the failure to the user rather than silently
+opening the PR without them.
+
 ## Step 3: Get Vercel preview URL
 
 1. The Vercel preview URL follows the pattern: `https://ragaflow-git-<branch-name>-kpathakota.vercel.app` (branch name with `/` replaced by `-`).

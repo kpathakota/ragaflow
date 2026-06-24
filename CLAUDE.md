@@ -214,6 +214,7 @@ See `docs/dev-design.md` § "Git & Pull Request Workflow" for the full branch/PR
 - **Clean up large files at deletion time** — when removing binary files from the repo, run `git filter-repo` in the same task
 - **Gitignore new tools immediately** — add local state directories to `.gitignore` before the first commit
 - **Test coverage for diffs** — use `/test-gaps` skill to analyze and fill coverage gaps before merging
+- **Screenshots on every UI PR** — use `/pr-screenshots` (auto-invoked by `/deploy`) to capture the changed surface running (web via `web/scripts/screenshot.mjs`, iOS via `ios/scripts/screenshot.sh`) and post them to the PR. Host on R2, not GitHub releases (private repo → release URLs render blank).
 - Update this file each conversation with new context
 
 ## No one-off work
