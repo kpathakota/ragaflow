@@ -53,8 +53,16 @@ For each orphaned worktree (not the main working directory):
 2. Delete remote branches in a single push: `git push origin --delete <branch1> <branch2> ...`
 3. Run `git fetch --prune origin` again to clean up any remaining stale refs.
 
-## Step 6: Verify
+## Step 6: Sync local with origin
+
+Always leave local and origin in sync at the end of cleanup.
+
+1. For both `dev` and `main`, fast-forward the local branch to its remote counterpart: `git pull --ff-only origin dev` and `git pull --ff-only origin main` (check out each branch first, or use `git fetch origin <branch>:<branch>` for branches not currently checked out).
+2. If a fast-forward isn't possible (local has diverged), don't force anything — report the divergence to the user and let them decide.
+
+## Step 7: Verify
 
 1. Run `git branch -a` and confirm only `dev`, `main`, and their remote counterparts remain.
 2. Run `git worktree list` and confirm only the main working directory exists.
-3. Report the final state to the user.
+3. Run `git status -sb` and confirm the current branch is in sync with its remote (no `ahead`/`behind`).
+4. Report the final state to the user.
