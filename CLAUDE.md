@@ -48,7 +48,7 @@ Both clients share the same Supabase backend. No shared code between web and iOS
 | iOS release | production | `ios/Ragaflow/Configuration/Release.xcconfig` |
 
 1. Pull `web/.env.local` from Vercel: `cd web && vercel env pull .env.local --environment=production` (or copy from another dev)
-2. Migrations in `supabase/migrations/` are mostly applied on production, but **not all** — e.g. `010_featured_and_display_name.sql` is NOT applied (prod `tracks` lacks `featured`/`featured_scenarios`/`display_name`), which disables featured tracks / the Home "Tonight" card on both clients. Run pending ones in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
+2. Migrations in `supabase/migrations/` are mostly applied on production. `010_featured_and_display_name.sql` was applied 2026-06-24 (prod `tracks` now has `featured`/`featured_scenarios`, `rasikas` has `display_name`; 5 tracks featured, 2 sleep-featured for the Home "Tonight" card). When a migration is pending, run it in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
 3. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
