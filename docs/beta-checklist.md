@@ -68,14 +68,15 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 
 ### Screen 4: Session Player
 
-- [ ] Larger timer (`text-4xl`) in accent color during playback
-- [ ] Show track title + ragam name below timer during running/paused
-- [ ] Circular progress ring around play/pause button
-- [ ] Breathing animation on background orb (meditate/sleep)
-- [ ] 3-second crossfade on loop restart
-- [ ] Port sleep volume fade to web
-- [ ] Add "Back to list" to web session player completion state
-- [ ] Unify favorite button placement (inline vs toolbar)
+- [x] Larger timer (`text-4xl`) in accent color during playback *(web — #52)*
+- [x] Show track title + ragam name below timer during running/paused *(web — #52)*
+- [x] Circular progress ring around play/pause button *(web — #52)*
+- [x] Breathing animation on background orb (meditate/sleep) *(web — #52)*
+- [ ] 3-second crossfade on loop restart *(deferred — needs dual-`<audio>` + real-device verification)*
+- [x] Port sleep volume fade to web *(web — #52)*
+- [x] Add "Back to list" to web session player completion state *(web — already present)*
+- [x] Unify favorite button placement (inline vs toolbar) *(web — #52)*
+- [ ] **iOS catch-up: player** — mirror the above on `SessionPlayerView.swift` (parity policy A3: web leads, iOS follows). Tested post-merge to dev (C3).
 
 ### Screen 5: Explore
 
@@ -97,10 +98,10 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 
 - [ ] Unify Explore accent color across platforms
 - [ ] iOS auth: earth-tone submit button
-- [ ] Port sleep volume fade to web
-- [ ] "Back to list" on web player completion
+- [x] Port sleep volume fade to web *(#52)*
+- [x] "Back to list" on web player completion *(already present)*
 - [ ] "Clear filters" + count badge on web Explore
-- [ ] Unify favorite button placement on session player
+- [x] Unify favorite button placement on session player *(web — #52; iOS catch-up tracked under Screen 4)*
 
 ---
 

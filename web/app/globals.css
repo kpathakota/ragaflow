@@ -42,3 +42,19 @@ body {
     box-shadow: 0 0 80px rgba(0, 0, 0, 0.55);
   }
 }
+
+/* Breathing ambient orb on the session player (meditate/sleep). */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.16; }
+  50% { transform: scale(1.14); opacity: 0.28; }
+}
+
+.animate-breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathe {
+    animation: none;
+  }
+}
