@@ -55,6 +55,15 @@ final class SessionPlayerViewModel {
         return String(format: "%02d:%02d", mins, secs)
     }
 
+    /// Fraction (0...1) of the session that has elapsed, for the circular
+    /// progress ring. Mirrors web `progressFraction` in lib/player.ts.
+    var progress: Double {
+        let total = Double(duration * 60)
+        guard total > 0 else { return 0 }
+        let done = (total - Double(remaining)) / total
+        return min(1, max(0, done))
+    }
+
     var displayName: String {
         ragam?.name ?? track?.displayName ?? "Ragaflow"
     }
