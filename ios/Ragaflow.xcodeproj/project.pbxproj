@@ -34,6 +34,7 @@
 		C5C74E0C25F736309A049D56 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743CEC8E8EBA3D278D7E3DA /* Track.swift */; };
 		CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */; };
 		CED328D86937BE8E91CAA6A8 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23EF28FD95CB4D54DEF1DD /* ProfileViewModel.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* HomeViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */; };
 		D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966A1852C0B156E908F43DDF /* Ragam.swift */; };
 		D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA77D1F146B22E3A514E3E61 /* ExploreView.swift */; };
 		D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29F8271D78294D42B4E57AF /* ProfileView.swift */; };
@@ -69,6 +70,7 @@
 		16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ragaflow.entitlements; sourceTree = "<group>"; };
 		26DC56A75637E4572BF38ED6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
+		C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewTests.swift; sourceTree = "<group>"; };
 		40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		44EFE15DB19746626C260B83 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowApp.swift; sourceTree = "<group>"; };
@@ -146,6 +148,7 @@
 				03225E59A85E33C9FE134C9D /* ExploreViewModelTests.swift */,
 				35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */,
 				7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */,
+				C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */,
 			);
 			path = RagaflowTests;
 			sourceTree = "<group>";
@@ -494,6 +497,7 @@
 				635AB0E9B8EB0EC68DBBDE60 /* MockSupabaseService.swift in Sources */,
 				CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */,
 				3A41C1ADE647D2D18586015B /* SessionPlayerViewModelTests.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* HomeViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
