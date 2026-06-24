@@ -53,7 +53,9 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${playfairDisplay.variable} antialiased`}
       >
         <AuthProvider>
-          <AnalyticsProvider>{children}</AnalyticsProvider>
+          <AnalyticsProvider>
+            <div className="app-frame">{children}</div>
+          </AnalyticsProvider>
         </AuthProvider>
       </body>
     </html>

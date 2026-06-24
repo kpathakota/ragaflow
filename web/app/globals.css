@@ -3,6 +3,10 @@
 :root {
   --background: #0F0B07;
   --foreground: #E6DCCA;
+  /* The "desk" the app frame sits on — only visible on wide screens beside the
+     centered mobile-width frame. Slightly darker than the app background so the
+     frame reads as an intentional device, not a stray column. */
+  --desk: #060402;
 }
 
 @theme inline {
@@ -14,9 +18,29 @@
 }
 
 body {
-  background: var(--background);
+  background: var(--desk);
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
+}
+
+/* Mobile-shaped app frame: a centered, fixed-width, full-height column. On
+   phones it fills the viewport (the desk is never seen); on desktop the app is
+   boxed into a phone shape with a hairline edge so it looks composed rather
+   than stretched across empty space. */
+.app-frame {
+  background: var(--background);
+  width: 100%;
+  max-width: 430px;
+  min-height: 100vh;
+  min-height: 100dvh;
+  margin-inline: auto;
+}
+
+@media (min-width: 431px) {
+  .app-frame {
+    border-inline: 1px solid color-mix(in srgb, var(--foreground) 8%, transparent);
+    box-shadow: 0 0 80px rgba(0, 0, 0, 0.55);
+  }
 }
 
 /* Breathing ambient orb on the session player (meditate/sleep). */
