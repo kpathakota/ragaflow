@@ -18,3 +18,19 @@ body {
   color: var(--foreground);
   font-family: var(--font-sans), Arial, Helvetica, sans-serif;
 }
+
+/* Breathing ambient orb on the session player (meditate/sleep). */
+@keyframes breathe {
+  0%, 100% { transform: scale(1); opacity: 0.16; }
+  50% { transform: scale(1.14); opacity: 0.28; }
+}
+
+.animate-breathe {
+  animation: breathe 8s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-breathe {
+    animation: none;
+  }
+}
