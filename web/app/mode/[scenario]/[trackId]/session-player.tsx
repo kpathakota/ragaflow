@@ -402,7 +402,7 @@ export function SessionPlayer({
             {/* Play/pause with circular progress ring */}
             <div className="relative flex items-center justify-center">
               <svg
-                className="absolute -rotate-90"
+                className="pointer-events-none absolute -rotate-90"
                 width="96"
                 height="96"
                 viewBox="0 0 96 96"
