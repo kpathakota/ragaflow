@@ -49,9 +49,10 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 ### Screen 1: Home
 
 - [x] Featured track card for 1-tap play (PR #48, #49)
-- [ ] Time-aware greeting ("Good evening") instead of tagline
-- [ ] Drop favorites count from Home (belongs on Profile)
-- [ ] Unify Explore accent color across platforms (web=emerald, iOS=tan)
+- [x] iOS home brought to parity with web redesign (candle glow, serif lockup, "Tonight" card, serif scenario cards, two-up footer)
+- [x] Unify Explore accent color across platforms (both now a neutral cream footer tile)
+- [ ] Time-aware greeting ("Good evening") instead of tagline *(open on both platforms)*
+- [ ] Drop favorites count from Home (belongs on Profile) *(open on both platforms)*
 
 ### Screen 2: Auth
 
@@ -96,7 +97,7 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 
 ### Visual Consistency (quick wins)
 
-- [ ] Unify Explore accent color across platforms
+- [x] Unify Explore accent color across platforms *(home: both now a neutral cream footer tile)*
 - [ ] iOS auth: earth-tone submit button
 - [x] Port sleep volume fade to web *(#52)*
 - [x] "Back to list" on web player completion *(already present)*

@@ -17,15 +17,15 @@ Returning rasika. Quick Play / featured track is the main payoff; new users get 
 
 ## Current state (from critique 2026-04-23)
 
-- **Web** (`web/app/page.tsx`): personalized defaults + scenario cards + Explore link + user badge. Featured track card shipped (PR #48, #49).
-- **iOS** (`ios/Ragaflow/Views/Home/HomeView.swift`): same shape.
+- **Web** (`web/app/page.tsx`): redesigned — warm `#0F0B07` background + time-of-day candle glow, serif (Playfair) brand lockup, a single time-aware "Tonight" invitation card (featured track, or the rasika's saved default for the current scenario), serif scenario cards, two-up Explore/Favorites footer.
+- **iOS** (`ios/Ragaflow/Views/Home/HomeView.swift`): brought to parity with the web redesign (system serif "New York" in place of Playfair). Collapsed the old QUICK PLAY + FEATURED lists into the single "Tonight" card to match web.
 
 ## Deltas to close (from beta-checklist)
 
 - [x] Featured track card for 1-tap play (PR #48, #49)
-- [ ] Time-aware greeting ("Good evening") instead of tagline
-- [ ] Drop favorites count from Home (belongs on Profile)
-- [ ] Unify Explore accent color across platforms (web=emerald, iOS=tan)
+- [x] Unify Explore accent color across platforms — both now use a neutral cream footer tile (the old iOS tan / web emerald scenario-style Explore card is gone)
+- [ ] Time-aware greeting ("Good evening") instead of tagline — still open on **both** platforms (the time-aware label lives on the "Tonight" card eyebrow, not the greeting)
+- [ ] Drop favorites count from Home (belongs on Profile) — still open on **both** platforms
 
 ## Notes
 

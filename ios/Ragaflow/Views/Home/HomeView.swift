@@ -4,13 +4,16 @@ struct HomeView: View {
     @Environment(SupabaseService.self) private var supabase
 
     @State private var rasika: Rasika?
-    @State private var defaultTracks: [(scenario: Scenario, track: Track, durationSeconds: Int?)] = []
-    @State private var featuredTracks: [Track] = []
     @State private var allTracks: [Track] = []
-    @State private var ragams: [String: Ragam] = [:]
+    @State private var featuredTracks: [Track] = []
+    @State private var suggestedTrack: Track?
+    @State private var suggestedDurationMin: Int?
 
-    /// Authenticated: "Welcome, <name>" or "Welcome"
-    /// Anonymous: tagline so first-time visitors know what Ragaflow is
+    /// Resolved once per appearance so the greeting/glow/suggested track stay stable.
+    private let timeOfDay = TimeOfDay.current()
+
+    /// Authenticated: "Welcome, <name>" or "Welcome".
+    /// Anonymous: tagline so first-time visitors know what Ragaflow is.
     private var subtitle: String {
         if supabase.currentUser != nil {
             if let name = rasika?.displayName, !name.isEmpty {
@@ -23,85 +26,108 @@ struct HomeView: View {
 
     var body: some View {
         ScrollView {
-            VStack(spacing: 16) {
-                // Header
-                VStack(spacing: 8) {
+            VStack(spacing: 0) {
+                // Top bar: profile badge / sign-in pill
+                HStack {
+                    Spacer()
+                    if supabase.currentUser != nil {
+                        NavigationLink {
+                            ProfileView()
+                        } label: {
+                            UserBadge()
+                        }
+                        .accessibilityLabel("Profile")
+                    } else {
+                        NavigationLink {
+                            AuthView()
+                        } label: {
+                            Text("Sign in")
+                                .font(.system(size: 14, weight: .medium))
+                                .foregroundStyle(Color.warmCream)
+                                .padding(.horizontal, 16)
+                                .padding(.vertical, 8)
+                                .background(Color.warmPill)
+                                .clipShape(Capsule())
+                        }
+                    }
+                }
+                .padding(.top, 4)
+
+                // Brand lockup
+                VStack(spacing: 10) {
                     Text("Ragaflow")
-                        .font(.largeTitle)
-                        .fontWeight(.semibold)
-                        .tracking(-0.5)
+                        .font(.system(size: 40, weight: .medium, design: .serif))
+                        .foregroundStyle(Color.warmCream)
                     Text(subtitle)
-                        .font(.subheadline)
-                        .foregroundStyle(.secondary)
+                        .font(.system(size: 13.5))
+                        .foregroundStyle(Color.warmCream.opacity(0.62))
+                        .multilineTextAlignment(.center)
+                        .frame(maxWidth: 300)
                 }
-                .padding(.top, 24)
-                .padding(.bottom, 8)
+                .padding(.top, 28)
+                .padding(.bottom, 36)
 
-                // Quick play defaults
-                if !defaultTracks.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("QUICK PLAY")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .tracking(1)
-                            .foregroundStyle(.secondary)
-
-                        ForEach(defaultTracks, id: \.scenario) { item in
-                            NavigationLink(value: PlayerDestination(
-                                trackId: item.track.id,
-                                scenario: item.scenario,
-                                duration: item.durationSeconds.map { $0 / 60 }
-                            )) {
-                                QuickPlayRow(scenario: item.scenario, track: item.track, durationMinutes: item.durationSeconds.map { $0 / 60 })
-                            }
-                        }
+                // Tonight invitation (time-aware featured/default track)
+                if let suggestedTrack {
+                    NavigationLink(value: PlayerDestination(
+                        trackId: suggestedTrack.id,
+                        scenario: timeOfDay.scenario,
+                        duration: suggestedDurationMin
+                    )) {
+                        TonightInvitationCard(
+                            track: suggestedTrack,
+                            scenario: timeOfDay.scenario,
+                            durationMinutes: suggestedDurationMin,
+                            eyebrowLabel: timeOfDay.label
+                        )
                     }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
-                }
-
-                // Featured tracks
-                if !featuredTracks.isEmpty {
-                    VStack(alignment: .leading, spacing: 12) {
-                        Text("FEATURED")
-                            .font(.caption)
-                            .fontWeight(.medium)
-                            .tracking(1)
-                            .foregroundStyle(.secondary)
-
-                        ForEach(featuredTracks) { track in
-                            let scenario = track.scenarios.first ?? .focus
-                            NavigationLink(value: PlayerDestination(
-                                trackId: track.id,
-                                scenario: scenario,
-                                duration: nil,
-                                autoplay: true
-                            )) {
-                                FeaturedTrackRow(track: track, scenario: scenario, ragamName: ragams[track.ragamId]?.name)
-                            }
-                        }
-                    }
-                    .padding(.horizontal)
-                    .padding(.bottom, 8)
+                    .buttonStyle(.plain)
                 }
 
                 // Scenario cards
-                VStack(spacing: 12) {
+                VStack(spacing: 10) {
                     ForEach(Scenario.allCases) { scenario in
                         NavigationLink(value: scenario) {
-                            ScenarioCard(scenario: scenario)
+                            HomeScenarioCard(scenario: scenario)
                         }
-                    }
-
-                    // Explore card
-                    NavigationLink(value: "explore") {
-                        ExploreCard()
+                        .buttonStyle(.plain)
                     }
                 }
-                .padding(.horizontal)
+                .padding(.top, 28)
+
+                // Two-up footer: Explore + Favorites
+                HStack(spacing: 10) {
+                    NavigationLink(value: "explore") {
+                        ExploreFooterTile()
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink(value: "explore") {
+                        FavoritesFooterTile(count: rasika?.favoriteTracks.count ?? 0)
+                    }
+                    .buttonStyle(.plain)
+                }
+                .padding(.top, 22)
             }
+            .frame(maxWidth: 400)
+            .frame(maxWidth: .infinity)
+            .padding(.horizontal, 20)
             .padding(.bottom, 32)
         }
+        .background {
+            ZStack(alignment: .top) {
+                Color.warmBackground
+                // Candle glow — colored by time of day
+                Circle()
+                    .fill(timeOfDay.scenario.accentColor)
+                    .frame(width: 280, height: 280)
+                    .opacity(0.12)
+                    .blur(radius: 70)
+                    .offset(y: 40)
+            }
+            .ignoresSafeArea()
+        }
+        .toolbar(.hidden, for: .navigationBar)
         .navigationDestination(for: Scenario.self) { scenario in
             TrackListView(scenario: scenario)
         }
@@ -113,26 +139,6 @@ struct HomeView: View {
         .navigationDestination(for: PlayerDestination.self) { dest in
             SessionPlayerView(trackId: dest.trackId, scenario: dest.scenario, initialDuration: dest.duration, autoplay: dest.autoplay)
         }
-        .toolbar {
-            ToolbarItem(placement: .topBarTrailing) {
-                if supabase.currentUser != nil {
-                    NavigationLink {
-                        ProfileView()
-                    } label: {
-                        UserBadge()
-                    }
-                    .accessibilityLabel("Profile")
-                } else {
-                    NavigationLink {
-                        AuthView()
-                    } label: {
-                        Text("Sign in")
-                            .font(.subheadline)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-        }
         .task {
             await loadData()
         }
@@ -143,89 +149,92 @@ struct HomeView: View {
             async let rasikaResult = supabase.fetchRasika()
             async let allTracksResult = supabase.fetchAllTracks()
             async let featuredResult = supabase.fetchFeaturedTracks()
-            async let ragamsResult = supabase.fetchAllRagams()
 
-            let (fetchedRasika, fetchedAllTracks, fetchedFeatured, fetchedRagams) =
-                try await (rasikaResult, allTracksResult, featuredResult, ragamsResult)
+            let (fetchedRasika, fetchedAllTracks, fetchedFeatured) =
+                try await (rasikaResult, allTracksResult, featuredResult)
 
             rasika = fetchedRasika
             allTracks = fetchedAllTracks
             featuredTracks = fetchedFeatured
-            ragams = Dictionary(uniqueKeysWithValues: fetchedRagams.map { ($0.id, $0) })
-
-            guard let rasika else { return }
-
-            var defaults: [(Scenario, Track, Int?)] = []
-            let mapping: [(Scenario, String?, Int?)] = [
-                (.focus, rasika.defaultFocusTrack, rasika.defaultFocusDuration),
-                (.sleep, rasika.defaultSleepTrack, rasika.defaultSleepDuration),
-                (.meditate, rasika.defaultMeditateTrack, rasika.defaultMeditateDuration),
-            ]
-
-            for (scenario, trackId, dur) in mapping {
-                if let trackId, let track = allTracks.first(where: { $0.id == trackId }) {
-                    defaults.append((scenario, track, dur))
-                }
-            }
-
-            defaultTracks = defaults
+            computeSuggestedTrack()
         } catch {
             // Data loads silently fail — same as web behavior
         }
     }
+
+    /// Mirrors web `getHomeData`: pick a time-appropriate featured track, then
+    /// prefer the rasika's saved default for the current scenario.
+    private func computeSuggestedTrack() {
+        let scenario = timeOfDay.scenario
+        var suggested: Track?
+        var durationMin: Int?
+
+        if scenario == .sleep {
+            let sleepFeatured = allTracks.filter { $0.featuredScenarios.contains("sleep") }
+            suggested = sleepFeatured.randomElement()
+        }
+        if suggested == nil {
+            suggested = featuredTracks.first
+        }
+
+        if let rasika {
+            let defaultTrackId: String?
+            let defaultDuration: Int?
+            switch scenario {
+            case .focus:
+                defaultTrackId = rasika.defaultFocusTrack
+                defaultDuration = rasika.defaultFocusDuration
+            case .sleep:
+                defaultTrackId = rasika.defaultSleepTrack
+                defaultDuration = rasika.defaultSleepDuration
+            case .meditate:
+                defaultTrackId = rasika.defaultMeditateTrack
+                defaultDuration = rasika.defaultMeditateDuration
+            }
+            if let defaultTrackId, let track = allTracks.first(where: { $0.id == defaultTrackId }) {
+                suggested = track
+                durationMin = defaultDuration.map { $0 / 60 }
+            }
+        }
+
+        suggestedTrack = suggested
+        suggestedDurationMin = durationMin
+    }
 }
 
-// MARK: - Featured Track Row
+// MARK: - Time of day
+//
+// Mirrors web lib/time-of-day.ts. The per-window accent/accentLight map onto the
+// scenario's own accent colors, so only the label + scenario are needed here.
 
-struct FeaturedTrackRow: View {
-    let track: Track
-    let scenario: Scenario
-    let ragamName: String?
+enum TimeOfDay {
+    case morning, midday, evening, night
 
-    var body: some View {
-        HStack(spacing: 12) {
-            Circle()
-                .fill(scenario.accentColor)
-                .frame(width: 40, height: 40)
-                .overlay {
-                    Image(systemName: "play.fill")
-                        .font(.system(size: 14))
-                        .foregroundStyle(.white)
-                }
-
-            VStack(alignment: .leading, spacing: 2) {
-                Text(track.title ?? ragamName ?? "Untitled")
-                    .font(.subheadline)
-                    .fontWeight(.medium)
-                    .foregroundStyle(scenario.accentColorLight)
-                    .lineLimit(1)
-                HStack(spacing: 4) {
-                    if let ragamName, track.title != nil {
-                        Text(ragamName)
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                        Text("·")
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                    Text("\(track.duration / 60)m")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
-
-            Spacer()
+    static func current(hour: Int? = nil) -> TimeOfDay {
+        let h = hour ?? Calendar.current.component(.hour, from: Date())
+        switch h {
+        case 5..<12: return .morning
+        case 12..<17: return .midday
+        case 17..<21: return .evening
+        default: return .night
         }
-        .padding(.horizontal, 20)
-        .padding(.vertical, 16)
-        .background(
-            RoundedRectangle(cornerRadius: 16)
-                .fill(Color(.systemGray6).opacity(0.6))
-                .overlay(
-                    RoundedRectangle(cornerRadius: 16)
-                        .strokeBorder(scenario.accentColor.opacity(0.4), lineWidth: 1)
-                )
-        )
+    }
+
+    var label: String {
+        switch self {
+        case .morning: "This morning"
+        case .midday: "A pause"
+        case .evening: "Tonight"
+        case .night: "Wind down"
+        }
+    }
+
+    var scenario: Scenario {
+        switch self {
+        case .morning: .focus
+        case .midday: .meditate
+        case .evening, .night: .sleep
+        }
     }
 }
 
