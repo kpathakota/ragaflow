@@ -394,15 +394,10 @@ export function SessionPlayer({
               {display}
             </span>
 
-            {/* Track title + ragam beneath the timer */}
-            <div className="text-center">
-              <p className="text-sm font-medium text-stone-200">
-                {track.title ?? ragam?.name ?? "Untitled"}
-              </p>
-              {track.title && ragam?.name && (
-                <p className="mt-0.5 text-xs text-stone-500">{ragam.name}</p>
-              )}
-            </div>
+            {/* Ragam name beneath the timer (title stays at the top only) */}
+            {ragam?.name && (
+              <p className="text-sm font-medium text-stone-300">{ragam.name}</p>
+            )}
 
             {/* Play/pause with circular progress ring */}
             <div className="relative flex items-center justify-center">
