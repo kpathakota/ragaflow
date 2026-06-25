@@ -1,6 +1,6 @@
 # Screen: Explore
 
-**Status:** `active` (web — feat/screen-explore, 2026-06-25)
+**Status:** `shipped` (web — PR #57, 2026-06-25); iOS follow-up queued
 **Locked:** 2026-06-14
 
 ## Job to be Done
