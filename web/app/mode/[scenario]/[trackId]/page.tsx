@@ -11,10 +11,10 @@ export default async function SessionPage({
   searchParams,
 }: {
   params: Promise<{ scenario: string; trackId: string }>;
-  searchParams: Promise<{ d?: string; autoplay?: string }>;
+  searchParams: Promise<{ d?: string; autoplay?: string; from?: string }>;
 }) {
   const { scenario, trackId } = await params;
-  const { d, autoplay } = await searchParams;
+  const { d, autoplay, from } = await searchParams;
 
   if (!validScenarios.includes(scenario as Scenario)) notFound();
 
@@ -24,6 +24,10 @@ export default async function SessionPage({
   const ragam = await getRagamById(track.ragam_id);
   const initialDuration = d ? parseInt(d, 10) : undefined;
 
+  // Back returns to wherever the player was opened from. Explore links carry
+  // ?from=explore; everything else falls back to the scenario track list.
+  const backHref = from === "explore" ? "/explore" : `/mode/${scenario}`;
+
   return (
     <SessionPlayer
       track={track}
@@ -31,6 +35,7 @@ export default async function SessionPage({
       scenario={scenario as Scenario}
       initialDuration={initialDuration && !isNaN(initialDuration) ? initialDuration : undefined}
       autoplay={autoplay === "1"}
+      backHref={backHref}
     />
   );
 }

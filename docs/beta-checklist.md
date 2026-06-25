@@ -81,11 +81,11 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 
 ### Screen 5: Explore
 
-- [ ] Search bar (client-side fuzzy across titles, ragams, tags)
-- [ ] Make ragam descriptions more prominent as mood descriptors
-- [ ] Duration and free/premium filters
-- [ ] Fix back-button context when linking from Explore
-- [ ] Add "Clear filters" + selected tag count to web
+- [x] Search bar (client-side fuzzy across titles, ragams, tags) *(web — #explore)*
+- [x] Make ragam descriptions more prominent as mood descriptors *(web — serif italic + time-of-day)*
+- [x] Duration and free/premium filters *(web)*
+- [x] Fix back-button context when linking from Explore *(web — ?from=explore)*
+- [x] Add "Clear filters" + selected tag count to web
 
 ### Screen 6: Profile
 
@@ -101,7 +101,7 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 - [ ] iOS auth: earth-tone submit button
 - [x] Port sleep volume fade to web *(#52)*
 - [x] "Back to list" on web player completion *(already present)*
-- [ ] "Clear filters" + count badge on web Explore
+- [x] "Clear filters" + count badge on web Explore
 - [x] Unify favorite button placement on session player *(web — #52; iOS catch-up tracked under Screen 4)*
 
 ---

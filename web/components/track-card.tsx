@@ -14,6 +14,8 @@ type TrackCardProps = {
   favoriteTrackIds?: string[];
   onToggleFavorite?: (trackId: string) => void;
   isFeatured?: boolean;
+  /** Tags the link with its origin so the player's Back returns here (e.g. "explore"). */
+  linkFrom?: string;
 };
 
 export function TrackCard({
@@ -23,6 +25,7 @@ export function TrackCard({
   favoriteTrackIds = [],
   onToggleFavorite,
   isFeatured = false,
+  linkFrom,
 }: TrackCardProps) {
   const { user } = useAuth();
   const router = useRouter();
@@ -65,7 +68,7 @@ export function TrackCard({
 
   return (
     <Link
-      href={`/mode/${scenario}/${track.id}`}
+      href={`/mode/${scenario}/${track.id}${linkFrom ? `?from=${linkFrom}` : ""}`}
       className={`group flex items-center justify-between rounded-xl border bg-stone-900/60 px-5 py-4 transition-colors hover:bg-stone-800/60 ${
         isFeatured
           ? `${scenarioMap[scenario].accent.border} ${scenarioMap[scenario].accent.borderHover}`

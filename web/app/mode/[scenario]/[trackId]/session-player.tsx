@@ -35,13 +35,16 @@ export function SessionPlayer({
   scenario,
   initialDuration,
   autoplay = false,
+  backHref,
 }: {
   track: Track;
   ragam: Ragam | undefined;
   scenario: Scenario;
   initialDuration?: number;
   autoplay?: boolean;
+  backHref?: string;
 }) {
+  const listHref = backHref ?? `/mode/${scenario}`;
   const config = scenarioMap[scenario];
   const accent = config.accent;
   const breathing = scenario === "meditate" || scenario === "sleep";
@@ -226,7 +229,7 @@ export function SessionPlayer({
       {/* Top bar: back + favorite */}
       <div className="flex items-center justify-between">
         <Link
-          href={`/mode/${scenario}`}
+          href={listHref}
           className="text-sm text-stone-500 transition-colors hover:text-stone-300"
         >
           &larr; Back
@@ -509,7 +512,7 @@ export function SessionPlayer({
                 New session
               </button>
               <Link
-                href={`/mode/${scenario}`}
+                href={listHref}
                 className="rounded-full bg-stone-800 px-6 py-3 text-sm font-medium text-stone-300 transition-colors hover:bg-stone-700"
               >
                 Back to list

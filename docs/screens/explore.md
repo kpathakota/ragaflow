@@ -1,6 +1,6 @@
 # Screen: Explore
 
-**Status:** `locked-jtbd` (next: `queued` → `active` → `shipped`)
+**Status:** `active` (web — feat/screen-explore, 2026-06-25)
 **Locked:** 2026-06-14
 
 ## Job to be Done
@@ -29,11 +29,11 @@ Implication for this screen: ragam names stay primary. Ragam descriptions can ac
 
 ## Deltas to close (from beta-checklist)
 
-- [ ] Search bar (client-side fuzzy across titles, ragams, tags)
-- [ ] Make ragam descriptions more prominent as mood descriptors
-- [ ] Duration and free/premium filters
-- [ ] Fix back-button context when linking from Explore
-- [ ] Add "Clear filters" + selected tag count to web
+- [x] Search bar (client-side fuzzy across titles, ragams, tags)
+- [x] Make ragam descriptions more prominent as mood descriptors
+- [x] Duration and free/premium filters
+- [x] Fix back-button context when linking from Explore
+- [x] Add "Clear filters" + selected tag count to web
 
 ## Notes
 
