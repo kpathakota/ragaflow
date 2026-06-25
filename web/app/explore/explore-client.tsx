@@ -81,8 +81,12 @@ export function ExploreClient({
     setAccess(EMPTY_FILTERS.access);
   }, []);
 
-  // Check if tags container overflows beyond 2 rows (~72px)
-  const COLLAPSED_HEIGHT = 72;
+  // Collapsed height shows two full rows plus a peek of the third, which the
+  // mask gradient below fades out — so overflow reads as an intentional hint
+  // rather than a hard cut through the middle of a pill row.
+  const COLLAPSED_HEIGHT = 84;
+  const FADE = "linear-gradient(to bottom, #000 calc(100% - 34px), transparent)";
+  const collapsedFade = needsCollapse && !tagsExpanded;
   useEffect(() => {
     const el = tagsContainerRef.current;
     if (el) {
@@ -141,6 +145,8 @@ export function ExploreClient({
             className="flex flex-wrap gap-2 overflow-hidden transition-[max-height] duration-300 ease-in-out"
             style={{
               maxHeight: tagsExpanded || !needsCollapse ? "none" : `${COLLAPSED_HEIGHT}px`,
+              maskImage: collapsedFade ? FADE : undefined,
+              WebkitMaskImage: collapsedFade ? FADE : undefined,
             }}
           >
             <button
