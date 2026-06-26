@@ -7,62 +7,8 @@ struct ExploreView: View {
 
     var body: some View {
         ScrollView {
-            if let vm = viewModel {
-                if vm.isLoading {
-                    ProgressView()
-                        .padding(.top, 100)
-                } else {
-                    VStack(alignment: .leading, spacing: 20) {
-                        // Tag filter
-                        tagFilterSection(vm: vm)
-
-                        // Grouped tracks
-                        ForEach(vm.groupedByRagam, id: \.ragam.id) { group in
-                            VStack(alignment: .leading, spacing: 12) {
-                                Text(group.ragam.name)
-                                    .font(.title3)
-                                    .fontWeight(.semibold)
-                                    .padding(.horizontal)
-
-                                if let description = group.ragam.description as String?, !description.isEmpty {
-                                    Text(description)
-                                        .font(.caption)
-                                        .foregroundStyle(.secondary)
-                                        .padding(.horizontal)
-                                }
-
-                                ForEach(group.tracks) { track in
-                                    NavigationLink(value: PlayerDestination(
-                                        trackId: track.id,
-                                        scenario: track.scenarios.first ?? .focus,
-                                        duration: nil
-                                    )) {
-                                        TrackCard(
-                                            track: track,
-                                            ragamName: nil,
-                                            isFavorite: vm.favorites.contains(track.id),
-                                            scenario: nil,
-                                            onToggleFavorite: {
-                                                Task { await vm.toggleFavorite(trackId: track.id) }
-                                            }
-                                        )
-                                    }
-                                    .buttonStyle(.plain)
-                                    .padding(.horizontal)
-                                }
-                            }
-                            .padding(.bottom, 8)
-                        }
-
-                        if vm.groupedByRagam.isEmpty {
-                            Text("No tracks match the selected tags")
-                                .foregroundStyle(.secondary)
-                                .frame(maxWidth: .infinity)
-                                .padding(.top, 40)
-                        }
-                    }
-                    .padding(.vertical, 16)
-                }
+            if let vm = viewModel, !vm.isLoading {
+                ExploreContent(vm: vm)
             } else {
                 ProgressView()
                     .padding(.top, 100)
@@ -78,57 +24,215 @@ struct ExploreView: View {
             }
         }
     }
+}
 
-    @ViewBuilder
-    private func tagFilterSection(vm: ExploreViewModel) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
-            Button {
-                withAnimation { vm.tagsExpanded.toggle() }
-            } label: {
-                HStack(spacing: 4) {
-                    Text("Filter by tag")
-                        .font(.subheadline)
-                        .fontWeight(.medium)
-                    Image(systemName: vm.tagsExpanded ? "chevron.up" : "chevron.down")
-                        .font(.caption)
-                    if !vm.selectedTags.isEmpty {
-                        Text("(\(vm.selectedTags.count))")
-                            .font(.caption)
-                            .foregroundStyle(Color(red: 0.72, green: 0.52, blue: 0.35))
-                    }
-                }
-                .foregroundStyle(.secondary)
+// MARK: - Content
+//
+// Split out so the @Observable view model can be bound (search field, filters)
+// via @Bindable. Mirrors web app/explore/explore-client.tsx.
+
+private struct ExploreContent: View {
+    @Bindable var vm: ExploreViewModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 20) {
+            searchField
+            filtersSection
+
+            ForEach(vm.groupedByRagam, id: \.ragam.id) { group in
+                ragamGroup(group)
             }
-            .padding(.horizontal)
 
-            if vm.tagsExpanded {
-                FlowLayout(spacing: 6) {
-                    ForEach(vm.allTags, id: \.self) { tag in
-                        Button {
+            if vm.groupedByRagam.isEmpty {
+                emptyState
+            }
+        }
+        .padding(.horizontal)
+        .padding(.vertical, 16)
+    }
+
+    // MARK: Search
+
+    private var searchField: some View {
+        HStack(spacing: 8) {
+            Image(systemName: "magnifyingglass")
+                .font(.system(size: 14))
+                .foregroundStyle(.secondary)
+            TextField("Search ragams, titles, moods…", text: $vm.query)
+                .textFieldStyle(.plain)
+                .font(.subheadline)
+                .autocorrectionDisabled()
+                .textInputAutocapitalization(.never)
+                .submitLabel(.search)
+            if !vm.query.isEmpty {
+                Button {
+                    vm.query = ""
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.system(size: 15))
+                        .foregroundStyle(.secondary)
+                }
+                .buttonStyle(.plain)
+                .accessibilityLabel("Clear search")
+            }
+        }
+        .padding(.horizontal, 14)
+        .padding(.vertical, 10)
+        .background(
+            RoundedRectangle(cornerRadius: 12)
+                .fill(Color(.systemGray6).opacity(0.6))
+                .overlay(
+                    RoundedRectangle(cornerRadius: 12)
+                        .strokeBorder(Color(.systemGray4).opacity(0.5), lineWidth: 1)
+                )
+        )
+    }
+
+    // MARK: Filters
+
+    private var filtersSection: some View {
+        VStack(alignment: .leading, spacing: 12) {
+            // Tag pills
+            VStack(alignment: .leading, spacing: 8) {
+                FlowLayout(spacing: 8) {
+                    pill(label: "All", isOn: vm.selectedTag == nil) {
+                        vm.selectedTag = nil
+                    }
+                    ForEach(vm.visibleTags, id: \.self) { tag in
+                        pill(label: tag, isOn: vm.selectedTag == tag) {
                             vm.toggleTag(tag)
-                        } label: {
-                            Text(tag)
-                                .font(.caption)
-                                .padding(.horizontal, 10)
-                                .padding(.vertical, 5)
-                                .background(vm.selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35).opacity(0.3) : Color(.systemGray5))
-                                .foregroundStyle(vm.selectedTags.contains(tag) ? Color(red: 0.72, green: 0.52, blue: 0.35) : .secondary)
-                                .clipShape(Capsule())
                         }
                     }
                 }
-                .padding(.horizontal)
 
-                if !vm.selectedTags.isEmpty {
-                    Button("Clear filters") {
-                        vm.clearFilters()
+                if vm.needsTagCollapse {
+                    Button {
+                        withAnimation { vm.tagsExpanded.toggle() }
+                    } label: {
+                        Text(vm.tagsExpanded ? "Show fewer tags" : "Show all tags")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
                     }
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-                    .padding(.horizontal)
+                    .buttonStyle(.plain)
+                }
+            }
+
+            // Duration pills
+            FlowLayout(spacing: 8) {
+                ForEach(DurationFilter.allCases) { option in
+                    pill(label: option.label, isOn: vm.duration == option) {
+                        vm.duration = option
+                    }
+                }
+            }
+
+            // Access pills
+            FlowLayout(spacing: 8) {
+                ForEach(AccessFilter.allCases) { option in
+                    pill(label: option.label, isOn: vm.access == option) {
+                        vm.access = option
+                    }
+                }
+            }
+
+            // Active filter count + clear
+            if vm.activeFilterCount > 0 {
+                HStack {
+                    Text("\(vm.activeFilterCount) filter\(vm.activeFilterCount == 1 ? "" : "s") active")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                    Spacer()
+                    Button("Clear filters") {
+                        withAnimation { vm.clearFilters() }
+                    }
+                    .font(.caption.weight(.medium))
+                    .foregroundStyle(Color.warmAccent)
+                    .buttonStyle(.plain)
                 }
             }
         }
+    }
+
+    private func pill(label: String, isOn: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(label)
+                .font(.caption.weight(.medium))
+                .padding(.horizontal, 12)
+                .padding(.vertical, 6)
+                .background(isOn ? Color.warmAccent : Color(.systemGray5))
+                .foregroundStyle(isOn ? .white : Color.secondary)
+                .clipShape(Capsule())
+        }
+        .buttonStyle(.plain)
+    }
+
+    // MARK: Ragam group
+
+    @ViewBuilder
+    private func ragamGroup(_ group: (ragam: Ragam, tracks: [Track])) -> some View {
+        VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 4) {
+                Text(group.ragam.name)
+                    .font(.system(.title3, design: .serif))
+                    .fontWeight(.medium)
+                    .foregroundStyle(.primary)
+
+                if let timeOfDay = group.ragam.timeOfDay, !timeOfDay.isEmpty {
+                    Text(timeOfDay.uppercased())
+                        .font(.system(size: 11, weight: .medium))
+                        .tracking(1.4)
+                        .foregroundStyle(.secondary)
+                }
+
+                if !group.ragam.description.isEmpty {
+                    Text(group.ragam.description)
+                        .font(.system(.subheadline, design: .serif))
+                        .italic()
+                        .foregroundStyle(.secondary)
+                        .fixedSize(horizontal: false, vertical: true)
+                }
+            }
+
+            ForEach(group.tracks) { track in
+                NavigationLink(value: PlayerDestination(
+                    trackId: track.id,
+                    scenario: track.scenarios.first ?? .focus,
+                    duration: nil
+                )) {
+                    TrackCard(
+                        track: track,
+                        ragamName: nil,
+                        isFavorite: vm.favorites.contains(track.id),
+                        scenario: nil,
+                        onToggleFavorite: {
+                            Task { await vm.toggleFavorite(trackId: track.id) }
+                        }
+                    )
+                }
+                .buttonStyle(.plain)
+            }
+        }
+        .padding(.bottom, 8)
+    }
+
+    // MARK: Empty state
+
+    private var emptyState: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            Text("No tracks match these filters.")
+                .font(.subheadline)
+                .foregroundStyle(.secondary)
+            if vm.activeFilterCount > 0 {
+                Button("Clear filters") {
+                    withAnimation { vm.clearFilters() }
+                }
+                .font(.subheadline.weight(.medium))
+                .foregroundStyle(Color.warmAccent)
+                .buttonStyle(.plain)
+            }
+        }
+        .frame(maxWidth: .infinity, alignment: .center)
+        .padding(.top, 40)
     }
 }
 
