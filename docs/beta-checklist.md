@@ -81,11 +81,11 @@ Each screen needs a design pass before opening beyond 30 people. Derived from `d
 
 ### Screen 5: Explore
 
-- [x] Search bar (client-side fuzzy across titles, ragams, tags) *(web — #explore)*
-- [x] Make ragam descriptions more prominent as mood descriptors *(web — serif italic + time-of-day)*
-- [x] Duration and free/premium filters *(web)*
-- [x] Fix back-button context when linking from Explore *(web — ?from=explore)*
-- [x] Add "Clear filters" + selected tag count to web
+- [x] Search bar (client-side fuzzy across titles, ragams, tags) *(web + iOS)*
+- [x] Make ragam descriptions more prominent as mood descriptors *(web + iOS — serif italic + time-of-day)*
+- [x] Duration and free/premium filters *(web + iOS)*
+- [x] Fix back-button context when linking from Explore *(web — ?from=explore; iOS via NavigationStack)*
+- [x] Add "Clear filters" + active-filter count *(web + iOS)*
 
 ### Screen 6: Profile
 

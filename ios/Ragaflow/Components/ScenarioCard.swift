@@ -17,6 +17,8 @@ extension Color {
     static let warmPill = Color(red: 41 / 255, green: 37 / 255, blue: 36 / 255)
     /// Favorites accent (#C96A4C).
     static let warmFavorite = Color(red: 201 / 255, green: 106 / 255, blue: 76 / 255)
+    /// Explore accent — warm tan (#B8845A), matches web's selected-filter pills.
+    static let warmAccent = Color(red: 184 / 255, green: 132 / 255, blue: 90 / 255)
 }
 
 // MARK: - Tonight invitation

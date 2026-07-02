@@ -1,6 +1,6 @@
 # Screen: Explore
 
-**Status:** `shipped` (web — PR #57, 2026-06-25); iOS follow-up queued
+**Status:** `shipped` (web — PR #57, 2026-06-25; iOS — 2026-06-26, this PR)
 **Locked:** 2026-06-14
 
 ## Job to be Done
@@ -24,16 +24,15 @@ Implication for this screen: ragam names stay primary. Ragam descriptions can ac
 ## Current state (from critique 2026-04-23)
 
 - **Web** (`web/app/explore/`): grouped by ragam, tag filter, no search, no duration filter, no premium filter.
-- **iOS** (`ios/Ragaflow/Views/Explore/ExploreView.swift`): grouped by ragam, tag pills (gold when selected), "Clear filters" button + selected tag count.
-- Cross-platform: accent color differs (web=emerald, iOS=tan), tag pill style differs.
+- **iOS** (`ios/Ragaflow/Views/Explore/ExploreView.swift`): at parity with web — search bar, single-select tag pills, duration + free/premium filters, active-filter count + "Clear filters", and serif ragam names with an uppercase time-of-day label + italic mood description. Shared `Color.warmAccent` (#B8845A) matches web's selected-pill accent.
 
 ## Deltas to close (from beta-checklist)
 
-- [x] Search bar (client-side fuzzy across titles, ragams, tags)
-- [x] Make ragam descriptions more prominent as mood descriptors
-- [x] Duration and free/premium filters
-- [x] Fix back-button context when linking from Explore
-- [x] Add "Clear filters" + selected tag count to web
+- [x] Search bar (client-side fuzzy across titles, ragams, tags) — web + iOS
+- [x] Make ragam descriptions more prominent as mood descriptors — web + iOS
+- [x] Duration and free/premium filters — web + iOS
+- [x] Fix back-button context when linking from Explore — web (`?from=explore`); iOS gets this free from the NavigationStack
+- [x] Add "Clear filters" + active-filter count — web + iOS
 
 ## Notes
 
