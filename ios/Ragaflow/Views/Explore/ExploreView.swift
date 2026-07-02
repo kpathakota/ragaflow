@@ -35,15 +35,18 @@ private struct ExploreContent: View {
     @Bindable var vm: ExploreViewModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 20) {
+        // Compute the grouping once per render rather than in both the ForEach
+        // and the empty-state check.
+        let groups = vm.groupedByRagam
+        return VStack(alignment: .leading, spacing: 20) {
             searchField
             filtersSection
 
-            ForEach(vm.groupedByRagam, id: \.ragam.id) { group in
+            ForEach(groups, id: \.ragam.id) { group in
                 ragamGroup(group)
             }
 
-            if vm.groupedByRagam.isEmpty {
+            if groups.isEmpty {
                 emptyState
             }
         }
@@ -158,12 +161,15 @@ private struct ExploreContent: View {
             Text(label)
                 .font(.caption.weight(.medium))
                 .padding(.horizontal, 12)
-                .padding(.vertical, 6)
+                .padding(.vertical, 8)
+                .frame(minHeight: 32)
                 .background(isOn ? Color.warmAccent : Color(.systemGray5))
                 .foregroundStyle(isOn ? .white : Color.secondary)
                 .clipShape(Capsule())
+                .contentShape(Capsule())
         }
         .buttonStyle(.plain)
+        .accessibilityAddTraits(isOn ? [.isSelected] : [])
     }
 
     // MARK: Ragam group

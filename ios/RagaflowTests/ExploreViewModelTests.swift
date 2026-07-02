@@ -33,6 +33,30 @@ private func makeTracks() -> [Track] {
     ]
 }
 
+/// Minimal track builder for boundary/threshold tests that need specific
+/// durations or tag sets without disturbing the shared `makeTracks` fixtures.
+private func makeTrack(
+    id: String, duration: Int, tags: [String] = [], free: Bool = true, ragamId: String = "r1"
+) -> Track {
+    Track(
+        id: id, title: id, ragamId: ragamId, scenarios: [.focus], tags: tags,
+        description: "", artistNote: nil, recordedDate: "2026-01-01", location: nil,
+        duration: duration, audioUrl: "https://example.com/\(id).m4a",
+        downloadUrl: nil, free: free, featured: false, featuredScenarios: [],
+        createdAt: "2026-01-01T00:00:00Z"
+    )
+}
+
+@MainActor
+private func viewModel(tracks: [Track]) async -> ExploreViewModel {
+    let mock = MockSupabaseService()
+    mock.tracks = tracks
+    mock.ragams = makeRagams()
+    let vm = ExploreViewModel(supabase: mock)
+    await vm.loadData()
+    return vm
+}
+
 private func makeRagams() -> [Ragam] {
     [
         Ragam(id: "r1", name: "Hindolam", description: "Pentatonic", timeOfDay: "morning"),
@@ -147,6 +171,26 @@ struct ExploreViewModelTests {
         #expect(vm.filteredTracks.count == 3)
     }
 
+    @Test("duration buckets are inclusive at the 20m and 40m boundaries")
+    @MainActor
+    func durationBoundaries() async {
+        // Exactly 20m (1200s) and exactly 40m (2400s) — the inclusive/exclusive
+        // edges of the "medium" bucket (>= 20 && <= 40).
+        let vm = await viewModel(tracks: [
+            makeTrack(id: "b20", duration: 1200),
+            makeTrack(id: "b40", duration: 2400),
+        ])
+
+        vm.duration = .short // < 20m — excludes exactly 20m
+        #expect(vm.filteredTracks.isEmpty)
+
+        vm.duration = .medium // 20–40m inclusive — includes both
+        #expect(Set(vm.filteredTracks.map(\.id)) == Set(["b20", "b40"]))
+
+        vm.duration = .long // > 40m — excludes exactly 40m
+        #expect(vm.filteredTracks.isEmpty)
+    }
+
     // MARK: Access filter
 
     @Test("access filter splits free vs premium")
@@ -253,13 +297,43 @@ struct ExploreViewModelTests {
 
     // MARK: Tag collapse
 
-    @Test("needsTagCollapse only past the collapse limit")
+    @Test("needsTagCollapse is false below the collapse limit")
     @MainActor
     func tagCollapse() async {
         let vm = await loadedViewModel()
         // 4 tags < limit → no collapse, all visible.
         #expect(vm.needsTagCollapse == false)
         #expect(vm.visibleTags == vm.allTags)
+    }
+
+    @Test("exactly the collapse limit does not trigger collapse")
+    @MainActor
+    func tagCollapseAtLimit() async {
+        let limit = ExploreViewModel.collapsedTagLimit
+        let tags = (1...limit).map { "tag\($0)" }
+        let vm = await viewModel(tracks: [makeTrack(id: "t", duration: 1800, tags: tags)])
+
+        #expect(vm.allTags.count == limit)
+        #expect(vm.needsTagCollapse == false)
+        #expect(vm.visibleTags.count == limit)
+    }
+
+    @Test("past the collapse limit, collapsed view caps visible tags and expands to all")
+    @MainActor
+    func tagCollapsePastLimit() async {
+        let limit = ExploreViewModel.collapsedTagLimit
+        let count = limit + 1
+        let tags = (1...count).map { "tag\($0)" }
+        let vm = await viewModel(tracks: [makeTrack(id: "t", duration: 1800, tags: tags)])
+
+        #expect(vm.allTags.count == count)
+        #expect(vm.needsTagCollapse == true)
+        // Collapsed: only the leading `limit` tags are visible.
+        #expect(vm.visibleTags.count == limit)
+        #expect(vm.visibleTags == Array(vm.allTags.prefix(limit)))
+        // Expanded: all tags shown.
+        vm.tagsExpanded = true
+        #expect(vm.visibleTags.count == count)
     }
 
     // MARK: Grouping

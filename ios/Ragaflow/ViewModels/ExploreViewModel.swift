@@ -64,6 +64,10 @@ final class ExploreViewModel {
     var favorites: Set<String> = []
     var isLoading = true
 
+    /// Sorted unique tags, computed once in `loadData` since `tracks` is
+    /// immutable after load — avoids re-deriving it on every render.
+    private(set) var allTags: [String] = []
+
     // Filters (mirror web explore-client state).
     var query = ""
     var selectedTag: String?
@@ -79,10 +83,6 @@ final class ExploreViewModel {
     }
 
     // MARK: - Computed
-
-    var allTags: [String] {
-        Set(tracks.flatMap(\.tags)).sorted()
-    }
 
     var needsTagCollapse: Bool {
         allTags.count > Self.collapsedTagLimit
@@ -115,8 +115,8 @@ final class ExploreViewModel {
 
     var filteredTracks: [Track] {
         tracks.filter { track in
-            (selectedTag == nil || track.tags.contains(selectedTag!))
-                && duration.matches(track)
+            if let tag = selectedTag, !track.tags.contains(tag) { return false }
+            return duration.matches(track)
                 && access.matches(track)
                 && matchesQuery(track)
         }
@@ -140,6 +140,9 @@ final class ExploreViewModel {
             let sorted = tracks.sorted { ($0.recordedDate ?? "") > ($1.recordedDate ?? "") }
             return (ragam, sorted)
         }
+        // Deterministic alphabetical order. Intentional deviation from web, which
+        // renders groups in first-appearance order; `Dictionary(grouping:)` is
+        // unordered, so sort by name for a stable, predictable layout.
         .sorted { $0.ragam.name < $1.ragam.name }
     }
 
@@ -154,6 +157,7 @@ final class ExploreViewModel {
             let (fetchedTracks, fetchedRagams, rasika) = try await (tracksResult, ragamsResult, rasikaResult)
 
             tracks = fetchedTracks
+            allTags = Set(fetchedTracks.flatMap(\.tags)).sorted()
             ragams = Dictionary(uniqueKeysWithValues: fetchedRagams.map { ($0.id, $0) })
             favorites = Set(rasika?.favoriteTracks ?? [])
         } catch {}
