@@ -20,9 +20,6 @@ struct ProfileView: View {
                         // Stats
                         statsSection(vm: vm)
 
-                        // Subscription status
-                        subscriptionSection(vm: vm)
-
                         // Certifications
                         if !vm.certifications.isEmpty {
                             certificationsSection(vm: vm)
@@ -96,44 +93,6 @@ struct ProfileView: View {
             Text(label)
                 .font(.caption)
                 .foregroundStyle(.secondary)
-        }
-        .frame(maxWidth: .infinity)
-        .padding()
-        .background(Color(.systemGray6))
-        .clipShape(RoundedRectangle(cornerRadius: 16))
-    }
-
-    @ViewBuilder
-    private func subscriptionSection(vm: ProfileViewModel) -> some View {
-        let status = vm.subscriptionStatus
-
-        VStack(spacing: 8) {
-            switch status {
-            case .active, .lifetime:
-                HStack {
-                    Image(systemName: "star.fill")
-                        .foregroundStyle(.green)
-                    Text(status == .lifetime ? "Lifetime" : "Premium")
-                        .fontWeight(.medium)
-                        .foregroundStyle(.green)
-                }
-            case .canceled:
-                Text("Canceled — access until period ends")
-                    .font(.subheadline)
-                    .foregroundStyle(.orange)
-            case .pastDue:
-                Text("Payment past due")
-                    .font(.subheadline)
-                    .foregroundStyle(.red)
-            case .free, .expired:
-                VStack(spacing: 8) {
-                    Text("Go Premium")
-                        .font(.headline)
-                    Text("$5/mo · $30/yr · $100 lifetime")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-            }
         }
         .frame(maxWidth: .infinity)
         .padding()
