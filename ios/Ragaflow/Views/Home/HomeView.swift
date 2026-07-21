@@ -36,7 +36,12 @@ struct HomeView: View {
                         } label: {
                             UserBadge()
                         }
+                        // The badge's initial (e.g. "K") otherwise bleeds up as the
+                        // button's a11y label; ignore children so "Profile" wins for
+                        // VoiceOver, and pin an identifier for deterministic UI tests.
+                        .accessibilityElement(children: .ignore)
                         .accessibilityLabel("Profile")
+                        .accessibilityIdentifier("Profile")
                     } else {
                         NavigationLink {
                             AuthView()

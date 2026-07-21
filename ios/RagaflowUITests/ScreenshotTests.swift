@@ -53,8 +53,12 @@ final class ScreenshotTests: XCTestCase {
 
     private func signInIfRequested() {
         guard ProcessInfo.processInfo.environment["SCREENSHOT_SIGN_IN"] == "1" else { return }
-        guard app.staticTexts["Sign in"].waitForExistence(timeout: 10) else { return }
-        app.staticTexts["Sign in"].tap()
+        // The home sign-in affordance is a NavigationLink pill, exposed to
+        // accessibility as a Button (not a StaticText) — querying it as a
+        // static text silently no-ops and skips sign-in entirely.
+        let signInPill = app.buttons["Sign in"]
+        guard signInPill.waitForExistence(timeout: 10) else { return }
+        signInPill.tap()
         let emailField = app.textFields["Email"]
         guard emailField.waitForExistence(timeout: 5) else { return }
         emailField.tap(); emailField.typeText(testEmail)
@@ -129,7 +133,9 @@ final class ScreenshotTests: XCTestCase {
         signInIfRequested()
         waitForHome()
         // Profile is behind the user badge; only reachable when signed in.
-        guard app.staticTexts["Sign in"].exists == false else {
+        // The signed-out affordance is a Button labeled "Sign in" (a
+        // NavigationLink pill), not a StaticText.
+        guard app.buttons["Sign in"].exists == false else {
             throw XCTSkip("Not signed in — set SCREENSHOT_SIGN_IN=1 to capture Profile")
         }
         let badge = app.buttons["Profile"]
