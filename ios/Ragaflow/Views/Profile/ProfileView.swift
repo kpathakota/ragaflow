@@ -98,21 +98,24 @@ struct ProfileView: View {
                 "This permanently deletes your account and all of your data — favorites, listening history, certifications, and default tracks. This cannot be undone."
             )
         }
+        // Static title + `presenting:` so the alert's content is captured at
+        // presentation time — computing it live from vm.deleteAccountFailure
+        // would flip the copy to the generic branch mid-dismiss when the
+        // isPresented binding nils the failure.
         .alert(
-            vm.deleteAccountFailure == .activeSubscription
-                ? "Subscription active"
-                : "Deletion failed",
+            "Couldn't Delete Account",
             isPresented: Binding(
                 get: { vm.deleteAccountFailure != nil },
                 set: { if !$0 { vm.deleteAccountFailure = nil } }
-            )
-        ) {
+            ),
+            presenting: vm.deleteAccountFailure
+        ) { _ in
             Button("OK", role: .cancel) {}
-        } message: {
+        } message: { failure in
             // Neutral copy on the subscription path — no URL, no mention of
             // web checkout (Guideline 3.1.1).
             Text(
-                vm.deleteAccountFailure == .activeSubscription
+                failure == .activeSubscription
                     ? "You have an active subscription. Please cancel it first, then try again."
                     : "Something went wrong. Please try again, or email support@ragaflow.io."
             )

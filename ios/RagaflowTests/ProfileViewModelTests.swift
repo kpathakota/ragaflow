@@ -1,5 +1,6 @@
 import Testing
 import Foundation
+import Supabase
 @testable import Ragaflow
 
 // MARK: - Fixtures
@@ -237,6 +238,35 @@ struct ProfileViewModelTests {
 
         #expect(deleted == true)
         #expect(vm.deleteAccountFailure == nil)
+    }
+
+    @Test("classifies a real 409 FunctionsError as activeSubscription")
+    func classify409() {
+        let outcome = classifyDeleteAccountError(
+            FunctionsError.httpError(code: 409, data: Data())
+        )
+        #expect(outcome == .activeSubscription)
+    }
+
+    @Test("classifies a real 401 FunctionsError as alreadyDeleted (lost-200 retry)")
+    func classify401() {
+        let outcome = classifyDeleteAccountError(
+            FunctionsError.httpError(code: 401, data: Data())
+        )
+        #expect(outcome == .alreadyDeleted)
+    }
+
+    @Test("classifies other HTTP codes and non-Functions errors as failure")
+    func classifyFailures() {
+        #expect(
+            classifyDeleteAccountError(
+                FunctionsError.httpError(code: 500, data: Data())
+            ) == .failure
+        )
+        #expect(
+            classifyDeleteAccountError(URLError(.notConnectedToInternet)) == .failure
+        )
+        #expect(classifyDeleteAccountError(FunctionsError.relayError) == .failure)
     }
 
     @Test("handles empty data gracefully")
