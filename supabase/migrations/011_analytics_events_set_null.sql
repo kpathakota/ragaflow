@@ -5,9 +5,29 @@
 -- (rasika_id = null already means "anonymous visit"), keeping DAU/error metrics
 -- intact while removing the personal identifier.
 -- See docs/account-deletion-design.md.
+--
+-- Idempotent: drops whatever FK exists on rasika_id by dynamic lookup (name-
+-- agnostic), then re-adds it — safe to re-run, and matches uploads/sync.sql.
 
-ALTER TABLE analytics_events
-  DROP CONSTRAINT analytics_events_rasika_id_fkey;
+DO $$
+DECLARE
+  c record;
+BEGIN
+  FOR c IN
+    SELECT con.conname
+    FROM pg_constraint con
+    WHERE con.conrelid = 'public.analytics_events'::regclass
+      AND con.contype = 'f'
+      AND EXISTS (
+        SELECT 1 FROM pg_attribute a
+        WHERE a.attrelid = con.conrelid
+          AND a.attnum = ANY (con.conkey)
+          AND a.attname = 'rasika_id'
+      )
+  LOOP
+    EXECUTE format('ALTER TABLE public.analytics_events DROP CONSTRAINT %I', c.conname);
+  END LOOP;
+END $$;
 
 ALTER TABLE analytics_events
   ADD CONSTRAINT analytics_events_rasika_id_fkey

@@ -57,6 +57,14 @@ Deno.serve(async (req) => {
   const uid = userData.user.id;
 
   // Subscription guard: refuse if a live Polar subscription would be orphaned.
+  //
+  // Known accepted race: a rasika who completes Polar checkout and deletes
+  // before the subscription.active webhook lands still reads as 'free' here
+  // and passes the guard, orphaning the new subscription. Auto-canceling via
+  // the Polar API was rejected for v1 (docs/account-deletion-design.md), so
+  // the mitigation is detection: migration 012 + the Polar webhook handler
+  // log an ORPHANED SUBSCRIPTION error when a webhook matches no rasika, for
+  // manual cancellation in the Polar dashboard.
   const { data: rasika, error: rasikaError } = await admin
     .from("rasikas")
     .select("subscription_status")
