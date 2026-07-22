@@ -124,8 +124,8 @@ Ragaflow collects:
 Ragaflow streams Indian classical music sessions for focus, sleep, and meditation.
 
 DEMO ACCOUNT (required — the app gates content behind sign-in):
-  email:    <create a review demo account>
-  password: <password>
+  email:    kpathakota+test@gmail.com
+  password: test123
 
 BACKGROUND AUDIO: The app uses the Audio background mode so a session keeps
 playing when the screen locks or the app is backgrounded — this is core to the
@@ -139,9 +139,11 @@ Audio is streamed from our CDN (Cloudflare R2). An internet connection is
 required to play.
 ```
 
-> **Action:** create a dedicated review demo account in Supabase (real email you
-> control) and fill in the credentials above. Reviewers will reject an app they
-> can't get past the sign-in wall.
+> The credentials above reuse the existing UI-test account
+> (`kpathakota+test@gmail.com` / `test123`), which is a real account on
+> production Supabase. Fine for beta review. If you'd rather not expose that
+> account, create a dedicated `review@` account and swap it in — reviewers will
+> reject an app they can't get past the sign-in wall.
 
 ---
 
