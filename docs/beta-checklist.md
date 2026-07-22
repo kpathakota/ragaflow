@@ -34,15 +34,27 @@ Privacy/Terms/Support URLs) deploys from `main`.
 - [x] **Listing kit** — copy/keywords/reviewer notes in
       `docs/app-store-listing.md`; 6 screenshots at 6.9" spec captured
 
-**Open code decision — the one gap (rejection risk):**
+**Must build before submission — account deletion (not started on either platform):**
 
-- [ ] **In-app account deletion — Guideline 5.1.1(v).** Apps that offer account
-      creation must let users *initiate deletion in the app*. We only have
-      Sign Out + "email support@ragaflow.io" in the privacy policy — a common
-      first-submission rejection. Options: (a) build a minimal Profile →
-      "Delete Account" flow (Supabase Edge Function with service role deletes
-      auth user + rows) before submitting, or (b) submit as-is and build it in
-      the rejection loop if Apple flags it. Decide before submitting.
+- [ ] **Account deletion — Guideline 5.1.1(v), iOS + web.** Apps that offer
+      account creation must let users *initiate deletion in the app*. Deletion
+      currently exists **nowhere** — not iOS, not web; the only path is
+      Sign Out + "email support@ragaflow.io" in the privacy policy, a common
+      first-submission rejection. Decided: build it before submitting.
+      Scope (own session, not started):
+      - **Backend** — Supabase Edge Function (service role): delete the auth
+        user + owned rows (`rasikas`, `listening_sessions`, `certifications`;
+        decide whether `analytics_events.rasika_id` rows are deleted or nulled)
+      - **iOS** — Profile → "Delete Account" with a destructive confirmation →
+        calls the function → signs out locally
+      - **Web** — same flow on `/profile` (parity + the privacy policy's promise)
+      - **Docs** — update privacy policy/page wording from "email us" to
+        "delete in the app, or email us"
+      - **Test well** (prod-only Supabase — throwaway accounts, no bulk writes):
+        rows actually gone after deletion; deleted user can't sign back in;
+        same email can re-register fresh; unauthenticated/wrong-user calls
+        rejected (can only delete *your own* account); both clients handle the
+        signed-out state cleanly after deletion
 
 **Not code / not `main` (after the merge, owner: human):**
 
