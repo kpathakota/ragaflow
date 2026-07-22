@@ -12,6 +12,16 @@ final class ProfileViewModel {
     var sessionCount: Int = 0
     var isLoading = true
 
+    // Account deletion (docs/account-deletion-design.md)
+    enum DeleteAccountFailure {
+        case activeSubscription
+        case generic
+    }
+
+    var showDeleteConfirmation = false
+    var isDeletingAccount = false
+    var deleteAccountFailure: DeleteAccountFailure?
+
     init(supabase: SupabaseServiceProtocol) {
         self.supabase = supabase
     }
@@ -52,6 +62,24 @@ final class ProfileViewModel {
 
     func signOut() async {
         try? await supabase.signOut()
+    }
+
+    /// Returns true when the account was deleted (caller dismisses to the
+    /// signed-out Home). On failure the account is intact and an alert-ready
+    /// failure reason is set.
+    func deleteAccount() async -> Bool {
+        isDeletingAccount = true
+        defer { isDeletingAccount = false }
+
+        do {
+            try await supabase.deleteAccount()
+            return true
+        } catch DeleteAccountError.activeSubscription {
+            deleteAccountFailure = .activeSubscription
+        } catch {
+            deleteAccountFailure = .generic
+        }
+        return false
     }
 
     // MARK: - Formatting

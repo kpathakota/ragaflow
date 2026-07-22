@@ -1,6 +1,33 @@
 import Foundation
 import Supabase
 
+/// Thrown by `deleteAccount()` so the UI can distinguish the one recoverable
+/// refusal (active subscription → 409) from everything else.
+enum DeleteAccountError: Error {
+    case activeSubscription
+}
+
+/// Outcome of classifying a `delete-account` invoke error. Pure mapping,
+/// extracted so it can be unit-tested against real `FunctionsError` values.
+enum DeleteAccountInvokeOutcome: Equatable {
+    /// 409 — a live subscription blocks deletion.
+    case activeSubscription
+    /// 401 — the (freshly refreshed) token no longer resolves to a user.
+    /// The account is already gone: a prior attempt succeeded server-side
+    /// but its 200 was lost. Treat as deleted and clean up locally.
+    case alreadyDeleted
+    /// Anything else — propagate to the caller.
+    case failure
+}
+
+func classifyDeleteAccountError(_ error: Error) -> DeleteAccountInvokeOutcome {
+    if case let FunctionsError.httpError(code, _) = error {
+        if code == 409 { return .activeSubscription }
+        if code == 401 { return .alreadyDeleted }
+    }
+    return .failure
+}
+
 protocol SupabaseServiceProtocol: AnyObject {
     // Auth state
     var currentUser: User? { get }
@@ -12,6 +39,7 @@ protocol SupabaseServiceProtocol: AnyObject {
     func signIn(email: String, password: String) async throws
     func signUp(email: String, password: String) async throws
     func signOut() async throws
+    func deleteAccount() async throws
 
     // Ragams
     func fetchAllRagams() async throws -> [Ragam]
