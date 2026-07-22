@@ -1,4 +1,4 @@
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, beforeAll, afterAll } from "vitest";
 import { render, screen, fireEvent, waitFor } from "@testing-library/react";
 import { DeleteAccountSection } from "@/app/profile/delete-account";
 
@@ -17,6 +17,25 @@ const mockPush = vi.fn();
 vi.mock("next/navigation", () => ({
   useRouter: () => ({ push: mockPush, replace: vi.fn(), back: vi.fn() }),
 }));
+
+// jsdom doesn't implement navigation — replace location with a mock so the
+// hard-navigation fallback is observable.
+const mockLocationAssign = vi.fn();
+const originalLocation = window.location;
+
+beforeAll(() => {
+  Object.defineProperty(window, "location", {
+    value: { ...originalLocation, assign: mockLocationAssign },
+    writable: true,
+  });
+});
+
+afterAll(() => {
+  Object.defineProperty(window, "location", {
+    value: originalLocation,
+    writable: true,
+  });
+});
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -59,6 +78,23 @@ describe("DeleteAccountSection reveal and cancel", () => {
       screen.getByRole("button", { name: "Delete account" })
     ).toBeInTheDocument();
     expect(mockInvoke).not.toHaveBeenCalled();
+  });
+
+  it("moves keyboard focus to the panel on reveal and back to the trigger on cancel", async () => {
+    render(<DeleteAccountSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete account" }));
+
+    const panel = screen.getByRole("group", { name: "Delete your account?" });
+    await waitFor(() => {
+      expect(panel).toHaveFocus();
+    });
+
+    fireEvent.click(screen.getByRole("button", { name: "Cancel" }));
+    await waitFor(() => {
+      expect(
+        screen.getByRole("button", { name: "Delete account" })
+      ).toHaveFocus();
+    });
   });
 });
 
@@ -223,7 +259,25 @@ describe("DeleteAccountSection errors", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("still redirects when sign-out fails — the account is already deleted", async () => {
+  it("hard-navigates when sign-out resolves with an error — session may be stale", async () => {
+    // supabase-js signOut resolves { error } rather than throwing; on failure
+    // the local session may not have been removed, so the component must force
+    // a full reload instead of a soft client-side navigation.
+    mockSignOut.mockResolvedValue({
+      error: { name: "AuthRetryableFetchError", message: "fetch failed" },
+    });
+
+    render(<DeleteAccountSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Permanently delete" }));
+
+    await waitFor(() => {
+      expect(mockLocationAssign).toHaveBeenCalledWith("/");
+    });
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("hard-navigates when sign-out throws — the account is already deleted", async () => {
     mockSignOut.mockRejectedValue(new Error("session missing"));
 
     render(<DeleteAccountSection />);
@@ -231,8 +285,9 @@ describe("DeleteAccountSection errors", () => {
     fireEvent.click(screen.getByRole("button", { name: "Permanently delete" }));
 
     await waitFor(() => {
-      expect(mockPush).toHaveBeenCalledWith("/");
+      expect(mockLocationAssign).toHaveBeenCalledWith("/");
     });
+    expect(mockPush).not.toHaveBeenCalled();
   });
 
   it("Cancel after an error resets the panel and the error", async () => {
@@ -258,6 +313,23 @@ describe("DeleteAccountSection errors", () => {
     expect(
       screen.queryByText(/You have an active subscription/)
     ).not.toBeInTheDocument();
+  });
+
+  it("announces errors via role=alert for screen readers", async () => {
+    mockInvoke.mockResolvedValue({
+      data: null,
+      error: { name: "FunctionsHttpError", context: { status: 409 } },
+    });
+
+    render(<DeleteAccountSection />);
+    fireEvent.click(screen.getByRole("button", { name: "Delete account" }));
+    fireEvent.click(screen.getByRole("button", { name: "Permanently delete" }));
+
+    await waitFor(() => {
+      expect(screen.getByRole("alert")).toHaveTextContent(
+        /You have an active subscription/
+      );
+    });
   });
 
   it("missing supabase client shows generic error without invoking", async () => {

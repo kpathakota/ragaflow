@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
@@ -11,6 +11,21 @@ export function DeleteAccountSection() {
   const [confirming, setConfirming] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [error, setError] = useState<DeleteError>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const wasConfirming = useRef(false);
+
+  // Keyboard/screen-reader focus management: revealing the panel unmounts the
+  // trigger button, so move focus onto the panel (which carries the warning);
+  // canceling restores focus to the trigger.
+  useEffect(() => {
+    if (confirming) {
+      panelRef.current?.focus();
+    } else if (wasConfirming.current) {
+      triggerRef.current?.focus();
+    }
+    wasConfirming.current = confirming;
+  }, [confirming]);
 
   async function handleDelete() {
     const supabase = createClient();
@@ -44,18 +59,32 @@ export function DeleteAccountSection() {
 
     // Deletion succeeded. The server session is already gone — a global
     // sign-out would fail because the user no longer exists. Local scope
-    // clears this browser; ignore failures so the redirect always happens.
+    // clears this browser. signOut resolves { error } rather than throwing,
+    // and on failure the local session may NOT have been removed — so a soft
+    // client-side navigation would leave the UI looking signed in on a dead
+    // account. Hard-navigate in that case to force a full reload and session
+    // re-evaluation (getUser() fails → signed-out state everywhere).
+    let signOutOk = false;
     try {
-      await supabase.auth.signOut({ scope: "local" });
+      const { error: signOutError } = await supabase.auth.signOut({
+        scope: "local",
+      });
+      signOutOk = !signOutError;
     } catch {
-      // ignore — account is deleted either way
+      // treat as sign-out failure — account is deleted either way
     }
-    router.push("/");
+
+    if (signOutOk) {
+      router.push("/");
+    } else {
+      window.location.assign("/");
+    }
   }
 
   if (!confirming) {
     return (
       <button
+        ref={triggerRef}
         onClick={() => setConfirming(true)}
         className="rounded-xl border border-red-500/40 bg-stone-900/60 px-5 py-3 text-sm text-red-400 transition-colors hover:border-red-500/70 hover:text-red-300"
       >
@@ -65,8 +94,16 @@ export function DeleteAccountSection() {
   }
 
   return (
-    <div className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4">
-      <p className="text-sm font-medium text-red-400">Delete your account?</p>
+    <div
+      ref={panelRef}
+      tabIndex={-1}
+      role="group"
+      aria-labelledby="delete-account-heading"
+      className="rounded-xl border border-red-500/30 bg-red-500/10 px-5 py-4 outline-none focus-visible:ring-1 focus-visible:ring-red-500/50"
+    >
+      <p id="delete-account-heading" className="text-sm font-medium text-red-400">
+        Delete your account?
+      </p>
       <p className="mt-2 text-xs text-stone-400">
         This permanently deletes your account and all of your data — favorites,
         listening history, certifications, and default tracks. This cannot be
@@ -74,7 +111,7 @@ export function DeleteAccountSection() {
       </p>
 
       {error === "subscription" && (
-        <p className="mt-3 text-xs text-red-400">
+        <p role="alert" className="mt-3 text-xs text-red-400">
           You have an active subscription. Please cancel it first, then delete
           your account.{" "}
           <a
@@ -86,7 +123,7 @@ export function DeleteAccountSection() {
         </p>
       )}
       {error === "generic" && (
-        <p className="mt-3 text-xs text-red-400">
+        <p role="alert" className="mt-3 text-xs text-red-400">
           Something went wrong. Please try again, or email{" "}
           <a
             href="mailto:support@ragaflow.io"
