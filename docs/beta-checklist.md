@@ -58,7 +58,8 @@ Privacy/Terms/Support URLs) deploys from `main`.
 
 **Not code / not `main` (after the merge, owner: human):**
 
-- [ ] Merge `dev → main` → Xcode Cloud builds → select the build in ASC
+- [x] Merge `dev → main` → Xcode Cloud builds → select the build in ASC
+- [ ] Get account deletion into main. 
 - [ ] Verify `ragaflow.io/privacy` + `/terms` + `/support` live in production
 - [ ] `support@ragaflow.io` mailbox (email routing on ragaflow.io) — listing
       contact + privacy-policy deletion requests land here
@@ -66,10 +67,11 @@ Privacy/Terms/Support URLs) deploys from `main`.
       rating 4+, demo account in review notes → submit
 - [ ] **Not required for submission:** the domain split (env-gated, off until
       flipped — see `docs/domain-split-runbook.md`) and the color pass
+- [ ] Build an app walkthrough in derive.to. 
 
 ## Before invites go out
 
-- [ ] **Color pass with Supriya** — weekend of April 25. Something about the current palette isn't right. Align on scenario accents, backgrounds, text warmth.
+- [x] **Color pass with Supriya** — weekend of April 25. Something about the current palette isn't right. Align on scenario accents, backgrounds, text warmth.
 - [x] **Landing page** — shipped (PR #61): `/landing` live behind the env-gated domain split, on-brand draft copy. Full copy pass planned after the domain split is flipped.
 - [ ] **Invite email draft** — short, opinionated, tells people what to expect. Most won't read it, but the ones who do should feel invited, not instructed.
 
