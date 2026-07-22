@@ -73,4 +73,4 @@ where appropriate, notify you in the app.
 
 ## Contact
 
-Questions, requests, or account deletion: **kpats@hey.com**
+Questions, requests, or account deletion: **support@ragaflow.io**

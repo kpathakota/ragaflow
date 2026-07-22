@@ -85,7 +85,7 @@ want, e.g. `,carnatic music` won't fit but a short one like `,tanpura` would.)
 | Field | Value | Status |
 |-------|-------|--------|
 | **Marketing URL** | `https://ragaflow.io` | ✅ live |
-| **Support URL** | `https://ragaflow.io/support` (or a `mailto:` fallback) | ⚠️ create — a simple contact page or `mailto:kpats@hey.com` |
+| **Support URL** | `https://ragaflow.io/support` (or a `mailto:` fallback) | ⚠️ create — a simple contact page or `mailto:support@ragaflow.io` |
 | **Privacy Policy URL** | `https://ragaflow.io/privacy` | ⚠️ **required** — host `docs/privacy-policy.md` content here before submit |
 
 > Apple **rejects** submissions without a reachable Privacy Policy URL. This is
