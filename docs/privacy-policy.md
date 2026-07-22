@@ -1,6 +1,6 @@
 # Ragaflow Privacy Policy
 
-_Last updated: July 21, 2026_
+_Last updated: July 22, 2026_
 
 Ragaflow ("we", "us") makes an app and website that stream Indian classical
 music sessions for focus, sleep, and meditation. This policy explains what we
@@ -55,8 +55,12 @@ in the United States.
 ## Your choices
 
 - **Access or correct your data:** update your profile in the app, or contact us.
-- **Delete your account:** contact us at the email below and we will delete your
-  account and associated personal data.
+- **Delete your account:** delete your account in the app (Profile → Delete
+  account), or email support@ragaflow.io and we will do it for you. Deletion
+  removes your account and associated personal data — favorites, listening
+  history, certifications, and default tracks. If you purchased a subscription,
+  our merchant of record (Polar) retains payment records as required for legal
+  and tax purposes.
 - **Stop analytics:** analytics is tied to using the app; if you would prefer we
   not associate events with your account, contact us.
 
