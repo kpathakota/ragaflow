@@ -15,8 +15,8 @@ final class ScreenshotTests: XCTestCase {
 
     // Optional test account — set via the SCREENSHOT_SIGN_IN launch env to
     // capture authenticated screens (e.g. Profile).
-    private let testEmail = "kpathakota+test@gmail.com"
-    private let testPassword = "test123"
+    private let testEmail = "kpathakota+alt@gmail.com"
+    private let testPassword = "alt123"
 
     override func setUpWithError() throws {
         // Capture-only: these navigate/snapshot rather than assert correctness,

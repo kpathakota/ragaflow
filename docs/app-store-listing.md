@@ -69,14 +69,10 @@ An account is required so your favorites, defaults, and progress stay with you a
 ## Keywords (100 char max, comma-separated, no spaces)
 
 ```
-raga,indian classical,carnatic,focus,meditation,sleep,ambient,calm,study,mindfulness,relax,concentr
-```
-(100 chars exactly — trim `concentr` → keep as-is or drop it if ASC rejects)
-
-Safe fallback (95 chars):
-```
 raga,indian classical,carnatic,focus,meditation,sleep,ambient,calm,study,mindfulness,relax
 ```
+(90 chars — full words only; no truncation. Room to add one more term if you
+want, e.g. `,carnatic music` won't fit but a short one like `,tanpura` would.)
 
 > Don't repeat words already in the app name/subtitle ("Ragaflow", "sleep")
 > unnecessarily — Apple indexes those separately. The list above front-loads the
@@ -124,8 +120,8 @@ Ragaflow collects:
 Ragaflow streams Indian classical music sessions for focus, sleep, and meditation.
 
 DEMO ACCOUNT (required — the app gates content behind sign-in):
-  email:    kpathakota+test@gmail.com
-  password: test123
+  email:    kpathakota+alt@gmail.com
+  password: alt123
 
 BACKGROUND AUDIO: The app uses the Audio background mode so a session keeps
 playing when the screen locks or the app is backgrounded — this is core to the
@@ -139,11 +135,12 @@ Audio is streamed from our CDN (Cloudflare R2). An internet connection is
 required to play.
 ```
 
-> The credentials above reuse the existing UI-test account
-> (`kpathakota+test@gmail.com` / `test123`), which is a real account on
-> production Supabase. Fine for beta review. If you'd rather not expose that
-> account, create a dedicated `review@` account and swap it in — reviewers will
-> reject an app they can't get past the sign-in wall.
+> The credentials above are the UI-test account (`kpathakota+alt@gmail.com` /
+> `alt123`), verified logging in on **production** Supabase and used by the
+> screenshot/UI test suite. Treat it as a **disposable, review-only** login:
+> it's committed in plaintext, so rotate the password after the review passes
+> (and update the test files + this doc when you do). The older
+> `kpathakota+test@gmail.com` account is dead on prod — do not use it.
 
 ---
 
