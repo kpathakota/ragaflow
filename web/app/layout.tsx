@@ -22,7 +22,7 @@ const playfairDisplay = Playfair_Display({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL("https://ragaflow.app"),
+  metadataBase: new URL("https://ragaflow.io"),
   title: {
     default: "Ragaflow",
     template: "%s | Ragaflow",
