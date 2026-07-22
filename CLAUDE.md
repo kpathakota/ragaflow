@@ -151,7 +151,11 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 /profile                       → Profile (account info, stats, certifications, defaults, sign out)
 /auth                          → Sign in / sign up
 /auth/callback                 → Email confirmation redirect
+/privacy                       → Privacy policy (required for App Store; source: docs/privacy-policy.md)
+/support                       → Support / contact + common questions
 ```
+
+Static text pages (`/privacy`, `/support`) share `web/components/prose-page.tsx`.
 
 ## Scenarios
 
@@ -191,7 +195,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - 10-hour cumulative listening gate → must subscribe to continue (Task 2.5, not yet enforced)
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
 - Web payments: Polar.sh (merchant of record) ✅ — checkout, webhooks, portal all live
-- iOS payments: Apple IAP via StoreKit 2 (planned, M4)
+- iOS payments: Apple IAP via StoreKit 2 (planned, M4) — **deferred to v1.1**. The first App Store submission ships **fully free**: the Profile "Go Premium" card + track "Premium" badge were removed (PR #60) to avoid Guideline 3.1.1 rejection (surfacing a subscription with no working IAP). `ProfileViewModel.subscriptionStatus` kept for when IAP returns. See `docs/app-store-listing.md` + `docs/privacy-policy.md`.
 - Subscriber access: all premium tracks unlocked, no 10h gate. Statuses with access: `active`, `lifetime`, `canceled` (until period ends), `past_due` (grace period)
 
 ## Vercel deployment
