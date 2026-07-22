@@ -56,7 +56,7 @@ struct TrackCard: View {
                 }
             }
 
-            // Metadata line: duration · ragam · tags (first 3) · Premium
+            // Metadata line: duration · ragam · tags (first 3)
             HStack(spacing: 4) {
                 Text("\(track.duration / 60)min")
                     .font(.caption)
@@ -76,15 +76,6 @@ struct TrackCard: View {
                     Text(tag)
                         .font(.caption)
                         .foregroundStyle(.secondary)
-                }
-                if !track.free {
-                    Text("·")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                    Text("Premium")
-                        .font(.caption)
-                        .fontWeight(.medium)
-                        .foregroundStyle(Color(red: 0.79, green: 0.65, blue: 0.30)) // gold
                 }
                 Spacer()
             }

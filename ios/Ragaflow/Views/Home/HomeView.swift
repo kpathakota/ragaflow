@@ -36,7 +36,14 @@ struct HomeView: View {
                         } label: {
                             UserBadge()
                         }
+                        // Give VoiceOver a real label ("Profile" instead of the
+                        // badge's bare initial) and pin an identifier so UI tests
+                        // target it deterministically. Don't collapse children
+                        // with `.accessibilityElement(children:)` — that strips
+                        // the NavigationLink's button trait (it becomes an
+                        // "Other" element and `app.buttons["Profile"]` misses).
                         .accessibilityLabel("Profile")
+                        .accessibilityIdentifier("Profile")
                     } else {
                         NavigationLink {
                             AuthView()
