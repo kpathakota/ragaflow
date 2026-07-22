@@ -1,6 +1,12 @@
 import Foundation
 import Supabase
 
+/// Thrown by `deleteAccount()` so the UI can distinguish the one recoverable
+/// refusal (active subscription → 409) from everything else.
+enum DeleteAccountError: Error {
+    case activeSubscription
+}
+
 protocol SupabaseServiceProtocol: AnyObject {
     // Auth state
     var currentUser: User? { get }
@@ -12,6 +18,7 @@ protocol SupabaseServiceProtocol: AnyObject {
     func signIn(email: String, password: String) async throws
     func signUp(email: String, password: String) async throws
     func signOut() async throws
+    func deleteAccount() async throws
 
     // Ragams
     func fetchAllRagams() async throws -> [Ragam]

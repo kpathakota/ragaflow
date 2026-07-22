@@ -64,6 +64,23 @@ final class SupabaseService: SupabaseServiceProtocol {
         await MainActor.run { currentUser = nil }
     }
 
+    /// Deletes the signed-in rasika's account via the `delete-account` edge
+    /// function (the uid comes from the JWT server-side — nothing is sent).
+    /// Throws `DeleteAccountError.activeSubscription` on the 409 refusal.
+    /// See docs/account-deletion-design.md.
+    func deleteAccount() async throws {
+        do {
+            try await client.functions.invoke("delete-account")
+        } catch let FunctionsError.httpError(code, _) where code == 409 {
+            throw DeleteAccountError.activeSubscription
+        }
+
+        // Deletion succeeded — the server session is already gone, so only a
+        // local-scope sign-out can work; ignore errors either way.
+        try? await client.auth.signOut(scope: .local)
+        await MainActor.run { currentUser = nil }
+    }
+
     // MARK: - Ragams
 
     func fetchAllRagams() async throws -> [Ragam] {

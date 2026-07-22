@@ -23,6 +23,7 @@ final class MockSupabaseService: SupabaseServiceProtocol {
     var signInCalled = false
     var signUpCalled = false
     var signOutCalled = false
+    var deleteAccountCalled = false
     var toggleFavoriteTrackCalls: [String] = []
     var toggleFavoriteRagamCalls: [String] = []
     var setDefaultTrackCalls: [(scenario: Scenario, trackId: String, durationSeconds: Int?)] = []
@@ -54,6 +55,13 @@ final class MockSupabaseService: SupabaseServiceProtocol {
         if let error = errorToThrow { throw error }
         signOutCalled = true
         currentUser = nil
+    }
+
+    func deleteAccount() async throws {
+        if let error = errorToThrow { throw error }
+        deleteAccountCalled = true
+        currentUser = nil
+        isAuthenticated = false
     }
 
     // MARK: - Ragams

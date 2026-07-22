@@ -38,6 +38,9 @@ struct ProfileView: View {
                                 .background(Color(.systemGray6))
                                 .clipShape(RoundedRectangle(cornerRadius: 12))
                         }
+
+                        // Delete account (docs/account-deletion-design.md)
+                        deleteAccountButton(vm: vm)
                     }
                     .padding()
                 }
@@ -54,6 +57,65 @@ struct ProfileView: View {
                 viewModel = vm
                 Task { await vm.loadData() }
             }
+        }
+    }
+
+    private func deleteAccountButton(vm: ProfileViewModel) -> some View {
+        Button(role: .destructive) {
+            vm.showDeleteConfirmation = true
+        } label: {
+            Group {
+                if vm.isDeletingAccount {
+                    ProgressView()
+                } else {
+                    Text("Delete Account")
+                        .foregroundStyle(.red)
+                }
+            }
+            .frame(maxWidth: .infinity)
+            .padding()
+            .background(Color(.systemGray6))
+            .clipShape(RoundedRectangle(cornerRadius: 12))
+        }
+        .disabled(vm.isDeletingAccount)
+        .alert(
+            "Delete your account?",
+            isPresented: Binding(
+                get: { vm.showDeleteConfirmation },
+                set: { vm.showDeleteConfirmation = $0 }
+            )
+        ) {
+            Button("Cancel", role: .cancel) {}
+            Button("Delete Account", role: .destructive) {
+                Task {
+                    if await vm.deleteAccount() {
+                        dismiss()
+                    }
+                }
+            }
+        } message: {
+            Text(
+                "This permanently deletes your account and all of your data — favorites, listening history, certifications, and default tracks. This cannot be undone."
+            )
+        }
+        .alert(
+            vm.deleteAccountFailure == .activeSubscription
+                ? "Subscription active"
+                : "Deletion failed",
+            isPresented: Binding(
+                get: { vm.deleteAccountFailure != nil },
+                set: { if !$0 { vm.deleteAccountFailure = nil } }
+            )
+        ) {
+            Button("OK", role: .cancel) {}
+        } message: {
+            // Neutral copy on the subscription path — no URL, no mention of
+            // web checkout (Guideline 3.1.1).
+            Text(
+                vm.deleteAccountFailure == .activeSubscription
+                    ? "You have an active subscription. Please cancel it first, then try again."
+                    : "Something went wrong. Please try again, or email support@ragaflow.io."
+            )
         }
     }
 

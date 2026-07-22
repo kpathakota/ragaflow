@@ -177,6 +177,68 @@ struct ProfileViewModelTests {
         #expect(mock.signOutCalled == true)
     }
 
+    @Test("deleteAccount success delegates to supabase and returns true")
+    @MainActor
+    func deleteAccountSuccess() async {
+        let mock = MockSupabaseService()
+        let vm = ProfileViewModel(supabase: mock)
+
+        let deleted = await vm.deleteAccount()
+
+        #expect(deleted == true)
+        #expect(mock.deleteAccountCalled == true)
+        #expect(vm.deleteAccountFailure == nil)
+        #expect(vm.isDeletingAccount == false)
+    }
+
+    @Test("deleteAccount surfaces the active-subscription refusal")
+    @MainActor
+    func deleteAccountActiveSubscription() async {
+        let mock = MockSupabaseService()
+        mock.errorToThrow = DeleteAccountError.activeSubscription
+        let vm = ProfileViewModel(supabase: mock)
+
+        let deleted = await vm.deleteAccount()
+
+        #expect(deleted == false)
+        #expect(mock.deleteAccountCalled == false)
+        #expect(vm.deleteAccountFailure == .activeSubscription)
+        #expect(vm.isDeletingAccount == false)
+    }
+
+    @Test("deleteAccount maps any other error to the generic failure")
+    @MainActor
+    func deleteAccountGenericError() async {
+        let mock = MockSupabaseService()
+        mock.errorToThrow = URLError(.notConnectedToInternet)
+        let vm = ProfileViewModel(supabase: mock)
+
+        let deleted = await vm.deleteAccount()
+
+        #expect(deleted == false)
+        #expect(vm.deleteAccountFailure == .generic)
+        #expect(vm.isDeletingAccount == false)
+    }
+
+    @Test("deleteAccount failure leaves the confirmation flow re-triggerable")
+    @MainActor
+    func deleteAccountRetryAfterFailure() async {
+        let mock = MockSupabaseService()
+        mock.errorToThrow = URLError(.timedOut)
+        let vm = ProfileViewModel(supabase: mock)
+
+        _ = await vm.deleteAccount()
+        #expect(vm.deleteAccountFailure == .generic)
+
+        // Dismissing the alert and retrying after the error clears succeeds
+        vm.deleteAccountFailure = nil
+        mock.errorToThrow = nil
+        let deleted = await vm.deleteAccount()
+
+        #expect(deleted == true)
+        #expect(vm.deleteAccountFailure == nil)
+    }
+
     @Test("handles empty data gracefully")
     @MainActor
     func emptyData() async {
