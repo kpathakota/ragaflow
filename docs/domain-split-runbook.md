@@ -54,9 +54,8 @@ These resolve on the apex once the split is live:
 - Terms: `https://ragaflow.io/terms`
 - Support: `https://ragaflow.io/support`
 
-> ⚠️ `web/app/layout.tsx` currently sets `metadataBase: https://ragaflow.app`.
-> Update it to the canonical domain (`ragaflow.io`) so OpenGraph/canonical URLs
-> are right.
+> `web/app/layout.tsx` `metadataBase` is set to `https://ragaflow.io` (fixed in
+> this PR) so OpenGraph/canonical URLs match these domains.
 
 ## Verify after enabling
 

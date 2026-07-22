@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "How Ragaflow collects, uses, and protects your data.",
 };
 
-const CONTACT_EMAIL = "kpats@hey.com";
+const CONTACT_EMAIL = "support@ragaflow.io";
 
 export default function PrivacyPage() {
   return (

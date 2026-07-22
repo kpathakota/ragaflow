@@ -5,7 +5,7 @@ import SupportPage from "@/app/support/page";
 import TermsPage from "@/app/terms/page";
 import LandingPage from "@/app/landing/page";
 
-const CONTACT_EMAIL = "kpats@hey.com";
+const CONTACT_EMAIL = "support@ragaflow.io";
 
 describe("Privacy page", () => {
   it("renders the policy with required sections", () => {

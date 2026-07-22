@@ -94,6 +94,6 @@ before publishing.)_
 
 ## Contact
 
-Questions about these Terms: **kpats@hey.com**
+Questions about these Terms: **support@ragaflow.io**
 
 See also our [Privacy Policy](/privacy).

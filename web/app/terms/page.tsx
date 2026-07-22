@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "The terms that govern your use of Ragaflow.",
 };
 
-const CONTACT_EMAIL = "kpats@hey.com";
+const CONTACT_EMAIL = "support@ragaflow.io";
 
 export default function TermsPage() {
   return (

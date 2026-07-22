@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   description: "Get help with Ragaflow.",
 };
 
-const CONTACT_EMAIL = "kpats@hey.com";
+const CONTACT_EMAIL = "support@ragaflow.io";
 
 function MailLink() {
   return (
