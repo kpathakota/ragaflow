@@ -69,6 +69,7 @@ struct RasikaTests {
         {
             "id": "row-1",
             "rasika_id": "user-uuid",
+            "display_name": "Kiran",
             "favorite_tracks": ["t1", "t2"],
             "favorite_ragams": ["r1"],
             "default_focus_track": "t1",
@@ -85,6 +86,7 @@ struct RasikaTests {
 
         let rasika = try JSONDecoder().decode(Rasika.self, from: json)
         #expect(rasika.rasikaId == "user-uuid")
+        #expect(rasika.displayName == "Kiran")
         #expect(rasika.favoriteTracks == ["t1", "t2"])
         #expect(rasika.favoriteRagams == ["r1"])
         #expect(rasika.defaultFocusTrack == "t1")
@@ -107,6 +109,7 @@ struct RasikaTests {
         Rasika(
             id: "row-1",
             rasikaId: "user-1",
+            displayName: nil,
             favoriteTracks: [],
             favoriteRagams: [],
             defaultFocusTrack: focusTrack,

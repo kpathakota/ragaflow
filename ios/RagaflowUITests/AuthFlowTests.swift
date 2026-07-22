@@ -1,14 +1,14 @@
 import XCTest
 
 /// Tests for the authentication flow.
-/// Uses test credentials: kpathakota+test@gmail.com / test123
+/// Uses test credentials: kpathakota+alt@gmail.com / alt123
 ///
 /// Auth tests that require signed-out state will skip if a session persists.
 final class AuthFlowTests: XCTestCase {
 
     private var app: XCUIApplication!
-    private let testEmail = "kpathakota+test@gmail.com"
-    private let testPassword = "test123"
+    private let testEmail = "kpathakota+alt@gmail.com"
+    private let testPassword = "alt123"
 
     override func setUpWithError() throws {
         continueAfterFailure = false

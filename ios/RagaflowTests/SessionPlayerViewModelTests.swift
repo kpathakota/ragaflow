@@ -25,6 +25,8 @@ private func makeTrack(
         audioUrl: audioUrl,
         downloadUrl: nil,
         free: true,
+        featured: false,
+        featuredScenarios: [],
         createdAt: "2026-01-15T00:00:00Z"
     )
 }
@@ -37,6 +39,7 @@ private func makeRasika(favoriteTracks: [String] = [], customDuration: Int? = ni
     Rasika(
         id: "rasika-1",
         rasikaId: "user-uuid",
+        displayName: nil,
         favoriteTracks: favoriteTracks,
         favoriteRagams: [],
         defaultFocusTrack: nil,
@@ -430,6 +433,51 @@ struct SessionPlayerViewModelTests {
 
         vm.remaining = 1500
         #expect(vm.timerDisplay == "25:00")
+    }
+
+    @Test("progress reflects fraction of session elapsed")
+    @MainActor
+    func progress() {
+        let mock = MockSupabaseService()
+        let audio = MockAudioService()
+        let vm = SessionPlayerViewModel(
+            trackId: "track-1", scenario: .focus, initialDuration: nil,
+            supabase: mock, audio: audio
+        )
+        vm.duration = 10 // 600 seconds total
+
+        // Full remaining → no progress
+        vm.remaining = 600
+        #expect(vm.progress == 0)
+
+        // Halfway
+        vm.remaining = 300
+        #expect(vm.progress == 0.5)
+
+        // Complete
+        vm.remaining = 0
+        #expect(vm.progress == 1)
+    }
+
+    @Test("progress clamps to 0...1 and avoids divide-by-zero")
+    @MainActor
+    func progressClamps() {
+        let mock = MockSupabaseService()
+        let audio = MockAudioService()
+        let vm = SessionPlayerViewModel(
+            trackId: "track-1", scenario: .focus, initialDuration: nil,
+            supabase: mock, audio: audio
+        )
+
+        // Zero duration → 0, not NaN
+        vm.duration = 0
+        vm.remaining = 0
+        #expect(vm.progress == 0)
+
+        // remaining greater than total stays clamped at 0
+        vm.duration = 5 // 300s
+        vm.remaining = 400
+        #expect(vm.progress == 0)
     }
 
     @Test("displayName prefers ragam name over track name")

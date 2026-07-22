@@ -492,6 +492,56 @@ describe("SessionPlayer aria-labels", () => {
   });
 });
 
+describe("SessionPlayer progress ring (regression: pause/resume click interception)", () => {
+  // Regression guard for the bug where the circular progress ring stopped
+  // pause/resume from working. The ring is an absolutely-positioned SVG that
+  // paints on top of the play/pause button (positioned elements paint above
+  // static siblings regardless of DOM order), so without `pointer-events-none`
+  // it intercepts every click and the button beneath never fires.
+  //
+  // NOTE: a behavioral `fireEvent.click(pauseButton)` test does NOT catch this —
+  // jsdom has no layout/hit-testing, so fireEvent dispatches straight to the
+  // target node and the overlay is ignored (which is exactly why the existing
+  // pause/resume tests stayed green through the regression). The only reliable
+  // jsdom guard is to assert the overlay does not capture pointer events.
+  function getProgressRing(container: HTMLElement): SVGSVGElement {
+    const svg = container.querySelector('svg[aria-hidden="true"]');
+    if (!svg) throw new Error("progress ring SVG not found in running state");
+    return svg as SVGSVGElement;
+  }
+
+  it("running-state progress ring does not intercept clicks (pointer-events-none)", async () => {
+    const { container } = render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+
+    const ring = getProgressRing(container);
+    // The ring overlaps the button (same relative container) by design...
+    expect(ring.classList.contains("absolute")).toBe(true);
+    // ...so it MUST let clicks pass through to the button beneath.
+    expect(ring.classList.contains("pointer-events-none")).toBe(true);
+  });
+
+  it("paused-state progress ring does not intercept clicks (pointer-events-none)", async () => {
+    const { container } = render(
+      <SessionPlayer track={mockTrack} ragam={mockRagam} scenario="focus" />
+    );
+    await act(async () => {
+      fireEvent.click(screen.getByText("▶"));
+    });
+    await act(async () => {
+      fireEvent.click(screen.getByLabelText("Pause session"));
+    });
+
+    const ring = getProgressRing(container);
+    expect(ring.classList.contains("absolute")).toBe(true);
+    expect(ring.classList.contains("pointer-events-none")).toBe(true);
+  });
+});
+
 describe("SessionPlayer full-track completion", () => {
   beforeEach(() => {
     vi.mocked(useAuth).mockReturnValue({

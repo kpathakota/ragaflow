@@ -8,6 +8,7 @@ final class SessionPlayerViewModel {
     let trackId: String
     let scenario: Scenario
     let initialDuration: Int? // minutes
+    let autoplay: Bool
 
     private let supabase: SupabaseServiceProtocol
     private let audio: AudioServiceProtocol
@@ -54,6 +55,15 @@ final class SessionPlayerViewModel {
         return String(format: "%02d:%02d", mins, secs)
     }
 
+    /// Fraction (0...1) of the session that has elapsed, for the circular
+    /// progress ring. Mirrors web `progressFraction` in lib/player.ts.
+    var progress: Double {
+        let total = Double(duration * 60)
+        guard total > 0 else { return 0 }
+        let done = (total - Double(remaining)) / total
+        return min(1, max(0, done))
+    }
+
     var displayName: String {
         ragam?.name ?? track?.displayName ?? "Ragaflow"
     }
@@ -64,12 +74,14 @@ final class SessionPlayerViewModel {
         trackId: String,
         scenario: Scenario,
         initialDuration: Int?,
+        autoplay: Bool = false,
         supabase: SupabaseServiceProtocol,
         audio: AudioServiceProtocol
     ) {
         self.trackId = trackId
         self.scenario = scenario
         self.initialDuration = initialDuration
+        self.autoplay = autoplay
         self.supabase = supabase
         self.audio = audio
     }
@@ -92,6 +104,12 @@ final class SessionPlayerViewModel {
             }
         } catch {}
         isLoading = false
+
+        if autoplay, let track {
+            isFullTrack = true
+            duration = track.duration / 60
+            await startSession()
+        }
     }
 
     // MARK: - Session Actions

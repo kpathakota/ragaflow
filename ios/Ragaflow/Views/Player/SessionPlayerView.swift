@@ -4,16 +4,24 @@ struct SessionPlayerView: View {
     let trackId: String
     let scenario: Scenario
     let initialDuration: Int? // minutes
+    var autoplay: Bool = false
 
     @Environment(SupabaseService.self) private var supabase
     @Environment(\.horizontalSizeClass) private var horizontalSizeClass
+    @Environment(\.accessibilityReduceMotion) private var reduceMotion
 
     @State private var viewModel: SessionPlayerViewModel?
+    @State private var breathing = false
 
     @Environment(\.dismiss) private var dismiss
 
     private var playButtonSize: CGFloat { horizontalSizeClass == .regular ? 88 : 64 }
     private var checkmarkSize: CGFloat { horizontalSizeClass == .regular ? 112 : 80 }
+    private var timerFontSize: CGFloat { horizontalSizeClass == .regular ? 72 : 56 }
+
+    /// Meditate and sleep get a slow breathing orb (mirrors web `animate-breathe`).
+    private var isBreathingScenario: Bool { scenario == .meditate || scenario == .sleep }
+    private var breathingActive: Bool { isBreathingScenario && !reduceMotion }
 
     var body: some View {
         Group {
@@ -54,6 +62,7 @@ struct SessionPlayerView: View {
                     trackId: trackId,
                     scenario: scenario,
                     initialDuration: initialDuration,
+                    autoplay: autoplay,
                     supabase: supabase,
                     audio: AudioService.shared
                 )
@@ -89,7 +98,9 @@ struct SessionPlayerView: View {
 
             ZStack {
                 Circle()
-                    .fill(scenario.accentColor.opacity(0.15))
+                    .fill(scenario.accentColor)
+                    .opacity(breathingActive && breathing ? 0.28 : (isBreathingScenario ? 0.16 : 0.20))
+                    .scaleEffect(breathingActive && breathing ? 1.14 : 1.0)
                     .containerRelativeFrame([.horizontal, .vertical]) { length, axis in
                         if horizontalSizeClass == .regular {
                             return length * 0.35
@@ -97,6 +108,11 @@ struct SessionPlayerView: View {
                         return 220
                     }
                     .blur(radius: 60)
+                    .animation(
+                        breathingActive ? .easeInOut(duration: 4).repeatForever(autoreverses: true) : nil,
+                        value: breathing
+                    )
+                    .onAppear { if breathingActive { breathing = true } }
 
                 // Artist note
                 if let note = track.artistNote, vm.sessionState != .complete {
@@ -200,26 +216,45 @@ struct SessionPlayerView: View {
                     .hidden()
 
             case .running, .paused:
-                // Timer display
+                // Large timer in accent color
                 Text(vm.timerDisplay)
-                    .font(.caption)
+                    .font(.system(size: timerFontSize, weight: .light))
                     .monospacedDigit()
-                    .foregroundStyle(.tertiary)
+                    .foregroundStyle(scenario.accentColorLight)
 
-                // Play/Pause button
-                Button {
-                    if vm.sessionState == .running { vm.pause() }
-                    else { vm.resume() }
-                } label: {
-                    Circle()
-                        .fill(scenario.accentColor)
-                        .frame(width: playButtonSize, height: playButtonSize)
-                        .overlay {
-                            Image(systemName: vm.sessionState == .running ? "pause.fill" : "play.fill")
-                                .font(horizontalSizeClass == .regular ? .title : .title2)
-                                .foregroundStyle(.white)
-                        }
+                // Ragam name beneath the timer
+                if let ragam = vm.ragam {
+                    Text(ragam.name)
+                        .font(.subheadline)
+                        .fontWeight(.medium)
+                        .foregroundStyle(.secondary)
                 }
+
+                // Play/Pause button with circular progress ring
+                ZStack {
+                    Circle()
+                        .stroke(Color(.systemGray4), lineWidth: 3)
+                    Circle()
+                        .trim(from: 0, to: vm.progress)
+                        .stroke(scenario.accentColor, style: StrokeStyle(lineWidth: 3, lineCap: .round))
+                        .rotationEffect(.degrees(-90))
+                        .animation(.linear(duration: 1), value: vm.progress)
+
+                    Button {
+                        if vm.sessionState == .running { vm.pause() }
+                        else { vm.resume() }
+                    } label: {
+                        Circle()
+                            .fill(scenario.accentColor)
+                            .frame(width: playButtonSize, height: playButtonSize)
+                            .overlay {
+                                Image(systemName: vm.sessionState == .running ? "pause.fill" : "play.fill")
+                                    .font(horizontalSizeClass == .regular ? .title : .title2)
+                                    .foregroundStyle(.white)
+                            }
+                    }
+                }
+                .frame(width: playButtonSize + 24, height: playButtonSize + 24)
 
                 // Reset
                 Button {

@@ -75,6 +75,11 @@ final class MockSupabaseService: SupabaseServiceProtocol {
         return tracks
     }
 
+    func fetchFeaturedTracks() async throws -> [Track] {
+        if let error = errorToThrow { throw error }
+        return tracks.filter { $0.featured }
+    }
+
     func fetchTracks(scenario: Scenario) async throws -> [Track] {
         if let error = errorToThrow { throw error }
         return tracks.filter { $0.scenarios.contains(scenario) }

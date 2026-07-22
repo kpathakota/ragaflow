@@ -37,20 +37,19 @@ Both clients share the same Supabase backend. No shared code between web and iOS
 
 ## Supabase setup
 
-Two Supabase projects: **production** and **staging**.
+**Single Supabase project: production** (`mkikuyxvabhbaxspoiay`). The staging project was removed 2026-06-23 — everything points at production now, including local dev and Vercel previews. There is no throwaway DB; treat the database as live (no bulk/destructive test writes).
 
 | Environment | Supabase project | How env vars are set |
 |---|---|---|
-| Web local dev (`cd web && npm run dev`) | staging | `web/.env.local` |
-| Vercel preview (branch pushes) | staging | Vercel "Preview" env vars |
+| Web local dev (`cd web && npm run dev`) | production | `web/.env.local` (pull with `vercel env pull .env.local --environment=production`) |
+| Vercel preview (branch pushes) | production | Vercel "Preview" env vars |
 | Vercel production (main) | production | Vercel "Production" env vars |
-| iOS debug | staging | `ios/Ragaflow/Configuration/Debug.xcconfig` |
+| iOS debug | production | `ios/Ragaflow/Configuration/Debug.xcconfig` (gitignored — copy from another dev, or fill `SUPABASE_URL`/`SUPABASE_PUBLISHABLE_KEY` from `web/.env.local`) |
 | iOS release | production | `ios/Ragaflow/Configuration/Release.xcconfig` |
 
-1. Copy `web/.env.local` from another dev or set `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY` to the staging project
-2. Run all migrations in `supabase/migrations/` in order in the SQL editor
-3. Run `supabase/seed.sql` to insert starter data
-4. Supabase is required — without env vars the app renders empty (no local seed fallback)
+1. Pull `web/.env.local` from Vercel: `cd web && vercel env pull .env.local --environment=production` (or copy from another dev)
+2. Migrations in `supabase/migrations/` are mostly applied on production. `010_featured_and_display_name.sql` was applied 2026-06-24 (prod `tracks` now has `featured`/`featured_scenarios`, `rasikas` has `display_name`; 5 tracks featured, 2 sleep-featured for the Home "Tonight" card). When a migration is pending, run it in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
+3. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
 
@@ -152,7 +151,11 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 /profile                       → Profile (account info, stats, certifications, defaults, sign out)
 /auth                          → Sign in / sign up
 /auth/callback                 → Email confirmation redirect
+/privacy                       → Privacy policy (required for App Store; source: docs/privacy-policy.md)
+/support                       → Support / contact + common questions
 ```
+
+Static text pages (`/privacy`, `/support`) share `web/components/prose-page.tsx`.
 
 ## Scenarios
 
@@ -192,7 +195,7 @@ Tracks appear under scenarios via their `scenarios[]` array — a track can appe
 - 10-hour cumulative listening gate → must subscribe to continue (Task 2.5, not yet enforced)
 - Tiers: $5/mo, $30/yr, $100 lifetime, $300 sponsor
 - Web payments: Polar.sh (merchant of record) ✅ — checkout, webhooks, portal all live
-- iOS payments: Apple IAP via StoreKit 2 (planned, M4)
+- iOS payments: Apple IAP via StoreKit 2 (planned, M4) — **deferred to v1.1**. The first App Store submission ships **fully free**: the Profile "Go Premium" card + track "Premium" badge were removed (PR #60) to avoid Guideline 3.1.1 rejection (surfacing a subscription with no working IAP). `ProfileViewModel.subscriptionStatus` kept for when IAP returns. See `docs/app-store-listing.md` + `docs/privacy-policy.md`.
 - Subscriber access: all premium tracks unlocked, no 10h gate. Statuses with access: `active`, `lifetime`, `canceled` (until period ends), `past_due` (grace period)
 
 ## Vercel deployment
@@ -215,6 +218,7 @@ See `docs/dev-design.md` § "Git & Pull Request Workflow" for the full branch/PR
 - **Clean up large files at deletion time** — when removing binary files from the repo, run `git filter-repo` in the same task
 - **Gitignore new tools immediately** — add local state directories to `.gitignore` before the first commit
 - **Test coverage for diffs** — use `/test-gaps` skill to analyze and fill coverage gaps before merging
+- **Screenshots on every UI PR** — use `/pr-screenshots` (auto-invoked by `/deploy`) to capture the changed surface running (web via `web/scripts/screenshot.mjs`, iOS via `ios/scripts/screenshot.sh`) and post them to the PR. Host on R2, not GitHub releases (private repo → release URLs render blank).
 - Update this file each conversation with new context
 
 ## No one-off work

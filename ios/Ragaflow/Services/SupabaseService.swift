@@ -88,6 +88,15 @@ final class SupabaseService: SupabaseServiceProtocol {
             .value
     }
 
+    func fetchFeaturedTracks() async throws -> [Track] {
+        try await client.from("tracks")
+            .select()
+            .eq("featured", value: true)
+            .order("created_at")
+            .execute()
+            .value
+    }
+
     func fetchTrack(id: String) async throws -> Track? {
         try? await client.from("tracks").select().eq("id", value: id).single().execute().value
     }

@@ -2,7 +2,7 @@ import XCTest
 
 /// Smoke tests for Ragaflow iOS app.
 /// These tests run against the staging Supabase backend and require network access.
-/// Test credentials: kpathakota+test@gmail.com / test123
+/// Test credentials: kpathakota+alt@gmail.com / alt123
 final class RagaflowUITests: XCTestCase {
 
     private var app: XCUIApplication!

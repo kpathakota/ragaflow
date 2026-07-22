@@ -5,8 +5,8 @@ import XCTest
 final class FavoriteFlowTests: XCTestCase {
 
     private var app: XCUIApplication!
-    private let testEmail = "kpathakota+test@gmail.com"
-    private let testPassword = "test123"
+    private let testEmail = "kpathakota+alt@gmail.com"
+    private let testPassword = "alt123"
 
     override func setUpWithError() throws {
         continueAfterFailure = false

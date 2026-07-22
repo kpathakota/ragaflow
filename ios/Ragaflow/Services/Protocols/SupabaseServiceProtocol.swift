@@ -19,6 +19,7 @@ protocol SupabaseServiceProtocol: AnyObject {
 
     // Tracks
     func fetchAllTracks() async throws -> [Track]
+    func fetchFeaturedTracks() async throws -> [Track]
     func fetchTracks(scenario: Scenario) async throws -> [Track]
     func fetchTrack(id: String) async throws -> Track?
 

@@ -22,6 +22,12 @@ web/.yarn/*
 # testing
 web/coverage/
 
+# automation — local screenshot capture (D4 harness) + worker scratch
+.automation/
+web/.automation/
+web/test-results/
+web/playwright-report/
+
 # next.js
 web/.next/
 web/out/
@@ -77,9 +83,9 @@ ios/.build/
 ios/.swiftpm/
 
 # Secrets (real values, not the .example)
-ios/Ragaflow/Configuration/Secrets.xcconfig
-ios/Ragaflow/Configuration/Debug.xcconfig
-ios/Ragaflow/Configuration/Release.xcconfig
+ios/Ragaflow/Configuration/Secrets.xcconfig*
+ios/Ragaflow/Configuration/Debug.xcconfig*
+ios/Ragaflow/Configuration/Release.xcconfig*
 
 # CocoaPods (if ever used)
 ios/Pods/
@@ -92,3 +98,4 @@ audio/
 
 # integration test screenshots
 tests/integration/screenshots/
+.vercel

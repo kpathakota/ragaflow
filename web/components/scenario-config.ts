@@ -5,6 +5,7 @@ export type ScenarioConfig = {
   label: string;
   subtitle: string;
   accent: {
+    hex: string;
     text: string;
     border: string;
     borderHover: string;
@@ -18,6 +19,7 @@ export const scenarios: ScenarioConfig[] = [
     label: "Focus",
     subtitle: "Sharpen your mind with ragas for deep work",
     accent: {
+      hex: "#C9A54C",
       text: "text-[#C9A54C]",
       border: "border-[#C9A54C]/30",
       borderHover: "hover:border-[#C9A54C]/50",
@@ -29,6 +31,7 @@ export const scenarios: ScenarioConfig[] = [
     label: "Sleep",
     subtitle: "Drift into rest with soothing evening ragas",
     accent: {
+      hex: "#B08878",
       text: "text-[#B08878]",
       border: "border-[#B08878]/30",
       borderHover: "hover:border-[#B08878]/50",
@@ -40,6 +43,7 @@ export const scenarios: ScenarioConfig[] = [
     label: "Meditate",
     subtitle: "Find stillness with ragas for contemplation",
     accent: {
+      hex: "#8A9B72",
       text: "text-[#8A9B72]",
       border: "border-[#8A9B72]/30",
       borderHover: "hover:border-[#8A9B72]/50",

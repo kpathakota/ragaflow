@@ -32,6 +32,7 @@ struct TrackListView: View {
                                 ragamName: ragams[track.ragamId]?.name,
                                 isFavorite: favorites.contains(track.id),
                                 scenario: scenario,
+                                isFeatured: track.featuredScenarios.contains(scenario.rawValue),
                                 onToggleFavorite: {
                                     Task { await toggleFavorite(trackId: track.id) }
                                 }
@@ -51,10 +52,13 @@ struct TrackListView: View {
         }
     }
 
-    /// Sorted newest-first by recorded_date (matches web behavior)
+    /// Featured tracks pinned to top, then newest-first by recorded_date
     private var sortedTracks: [Track] {
         tracks.sorted { a, b in
-            (a.recordedDate ?? "") > (b.recordedDate ?? "")
+            let aFeatured = a.featuredScenarios.contains(scenario.rawValue)
+            let bFeatured = b.featuredScenarios.contains(scenario.rawValue)
+            if aFeatured != bFeatured { return aFeatured }
+            return (a.recordedDate ?? "") > (b.recordedDate ?? "")
         }
     }
 

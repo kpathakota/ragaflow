@@ -12,6 +12,7 @@
 		14137FF3DB2FCD1D81F39E59 /* AuthFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7328BC7944D33337C863D49A /* AuthFlowTests.swift */; };
 		17355608DF872ACD2F94C59C /* FavoriteFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C224B13724E5BD78E37E3393 /* FavoriteFlowTests.swift */; };
 		1C986489B933099D758A7594 /* PlayerFlowTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */; };
+		A7B8C9D0E1F2A3B4C5D6E7F8 /* ScreenshotTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = F8E7D6C5B4A3F2E1D0C9B8A7 /* ScreenshotTests.swift */; };
 		2227E0D7EE3CA50E1E98B255 /* ExploreViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D75F5631269100D96A2CB44 /* ExploreViewModel.swift */; };
 		2D07FF82E95E813F1CA2BAB1 /* AudioServiceProtocol.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00D7463D158D12F63BF3E377 /* AudioServiceProtocol.swift */; };
 		3A41C1ADE647D2D18586015B /* SessionPlayerViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */; };
@@ -34,6 +35,7 @@
 		C5C74E0C25F736309A049D56 /* Track.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5743CEC8E8EBA3D278D7E3DA /* Track.swift */; };
 		CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */; };
 		CED328D86937BE8E91CAA6A8 /* ProfileViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4E23EF28FD95CB4D54DEF1DD /* ProfileViewModel.swift */; };
+		D1E2F3A4B5C6D7E8F9A0B1C2 /* HomeViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */; };
 		D0A95D2AC729310DCA863193 /* Ragam.swift in Sources */ = {isa = PBXBuildFile; fileRef = 966A1852C0B156E908F43DDF /* Ragam.swift */; };
 		D6BF5458D14922BA60DDB366 /* ExploreView.swift in Sources */ = {isa = PBXBuildFile; fileRef = FA77D1F146B22E3A514E3E61 /* ExploreView.swift */; };
 		D84D215F5E59F75A94BE89E3 /* ProfileView.swift in Sources */ = {isa = PBXBuildFile; fileRef = C29F8271D78294D42B4E57AF /* ProfileView.swift */; };
@@ -69,6 +71,7 @@
 		16AF7F15DD9D9604481F92F7 /* Ragaflow.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Ragaflow.entitlements; sourceTree = "<group>"; };
 		26DC56A75637E4572BF38ED6 /* AuthView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AuthView.swift; sourceTree = "<group>"; };
 		35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileViewModelTests.swift; sourceTree = "<group>"; };
+		C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = HomeViewTests.swift; sourceTree = "<group>"; };
 		40F307F9C38771F6C0E0A3EF /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		44EFE15DB19746626C260B83 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		4A4E7EE28EF03231C4C261F7 /* RagaflowApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RagaflowApp.swift; sourceTree = "<group>"; };
@@ -97,6 +100,7 @@
 		C29F8271D78294D42B4E57AF /* ProfileView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ProfileView.swift; sourceTree = "<group>"; };
 		DA469ECB10ACA244F775C6CD /* Certification.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Certification.swift; sourceTree = "<group>"; };
 		E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayerFlowTests.swift; sourceTree = "<group>"; };
+		F8E7D6C5B4A3F2E1D0C9B8A7 /* ScreenshotTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ScreenshotTests.swift; sourceTree = "<group>"; };
 		E281ED4D732131448A16A649 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E67C11CB71736E44DA9D4390 /* Ragaflow.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Ragaflow.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		ED512E620EBA6000EE3EDF29 /* SupabaseServiceProtocol.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SupabaseServiceProtocol.swift; sourceTree = "<group>"; };
@@ -146,6 +150,7 @@
 				03225E59A85E33C9FE134C9D /* ExploreViewModelTests.swift */,
 				35C77D9DEC1630657CBB9337 /* ProfileViewModelTests.swift */,
 				7B16544FD226ACA37A74E9EA /* SessionPlayerViewModelTests.swift */,
+				C2B1A0F9E8D7C6B5A4F3E2D1 /* HomeViewTests.swift */,
 			);
 			path = RagaflowTests;
 			sourceTree = "<group>";
@@ -231,6 +236,7 @@
 				7328BC7944D33337C863D49A /* AuthFlowTests.swift */,
 				C224B13724E5BD78E37E3393 /* FavoriteFlowTests.swift */,
 				E1B4D123EF1EA712C644C81E /* PlayerFlowTests.swift */,
+				F8E7D6C5B4A3F2E1D0C9B8A7 /* ScreenshotTests.swift */,
 				660487D5240F7DF7F328F157 /* RagaflowUITests.swift */,
 			);
 			path = RagaflowUITests;
@@ -450,6 +456,7 @@
 				14137FF3DB2FCD1D81F39E59 /* AuthFlowTests.swift in Sources */,
 				17355608DF872ACD2F94C59C /* FavoriteFlowTests.swift in Sources */,
 				1C986489B933099D758A7594 /* PlayerFlowTests.swift in Sources */,
+				A7B8C9D0E1F2A3B4C5D6E7F8 /* ScreenshotTests.swift in Sources */,
 				C1A96C00FF6ADB3811DA7CEE /* RagaflowUITests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -494,6 +501,7 @@
 				635AB0E9B8EB0EC68DBBDE60 /* MockSupabaseService.swift in Sources */,
 				CA556C9097167CED780CDE6E /* ProfileViewModelTests.swift in Sources */,
 				3A41C1ADE647D2D18586015B /* SessionPlayerViewModelTests.swift in Sources */,
+				D1E2F3A4B5C6D7E8F9A0B1C2 /* HomeViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

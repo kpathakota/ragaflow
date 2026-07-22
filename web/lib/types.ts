@@ -21,12 +21,15 @@ export type Track = {
   audio_url: string;
   download_url: string | null;
   free: boolean;
+  featured: boolean;
+  featured_scenarios: Scenario[];
   created_at: string;
 };
 
 export type Rasika = {
   id: string;
   rasika_id: string;
+  display_name: string | null;
   favorite_tracks: string[];
   favorite_ragams: string[];
   default_focus_track: string | null;
