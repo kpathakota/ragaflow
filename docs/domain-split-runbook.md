@@ -4,9 +4,17 @@ Goal: `ragaflow.io` serves the marketing **landing** page (and `/privacy`,
 `/terms`, `/support`); `app.ragaflow.io` serves the **web app**. Both run from the
 **same Vercel project** — the split is done in `web/proxy.ts`, gated by env vars.
 
-**The code is safe to merge before any of this is done.** With `MARKETING_HOST`
-unset, `proxy.ts` behaves exactly as it does today (app at `/`). Nothing changes
-until you complete the steps below and set the env vars. Do them in order.
+**The code is safe to merge and deploy to production before any of this is
+done.** With `MARKETING_HOST` unset, `proxy.ts` behaves exactly as it does today
+(app at `ragaflow.io/`). Nothing changes until you set the env vars in step 4.
+
+**Order matters — setting the env vars (step 4) is the switch that flips
+everything, so do it LAST.** Steps 1–3 are all invisible to current users: the
+app keeps serving at `ragaflow.io/`, and once `app.ragaflow.io` is added it
+*also* serves the app (the proxy is still a no-op). Only step 4 turns on the
+split. If you flip it before `app.ragaflow.io` resolves and Supabase is updated,
+apex app-routes will redirect to a dead host and sign-in on the app host will
+fail its callback.
 
 ## 1. DNS
 
@@ -18,9 +26,20 @@ until you complete the steps below and set the env vars. Do them in order.
 
 - Add `app.ragaflow.io` to the project. Keep `ragaflow.io` and `www.ragaflow.io`.
 - Vercel serves the same deployment on all of them; `proxy.ts` decides what each
-  host shows.
+  host shows. Wait until `app.ragaflow.io` is verified and loads the app.
 
-## 3. Vercel → Project → Settings → Environment Variables (**Production** only)
+## 3. Supabase → Authentication → URL Configuration
+
+Auth uses `window.location.origin`, so the app will run on `app.ragaflow.io`:
+
+- **Site URL:** `https://app.ragaflow.io`
+- **Redirect URLs:** add `https://app.ragaflow.io/**` (keep
+  `http://localhost:3000/**`). Email-confirmation callbacks hit
+  `/auth/callback` on the app host.
+
+## 4. Vercel → Environment Variables (**Production** only) — THE ACTIVATION SWITCH
+
+Set these **only after steps 1–3 are done and verified**, then redeploy:
 
 | Key | Value |
 |---|---|
@@ -29,16 +48,15 @@ until you complete the steps below and set the env vars. Do them in order.
 | `NEXT_PUBLIC_APP_URL` | `https://app.ragaflow.io` |
 
 Leave these **unset for Preview** so preview deployments keep serving both the
-app (`/`) and the landing (`/landing`) for review. Redeploy after setting them.
+app (`/`) and the landing (`/landing`) for review.
 
-## 4. Supabase → Authentication → URL Configuration
-
-Auth uses `window.location.origin`, so the app now runs on `app.ragaflow.io`:
-
-- **Site URL:** `https://app.ragaflow.io`
-- **Redirect URLs:** add `https://app.ragaflow.io/**` (keep
-  `http://localhost:3000/**`). Email-confirmation callbacks hit
-  `/auth/callback` on the app host.
+> **Rollback:** unset `MARKETING_HOST` (or all three) and redeploy → instantly
+> back to single-domain behavior, no code change.
+>
+> **Heads-up for existing sessions:** signed-in beta users have their auth cookie
+> on `ragaflow.io`; after the flip the app lives on `app.ragaflow.io` (a
+> different host), so they'll need to sign in once more there. Minor at beta
+> scale, but expect it.
 
 ## 5. Polar webhooks (no change required, but verify)
 
