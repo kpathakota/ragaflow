@@ -57,8 +57,10 @@ export default function SupportPage() {
           <strong className="text-[#E6DCCA]">
             How do I delete my account?
           </strong>{" "}
-          Email <MailLink />{" "}from your account address and we&rsquo;ll delete
-          your account and associated data. See our{" "}
+          Go to Profile → Delete account. This permanently deletes your account
+          and all of your data — favorites, listening history, certifications,
+          and default tracks. You can also email <MailLink />{" "}from your
+          account address and we&rsquo;ll delete it for you. See our{" "}
           <a
             href="/privacy"
             className="text-[#E6DCCA] underline underline-offset-2 hover:text-[#E6DCCA]/80"

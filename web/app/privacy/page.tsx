@@ -10,7 +10,7 @@ const CONTACT_EMAIL = "support@ragaflow.io";
 
 export default function PrivacyPage() {
   return (
-    <ProsePage title="Privacy Policy" subtitle="Last updated: July 21, 2026">
+    <ProsePage title="Privacy Policy" subtitle="Last updated: July 22, 2026">
       <p>
         Ragaflow (&ldquo;we&rdquo;, &ldquo;us&rdquo;) makes an app and website
         that stream Indian classical music sessions for focus, sleep, and
@@ -89,8 +89,12 @@ export default function PrivacyPage() {
           </li>
           <li>
             <strong className="text-[#E6DCCA]">Delete your account:</strong>{" "}
-            contact us at the email below and we will delete your account and
-            associated personal data.
+            delete your account in the app (Profile → Delete account), or email{" "}
+            {CONTACT_EMAIL} and we will do it for you. Deletion removes your
+            account and associated personal data — favorites, listening history,
+            certifications, and default tracks. If you purchased a subscription,
+            our merchant of record (Polar) retains payment records as required
+            for legal and tax purposes.
           </li>
           <li>
             <strong className="text-[#E6DCCA]">Stop analytics:</strong> analytics

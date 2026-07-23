@@ -48,7 +48,7 @@ Both clients share the same Supabase backend. No shared code between web and iOS
 | iOS release | production | `ios/Ragaflow/Configuration/Release.xcconfig` |
 
 1. Pull `web/.env.local` from Vercel: `cd web && vercel env pull .env.local --environment=production` (or copy from another dev)
-2. Migrations in `supabase/migrations/` are mostly applied on production. `010_featured_and_display_name.sql` was applied 2026-06-24 (prod `tracks` now has `featured`/`featured_scenarios`, `rasikas` has `display_name`; 5 tracks featured, 2 sleep-featured for the Home "Tonight" card). When a migration is pending, run it in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
+2. Migrations in `supabase/migrations/` are all applied on production through 012 (as of 2026-07-22: 011 makes `analytics_events.rasika_id` ON DELETE SET NULL — account deletion anonymizes events; 012 makes `update_rasika_subscription` return the affected row count for webhook orphan detection). When a migration is pending, run it in the SQL editor (see `feedback_sync_sql_file` — write to `uploads/sync.sql`, don't execute from terminal)
 3. Supabase is required — without env vars the app renders empty (no local seed fallback)
 
 ## Data model (Phase 1 — current)
@@ -78,8 +78,11 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 
 ### Shared
 - `supabase/migrations/` — DDL + RLS policies (run in order)
+- `supabase/functions/delete-account/` — edge function for account deletion (deployed to prod 2026-07-22; both clients invoke via `functions.invoke`, uid from JWT only, 409 on active/past_due subscription). Deploy: `supabase functions deploy delete-account --project-ref mkikuyxvabhbaxspoiay --use-api` (CLI installed via brew, login required)
+- `supabase/config.toml` — minimal CLI config (exists so `functions deploy` works; pins `verify_jwt`)
 - `supabase/seed.sql` — insert statements for Supabase (7 ragams, 30 tracks)
 - `supabase/analytics-queries.sql` — ad-hoc SQL queries for analytics (DAU/WAU, errors, session quality)
+- `docs/account-deletion-design.md` — account deletion design (flow, edge function, test matrix)
 - `docs/spec.md` — product specification
 - `docs/dev-design.md` — development design & execution plan
 - `docs/ios-plan.md` — iOS implementation plan (milestones M0–M5)

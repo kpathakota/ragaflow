@@ -35,6 +35,13 @@ describe("Privacy page", () => {
     render(<PrivacyPage />);
     expect(screen.getByText(/we do not sell your personal information/i)).toBeInTheDocument();
   });
+
+  it("describes in-app account deletion (App Store 5.1.1(v))", () => {
+    render(<PrivacyPage />);
+    expect(
+      screen.getByText(/delete your account in the app \(Profile → Delete\s*account\)/i),
+    ).toBeInTheDocument();
+  });
 });
 
 describe("Support page", () => {
@@ -51,6 +58,13 @@ describe("Support page", () => {
 
     const privacyLink = screen.getByRole("link", { name: /privacy policy/i });
     expect(privacyLink).toHaveAttribute("href", "/privacy");
+  });
+
+  it("mentions the in-app account deletion path", () => {
+    render(<SupportPage />);
+    expect(
+      screen.getByText(/Go to Profile → Delete account/i),
+    ).toBeInTheDocument();
   });
 });
 

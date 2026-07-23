@@ -12,10 +12,64 @@ Goal: get Ragaflow into the hands of ~30 people to find who it actually works fo
 - [x] **Session logging** — listening sessions tracked with duration and completion
 - [x] **Favorites & defaults** — rasikas can personalize their experience
 
+## iOS App Store submission — what must be in `main` (as of 2026-07-22)
+
+Everything below is **already on `dev`** — one `dev → main` merge is the only
+code motion required. `main` is what matters twice over: Xcode Cloud archives
+the submitted binary from `main`, and Vercel production (the listing's
+Privacy/Terms/Support URLs) deploys from `main`.
+
+**In the dev → main merge (code — complete):**
+
+- [x] **Free-beta app** — "Go Premium" card + "Premium" badges stripped (PR #60);
+      no Guideline 3.1.1 exposure (no subscription surfaced without IAP)
+- [x] **Legal pages** — `/privacy`, `/terms`, `/support` (PR #61); go live on
+      ragaflow.io the moment main deploys — these are the URLs the listing needs
+- [x] **Review demo account** — `kpathakota+alt@gmail.com` / `alt123`, verified
+      live on prod, wired into UI tests + listing doc (rotate after review)
+- [x] **Info.plist ready** — background audio mode, export compliance
+      (`ITSAppUsesNonExemptEncryption=false`), dark-only
+- [x] **App icon** — real branded 1024 icon (tanpura rosette), already passing
+      ASC validation via TestFlight uploads
+- [x] **Listing kit** — copy/keywords/reviewer notes in
+      `docs/app-store-listing.md`; 6 screenshots at 6.9" spec captured
+
+**Must build before submission — account deletion (SHIPPED 2026-07-22):**
+
+- [x] **Account deletion — Guideline 5.1.1(v), iOS + web.** Built per
+      `docs/account-deletion-design.md`, merged to `dev` as PRs #63 (backend),
+      #64 (web), #65 (iOS) — each code-reviewed by agent with fixes applied.
+      - **Backend** — `delete-account` edge function **deployed to prod**;
+        migrations 011 (`analytics_events.rasika_id` → SET NULL, events
+        anonymized not deleted) + 012 (webhook orphan detection) **applied**
+      - **Web** — `/profile` delete flow **verified on prod** (rows gone,
+        analytics anonymized, re-registration clean)
+      - **iOS** — Profile → Delete Account with destructive confirmation;
+        69/69 unit tests; **pending TestFlight verification** once the next
+        build exists (needs the dev → main merge below)
+      - **Docs** — privacy policy/page + support page now say "delete in the
+        app (Profile → Delete account), or email us"
+      - Remaining test-matrix items: iOS on-device pass + the 409
+        active-subscription path on both platforms (flip a throwaway's
+        `subscription_status` in the SQL editor)
+
+**Not code / not `main` (after the merge, owner: human):**
+
+- [x] Merge `dev → main` → Xcode Cloud builds → select the build in ASC
+- [ ] Get account deletion into main. 
+- [ ] Verify `ragaflow.io/privacy` + `/terms` + `/support` live in production
+- [ ] `support@ragaflow.io` mailbox (email routing on ragaflow.io) — listing
+      contact + privacy-policy deletion requests land here
+- [ ] ASC: paste listing copy, upload screenshots, App Privacy labels, age
+      rating 4+, demo account in review notes → submit
+- [ ] **Not required for submission:** the domain split (env-gated, off until
+      flipped — see `docs/domain-split-runbook.md`) and the color pass
+- [ ] Build an app walkthrough in derive.to. 
+
 ## Before invites go out
 
-- [ ] **Color pass with Supriya** — weekend of April 25. Something about the current palette isn't right. Align on scenario accents, backgrounds, text warmth.
-- [ ] **Landing page** — needs to exist. When someone taps the invite link, they should understand what Ragaflow is and what to do within 5 seconds. Do this _after_ the color pass so it ships with the new palette.
+- [x] **Color pass with Supriya** — weekend of April 25. Something about the current palette isn't right. Align on scenario accents, backgrounds, text warmth.
+- [x] **Landing page** — shipped (PR #61): `/landing` live behind the env-gated domain split, on-brand draft copy. Full copy pass planned after the domain split is flipped.
 - [ ] **Invite email draft** — short, opinionated, tells people what to expect. Most won't read it, but the ones who do should feel invited, not instructed.
 
 ## Not blocking (confirmed)

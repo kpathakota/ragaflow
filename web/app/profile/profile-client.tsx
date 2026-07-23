@@ -8,6 +8,7 @@ import { createClient } from "@/lib/supabase/client";
 import { scenarios } from "@/components/scenario-config";
 import type { Rasika, Scenario, Track } from "@/lib/types";
 import { computeRagamProgress, getTierInfo, getTierColor } from "@/lib/certifications";
+import { DeleteAccountSection } from "./delete-account";
 import type { User } from "@supabase/supabase-js";
 
 type Stats = {
@@ -360,6 +361,9 @@ export function ProfileClient({ user }: { user: User }) {
         >
           {signingOut ? "Signing out..." : "Sign out"}
         </button>
+
+        {/* Delete account */}
+        <DeleteAccountSection />
       </div>
     </div>
   );

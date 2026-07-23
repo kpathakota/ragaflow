@@ -1,0 +1,9 @@
+# Minimal Supabase CLI config — exists so `supabase functions deploy` works.
+# Deploy: supabase functions deploy delete-account --project-ref mkikuyxvabhbaxspoiay
+project_id = "ragaflow"
+
+[functions.delete-account]
+# Security invariant (docs/account-deletion-design.md): unauthenticated calls
+# get 401 at the gateway before the function runs. The function additionally
+# verifies the JWT itself via auth.getUser().
+verify_jwt = true

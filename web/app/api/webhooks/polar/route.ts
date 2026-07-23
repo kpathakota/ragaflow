@@ -34,15 +34,34 @@ async function updateRasika(
     return;
   }
 
-  const { error } = await admin.rpc("update_rasika_subscription", {
-    p_rasika_id: externalId,
-    p_polar_customer_id: polarCustomerId,
-    p_subscription_status: status,
-  });
+  const { data: updatedRows, error } = await admin.rpc(
+    "update_rasika_subscription",
+    {
+      p_rasika_id: externalId,
+      p_polar_customer_id: polarCustomerId,
+      p_subscription_status: status,
+    }
+  );
 
   if (error) {
     console.error("[polar/webhook] Supabase update failed:", error.message);
     throw new Error(error.message);
+  }
+
+  // Migration 012 makes the RPC return the affected row count. Zero rows means
+  // the rasika no longer exists — most likely an account deleted between Polar
+  // checkout and this webhook arriving (the delete-account 409 guard can't see
+  // a subscription whose webhook hasn't landed yet). Don't throw — retries
+  // can't succeed — but log loudly so the orphaned Polar subscription gets
+  // canceled by hand in the Polar dashboard. (Pre-012 the RPC returns null,
+  // which intentionally doesn't trip this.)
+  if (updatedRows === 0) {
+    console.error(
+      `[polar/webhook] ORPHANED SUBSCRIPTION: update matched no rasika ` +
+        `(externalId=${externalId}, polarCustomerId=${polarCustomerId}, status=${status}). ` +
+        `Account was likely deleted between checkout and webhook delivery — ` +
+        `cancel this subscription in the Polar dashboard.`
+    );
   }
 }
 

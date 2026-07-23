@@ -58,7 +58,7 @@ function orderPayload(
 beforeEach(() => {
   vi.clearAllMocks();
   process.env.POLAR_WEBHOOK_SECRET = "test-secret";
-  mockRpc.mockResolvedValue({ error: null });
+  mockRpc.mockResolvedValue({ data: 1, error: null });
   mockCreateAdminClient.mockReturnValue({ rpc: mockRpc } as any);
 });
 
@@ -199,6 +199,34 @@ describe("webhook: updateRasika edge cases", () => {
         subscriptionPayload("user-10", "polar-cust-10")
       )
     ).rejects.toThrow("rasika not found");
+  });
+
+  it("logs an orphaned-subscription error when the update matches no rasika", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockRpc.mockResolvedValue({ data: 0, error: null });
+
+    // Must not throw — Polar retries can't succeed once the rasika is gone
+    await webhookConfig.onSubscriptionActive(
+      subscriptionPayload("deleted-user", "polar-cust-z")
+    );
+
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining("ORPHANED SUBSCRIPTION")
+    );
+    expect(console.error).toHaveBeenCalledWith(
+      expect.stringContaining("deleted-user")
+    );
+  });
+
+  it("does not log orphan errors before migration 012 (RPC returns null)", async () => {
+    vi.spyOn(console, "error").mockImplementation(() => {});
+    mockRpc.mockResolvedValue({ data: null, error: null });
+
+    await webhookConfig.onSubscriptionActive(
+      subscriptionPayload("user-12", "polar-cust-12")
+    );
+
+    expect(console.error).not.toHaveBeenCalled();
   });
 
   it("is idempotent — same event twice produces same RPC calls", async () => {
