@@ -34,27 +34,24 @@ Privacy/Terms/Support URLs) deploys from `main`.
 - [x] **Listing kit** — copy/keywords/reviewer notes in
       `docs/app-store-listing.md`; 6 screenshots at 6.9" spec captured
 
-**Must build before submission — account deletion (not started on either platform):**
+**Must build before submission — account deletion (SHIPPED 2026-07-22):**
 
-- [ ] **Account deletion — Guideline 5.1.1(v), iOS + web.** Apps that offer
-      account creation must let users *initiate deletion in the app*. Deletion
-      currently exists **nowhere** — not iOS, not web; the only path is
-      Sign Out + "email support@ragaflow.io" in the privacy policy, a common
-      first-submission rejection. Decided: build it before submitting.
-      Scope (own session, not started):
-      - **Backend** — Supabase Edge Function (service role): delete the auth
-        user + owned rows (`rasikas`, `listening_sessions`, `certifications`;
-        decide whether `analytics_events.rasika_id` rows are deleted or nulled)
-      - **iOS** — Profile → "Delete Account" with a destructive confirmation →
-        calls the function → signs out locally
-      - **Web** — same flow on `/profile` (parity + the privacy policy's promise)
-      - **Docs** — update privacy policy/page wording from "email us" to
-        "delete in the app, or email us"
-      - **Test well** (prod-only Supabase — throwaway accounts, no bulk writes):
-        rows actually gone after deletion; deleted user can't sign back in;
-        same email can re-register fresh; unauthenticated/wrong-user calls
-        rejected (can only delete *your own* account); both clients handle the
-        signed-out state cleanly after deletion
+- [x] **Account deletion — Guideline 5.1.1(v), iOS + web.** Built per
+      `docs/account-deletion-design.md`, merged to `dev` as PRs #63 (backend),
+      #64 (web), #65 (iOS) — each code-reviewed by agent with fixes applied.
+      - **Backend** — `delete-account` edge function **deployed to prod**;
+        migrations 011 (`analytics_events.rasika_id` → SET NULL, events
+        anonymized not deleted) + 012 (webhook orphan detection) **applied**
+      - **Web** — `/profile` delete flow **verified on prod** (rows gone,
+        analytics anonymized, re-registration clean)
+      - **iOS** — Profile → Delete Account with destructive confirmation;
+        69/69 unit tests; **pending TestFlight verification** once the next
+        build exists (needs the dev → main merge below)
+      - **Docs** — privacy policy/page + support page now say "delete in the
+        app (Profile → Delete account), or email us"
+      - Remaining test-matrix items: iOS on-device pass + the 409
+        active-subscription path on both platforms (flip a throwaway's
+        `subscription_status` in the SQL editor)
 
 **Not code / not `main` (after the merge, owner: human):**
 
