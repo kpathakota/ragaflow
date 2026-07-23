@@ -2,6 +2,24 @@
 
 A record of bugs and issues encountered, why they mattered, and how they were resolved. Newest entries at the top.
 
+## 2026-07-22
+
+### Issue — Portal failures silently redirect to /profile with no feedback (low priority)
+
+**File:** `web/app/api/portal/route.ts` (catch block, ~line 48)
+
+**What's wrong:** Every failure in the `/api/portal` route — unauthenticated, missing `polar_customer_id`, Polar API error — is caught and silently redirected back to `/profile`. To the rasika, the "Manage subscription" link (Plan card, and now the delete-account 409 panel) appears to do nothing.
+
+**How it surfaced:** Testing the account-deletion 409 path with a throwaway account whose `subscription_status` was flipped to `active` via SQL. Such an account has no `polar_customer_id` (only a real checkout's webhook sets it), so the portal link looked dead. Expected for a synthetic subscriber — but a real subscriber hitting a Polar API error would see the same silent nothing.
+
+**User impact:** Any real portal failure is indistinguishable from the link not working. No path to support, no retry signal.
+
+**Fix needed:** Redirect with a query param (e.g. `/profile?portal=error`) and render a banner on the profile page, matching the existing checkout success/error banner pattern in `profile-client.tsx`. Keep the silent redirect only for the unauthenticated case.
+
+**Status:** Open
+
+---
+
 ## 2026-04-12
 
 - The artist note reads "From the session" and doesn't feel clickable. Have it be expanded to begin with and with larger padding between that and the buttons. **Status: Fixed**
