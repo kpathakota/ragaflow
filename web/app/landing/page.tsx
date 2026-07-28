@@ -19,15 +19,15 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "/";
 const VALUE_PROPS = [
   {
     title: "Ragas, not rain sounds",
-    body: "Each session is a specific melodic framework with intent and history — not generic ambient noise stretched to fill an hour.",
+    body: "Each session is a specific melodic framework with intent and history, not generic ambient noise stretched to fill an hour.",
   },
   {
-    title: "One curator, not an algorithm",
+    title: "One curator, start to finish",
     body: "Every recording is chosen and shaped by a single musician's ear. You're hearing a point of view, not a playlist a machine assembled.",
   },
   {
     title: "Meaning you can hear",
-    body: "Ragam descriptions, artist notes, and the place each session was recorded — the depth is there when you're curious, invisible when you're not.",
+    body: "Ragam descriptions, artist notes, and the place each session was recorded. The depth is there when you're curious, invisible when you're not.",
   },
 ];
 
@@ -51,8 +51,8 @@ export default function LandingPage() {
             Ragaflow
           </h1>
           <p className="mx-auto mt-5 max-w-sm text-[17px] leading-relaxed text-[#E6DCCA]/70 sm:mt-7 sm:max-w-xl sm:text-[19px]">
-            Ragas chosen for how you want to feel. Pick a moment — focus, sleep,
-            or meditation — and let a raga hold the space.
+            Ragas chosen for how you want to feel. Pick a moment: focus, sleep,
+            or meditation. Then let a raga hold the space.
           </p>
           <div className="mt-9 flex flex-col items-center gap-3">
             <Link

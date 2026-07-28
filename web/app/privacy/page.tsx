@@ -15,9 +15,8 @@ export default function PrivacyPage() {
         Ragaflow (&ldquo;we&rdquo;, &ldquo;us&rdquo;) makes an app and website
         that stream Indian classical music sessions for focus, sleep, and
         meditation. This policy explains what we collect, why, and the choices
-        you have. We keep it short because the short version is the honest
-        version: we collect the minimum needed to run the app, and we don&rsquo;t
-        sell your data.
+        you have. We collect the minimum needed to run the app, and we
+        don&rsquo;t sell your data.
       </p>
 
       <ProseSection heading="What we collect">
