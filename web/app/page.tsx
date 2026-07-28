@@ -111,15 +111,15 @@ export default async function Home() {
     : "Indian classical ragas for focus, sleep & meditation";
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0F0B07] px-5 pt-2 pb-8 flex flex-col items-center">
+    <div className="relative min-h-screen overflow-hidden bg-[#0F0B07] px-5 pt-2 pb-8 sm:px-8 sm:pb-16 flex flex-col items-center">
       {/* Candle glow */}
       <div
-        className="pointer-events-none absolute top-[90px] left-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-[30%] rounded-full opacity-12 blur-[70px]"
+        className="pointer-events-none absolute top-[90px] left-1/2 h-[280px] w-[280px] -translate-x-1/2 -translate-y-[30%] rounded-full opacity-12 blur-[70px] sm:h-[420px] sm:w-[420px] sm:blur-[100px]"
         style={{ background: timeConfig.accent }}
       />
 
       {/* Content (above glow) */}
-      <div className="relative w-full max-w-sm">
+      <div className="relative w-full max-w-sm sm:max-w-2xl">
         {/* Profile badge */}
         <div className="flex justify-end pt-1">
           {user ? (
@@ -135,12 +135,12 @@ export default async function Home() {
         </div>
 
         {/* Brand lockup */}
-        <header className="pt-7 pb-9 text-center">
-          <h1 className="font-serif text-[40px] font-medium leading-none tracking-[-0.01em] text-[#E6DCCA]">
+        <header className="pt-7 pb-9 text-center sm:pt-14 sm:pb-12">
+          <h1 className="font-serif text-[40px] font-medium leading-none tracking-[-0.01em] text-[#E6DCCA] sm:text-[56px]">
             Ragaflow
           </h1>
           <p
-            className="mx-auto mt-2.5 max-w-[300px] text-[13.5px] leading-relaxed"
+            className="mx-auto mt-2.5 max-w-[300px] text-[13.5px] leading-relaxed sm:mt-4 sm:max-w-md sm:text-[15px]"
             style={{ color: "rgba(230,220,202,0.62)" }}
           >
             {subtitle}
@@ -159,8 +159,8 @@ export default async function Home() {
           />
         )}
 
-        {/* Scenario cards */}
-        <div className="mt-7 flex flex-col gap-2.5">
+        {/* Scenario cards — stacked on phone, three-up on desktop */}
+        <div className="mt-7 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-3 sm:gap-3">
           {scenarios.map((s) => (
             <Link
               key={s.key}
@@ -181,7 +181,7 @@ export default async function Home() {
         </div>
 
         {/* Two-up footer grid */}
-        <div className="mt-[22px] grid grid-cols-2 gap-2.5">
+        <div className="mt-[22px] grid grid-cols-2 gap-2.5 sm:mt-6 sm:gap-3">
           <Link
             href="/explore"
             className="flex flex-col items-start gap-1 rounded-[14px] border border-[#E6DCCA]/14 bg-transparent p-3.5 transition-[border-color] duration-[180ms] hover:border-[#E6DCCA]/24 active:opacity-80"

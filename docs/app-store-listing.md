@@ -8,18 +8,18 @@ noted inline — App Store Connect enforces them.
 
 ## App information
 
-| Field | Value |
-|-------|-------|
-| **App name** (30 char max) | `Ragaflow` |
-| **Subtitle** (30 char max) | `Ragas for focus & sleep` (23) |
-| **Bundle ID** | `com.ragaflow.app` |
-| **SKU** | `ragaflow` |
-| **Primary category** | Health & Fitness |
-| **Secondary category** | Music |
-| **Primary language** | English (U.S.) |
-| **Age rating** | 4+ (no objectionable content) |
-| **Version** | `1.0.0` (must match the binary's `CFBundleShortVersionString`) |
-| **Devices** | iPhone only — iPad support was dropped for 1.0 (untested), so no iPad screenshots are required |
+| Field                      | Value                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| **App name** (30 char max) | `Ragaflow`                                                                                     |
+| **Subtitle** (30 char max) | `Ragas for focus & sleep` (23)                                                                 |
+| **Bundle ID**              | `com.ragaflow.app`                                                                             |
+| **SKU**                    | `ragaflow`                                                                                     |
+| **Primary category**       | Health & Fitness                                                                               |
+| **Secondary category**     | Music                                                                                          |
+| **Primary language**       | English (U.S.)                                                                                 |
+| **Age rating**             | 4+ (no objectionable content)                                                                  |
+| **Version**                | `1.0.0` (must match the binary's `CFBundleShortVersionString`)                                 |
+| **Devices**                | iPhone only — iPad support was dropped for 1.0 (untested), so no iPad screenshots are required |
 
 > **Category note:** Health & Fitness primary puts Ragaflow next to Calm /
 > Headspace for the focus-sleep-meditation use case, which is the intended

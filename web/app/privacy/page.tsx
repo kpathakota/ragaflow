@@ -45,8 +45,8 @@ export default function PrivacyPage() {
           associated with your account.
         </p>
         <p>
-          <strong className="text-[#E6DCCA]">We do not collect</strong> your
-          location, contacts, photos, health data, or device advertising
+          <strong className="text-[#E6DCCA]">We do not collect</strong>{" "}
+          your location, contacts, photos, health data, or device advertising
           identifiers. We do not use third-party advertising or cross-app
           tracking, and Ragaflow does not track you across other companies&rsquo;
           apps or websites.

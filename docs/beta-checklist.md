@@ -61,16 +61,16 @@ Privacy/Terms/Support URLs) deploys from `main`.
 - [x] Account deletion is in `main` (PR #66, 2026-07-22)
 - [x] Verify `ragaflow.io/privacy` + `/terms` + `/support` live in production
       — all four routes (+ `/landing`) return 200, checked 2026-07-28
-- [ ] `support@ragaflow.io` mailbox — DNS side is done (`ragaflow.io` MX points
+- [x] `support@ragaflow.io` mailbox — DNS side is done (`ragaflow.io` MX points
       at Porkbun forwarding, SPF present); still send a test to confirm the
-      `support@` alias itself delivers
-- [ ] **Re-capture 6.9" screenshots** — `ios/scripts/screenshot.sh` writes to
+  `support@` alias itself delivers. Tested!
+- [x] **Re-capture 6.9" screenshots** — `ios/scripts/screenshot.sh` writes to
       `/tmp/ios-shots`, which has since been cleared, so the captured set is
       gone. Needs a machine with Xcode + simulator (not installed on this one).
       iPhone sizes only now that iPad support is dropped.
 - [ ] ASC: paste listing copy, upload screenshots, App Privacy labels, age
       rating 4+, demo account in review notes → submit
-- [ ] **Not required for submission:** the domain split (env-gated, off until
+- [x] **Not required for submission:** the domain split (env-gated, off until
       flipped — see `docs/domain-split-runbook.md`) and the color pass
 - [ ] Build an app walkthrough in derive.to. 
 
