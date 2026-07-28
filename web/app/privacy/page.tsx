@@ -15,9 +15,8 @@ export default function PrivacyPage() {
         Ragaflow (&ldquo;we&rdquo;, &ldquo;us&rdquo;) makes an app and website
         that stream Indian classical music sessions for focus, sleep, and
         meditation. This policy explains what we collect, why, and the choices
-        you have. We keep it short because the short version is the honest
-        version: we collect the minimum needed to run the app, and we don&rsquo;t
-        sell your data.
+        you have. We collect the minimum needed to run the app, and we
+        don&rsquo;t sell your data.
       </p>
 
       <ProseSection heading="What we collect">
@@ -45,8 +44,8 @@ export default function PrivacyPage() {
           associated with your account.
         </p>
         <p>
-          <strong className="text-[#E6DCCA]">We do not collect</strong> your
-          location, contacts, photos, health data, or device advertising
+          <strong className="text-[#E6DCCA]">We do not collect</strong>{" "}
+          your location, contacts, photos, health data, or device advertising
           identifiers. We do not use third-party advertising or cross-app
           tracking, and Ragaflow does not track you across other companies&rsquo;
           apps or websites.

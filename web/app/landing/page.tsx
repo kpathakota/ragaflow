@@ -19,40 +19,40 @@ const APP_URL = process.env.NEXT_PUBLIC_APP_URL || "/";
 const VALUE_PROPS = [
   {
     title: "Ragas, not rain sounds",
-    body: "Each session is a specific melodic framework with intent and history — not generic ambient noise stretched to fill an hour.",
+    body: "Each session is a specific melodic framework with intent and history, not generic ambient noise stretched to fill an hour.",
   },
   {
-    title: "One curator, not an algorithm",
+    title: "One curator, start to finish",
     body: "Every recording is chosen and shaped by a single musician's ear. You're hearing a point of view, not a playlist a machine assembled.",
   },
   {
     title: "Meaning you can hear",
-    body: "Ragam descriptions, artist notes, and the place each session was recorded — the depth is there when you're curious, invisible when you're not.",
+    body: "Ragam descriptions, artist notes, and the place each session was recorded. The depth is there when you're curious, invisible when you're not.",
   },
 ];
 
 export default function LandingPage() {
   return (
-    <div className="relative min-h-screen overflow-hidden bg-[#0F0B07] px-5 pb-10 flex flex-col items-center">
+    <div className="relative min-h-screen overflow-hidden bg-[#0F0B07] px-5 pb-10 sm:px-8 sm:pb-16 flex flex-col items-center">
       {/* Candle glow */}
       <div
         aria-hidden
-        className="pointer-events-none absolute top-[120px] left-1/2 h-[320px] w-[320px] -translate-x-1/2 rounded-full opacity-[0.14] blur-[80px]"
+        className="pointer-events-none absolute top-[120px] left-1/2 h-[320px] w-[320px] -translate-x-1/2 rounded-full opacity-[0.14] blur-[80px] sm:h-[520px] sm:w-[520px] sm:blur-[110px]"
         style={{ background: "#C9A54C" }}
       />
 
-      <main className="relative w-full max-w-md">
+      <main className="relative w-full max-w-md sm:max-w-3xl">
         {/* Hero */}
-        <section className="pt-20 pb-14 text-center">
+        <section className="pt-20 pb-14 text-center sm:pt-28 sm:pb-20">
           <p className="mb-5 text-xs font-medium uppercase tracking-[0.2em] text-[#E6DCCA]/45">
             Indian classical, for daily use
           </p>
-          <h1 className="font-serif text-[52px] font-medium leading-none tracking-[-0.01em] text-[#E6DCCA]">
+          <h1 className="font-serif text-[52px] font-medium leading-none tracking-[-0.01em] text-[#E6DCCA] sm:text-[76px]">
             Ragaflow
           </h1>
-          <p className="mx-auto mt-5 max-w-sm text-[17px] leading-relaxed text-[#E6DCCA]/70">
-            Ragas chosen for how you want to feel. Pick a moment — focus, sleep,
-            or meditation — and let a raga hold the space.
+          <p className="mx-auto mt-5 max-w-sm text-[17px] leading-relaxed text-[#E6DCCA]/70 sm:mt-7 sm:max-w-xl sm:text-[19px]">
+            Ragas chosen for how you want to feel. Pick a moment: focus, sleep,
+            or meditation. Then let a raga hold the space.
           </p>
           <div className="mt-9 flex flex-col items-center gap-3">
             <Link
@@ -70,14 +70,14 @@ export default function LandingPage() {
           </div>
         </section>
 
-        {/* What makes it different */}
-        <section className="space-y-9 py-8">
+        {/* What makes it different — stacked on phone, three-up on desktop */}
+        <section className="grid grid-cols-1 gap-9 py-8 sm:py-12 md:grid-cols-3 md:gap-8">
           {VALUE_PROPS.map((prop) => (
             <div key={prop.title} className="text-center">
               <h2 className="font-serif text-[22px] font-medium text-[#E6DCCA]">
                 {prop.title}
               </h2>
-              <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-[#E6DCCA]/65">
+              <p className="mx-auto mt-2 max-w-sm text-[15px] leading-relaxed text-[#E6DCCA]/65 sm:mt-3">
                 {prop.body}
               </p>
             </div>
@@ -85,11 +85,11 @@ export default function LandingPage() {
         </section>
 
         {/* Three moods */}
-        <section className="pt-8">
-          <h2 className="mb-6 text-center font-serif text-[22px] font-medium text-[#E6DCCA]">
+        <section className="pt-8 sm:pt-12">
+          <h2 className="mb-6 text-center font-serif text-[22px] font-medium text-[#E6DCCA] sm:mb-8">
             Three moods
           </h2>
-          <div className="space-y-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {scenarios.map((s) => (
               <div
                 key={s.key}
@@ -113,8 +113,8 @@ export default function LandingPage() {
         </section>
 
         {/* Closing CTA */}
-        <section className="pt-16 pb-4 text-center">
-          <p className="mx-auto mb-6 max-w-sm font-serif text-[24px] italic leading-snug text-[#E6DCCA]/90">
+        <section className="pt-16 pb-4 text-center sm:pt-24">
+          <p className="mx-auto mb-6 max-w-sm font-serif text-[24px] italic leading-snug text-[#E6DCCA]/90 sm:mb-8 sm:max-w-xl sm:text-[30px]">
             Press play, put the phone down, and let the raga do the rest.
           </p>
           <Link

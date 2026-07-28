@@ -8,16 +8,18 @@ noted inline — App Store Connect enforces them.
 
 ## App information
 
-| Field | Value |
-|-------|-------|
-| **App name** (30 char max) | `Ragaflow` |
-| **Subtitle** (30 char max) | `Ragas for focus & sleep` (23) |
-| **Bundle ID** | `com.ragaflow.app` |
-| **SKU** | `ragaflow` |
-| **Primary category** | Health & Fitness |
-| **Secondary category** | Music |
-| **Primary language** | English (U.S.) |
-| **Age rating** | 4+ (no objectionable content) |
+| Field                      | Value                                                                                          |
+| -------------------------- | ---------------------------------------------------------------------------------------------- |
+| **App name** (30 char max) | `Ragaflow`                                                                                     |
+| **Subtitle** (30 char max) | `Ragas for focus & sleep` (23)                                                                 |
+| **Bundle ID**              | `com.ragaflow.app`                                                                             |
+| **SKU**                    | `ragaflow`                                                                                     |
+| **Primary category**       | Health & Fitness                                                                               |
+| **Secondary category**     | Music                                                                                          |
+| **Primary language**       | English (U.S.)                                                                                 |
+| **Age rating**             | 4+ (no objectionable content)                                                                  |
+| **Version**                | `1.0.0` (must match the binary's `CFBundleShortVersionString`)                                 |
+| **Devices**                | iPhone only — iPad support was dropped for 1.0 (untested), so no iPad screenshots are required |
 
 > **Category note:** Health & Fitness primary puts Ragaflow next to Calm /
 > Headspace for the focus-sleep-meditation use case, which is the intended
@@ -85,11 +87,13 @@ want, e.g. `,carnatic music` won't fit but a short one like `,tanpura` would.)
 | Field | Value | Status |
 |-------|-------|--------|
 | **Marketing URL** | `https://ragaflow.io` | ✅ live |
-| **Support URL** | `https://ragaflow.io/support` (or a `mailto:` fallback) | ⚠️ create — a simple contact page or `mailto:support@ragaflow.io` |
-| **Privacy Policy URL** | `https://ragaflow.io/privacy` | ⚠️ **required** — host `docs/privacy-policy.md` content here before submit |
+| **Support URL** | `https://ragaflow.io/support` | ✅ live |
+| **Privacy Policy URL** | `https://ragaflow.io/privacy` | ✅ live |
+| **Terms URL** | `https://ragaflow.io/terms` | ✅ live |
 
-> Apple **rejects** submissions without a reachable Privacy Policy URL. This is
-> the one URL that blocks review — prioritize it.
+> All four returned 200 on 2026-07-28. Apple **rejects** submissions without a
+> reachable Privacy Policy URL, so re-check these after any domain-split flip
+> (see `docs/domain-split-runbook.md`).
 
 ---
 
@@ -162,7 +166,12 @@ size and down-scale for others, but uploading both avoids surprises):
 | **6.9"** (required) | iPhone 16 Pro Max | 1320 × 2868 |
 | **6.5"** (recommended) | iPhone 15 Plus / 11 Pro Max | 1284 × 2778 |
 
-Captured via `ios/scripts/screenshot.sh --all --sign-in` on iPhone 16 Pro Max.
+iPhone only — the 1.0 binary is `TARGETED_DEVICE_FAMILY = 1`, so App Store
+Connect will not ask for an iPad set.
+
+Capture via `ios/scripts/screenshot.sh --all --sign-in` on iPhone 16 Pro Max.
+Output lands in `/tmp/ios-shots`, which does **not** survive a reboot — copy
+the PNGs somewhere durable (or straight into ASC) right after the run.
 Suggested order for the listing (first 3 are what most users see):
 
 1. **Home** — the moment picker + "Tonight" featured card (the hook)
@@ -179,10 +188,11 @@ Suggested order for the listing (first 3 are what most users see):
 
 ## Pre-submit blockers (owner: you, in App Store Connect)
 
-- [ ] Privacy Policy URL live at `https://ragaflow.io/privacy`
-- [ ] Support URL live (or `mailto:` fallback)
-- [ ] Review demo account created + credentials in review notes
-- [ ] 6.9" screenshots uploaded (from the capture run)
+- [x] Privacy Policy URL live at `https://ragaflow.io/privacy`
+- [x] Support URL live at `https://ragaflow.io/support`
+- [x] Review demo account created + credentials in review notes
+- [ ] 6.9" screenshots re-captured and uploaded (the earlier set was in
+      `/tmp/ios-shots` and is gone)
 - [ ] App Privacy questionnaire completed (table above)
 - [ ] Age rating questionnaire → 4+
 - [ ] Build uploaded via Xcode Cloud (main workflow) or manual Archive

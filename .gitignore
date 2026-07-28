@@ -99,3 +99,6 @@ audio/
 # integration test screenshots
 tests/integration/screenshots/
 .vercel
+
+# Obsidian local vault state
+.obsidian/

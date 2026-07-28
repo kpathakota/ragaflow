@@ -118,7 +118,7 @@ After merge, update project documentation to reflect the completed work:
 
 1. **`docs/dev-design.md`** — mark the relevant task(s) as ✅ complete. If the work closes a deferred item, update the "What Remains" section.
 2. **`docs/issues.md`** — mark any issues resolved by this feature as **Status: Fixed** with the date.
-3. **`docs/ios-plan.md`** — if iOS milestones were completed, mark them as done.
+3. **`docs/archive/ios-plan.md`** — if iOS milestones were completed, mark them as done.
 4. Commit the doc updates to `dev` directly (doc-only change, per CLAUDE.md conventions).
 
 ## Rules

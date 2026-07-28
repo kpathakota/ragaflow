@@ -109,10 +109,10 @@ export default function TermsPage() {
           The Service is provided &ldquo;as is&rdquo; and &ldquo;as
           available,&rdquo; without warranties of any kind, to the fullest extent
           permitted by law. Ragaflow is for relaxation and focus; it is{" "}
-          <strong className="text-[#E6DCCA]">not</strong> a medical device or a
-          substitute for professional medical, psychological, or sleep-related
-          advice. Don&rsquo;t use the Service while driving or doing anything that
-          requires your full attention.
+          <strong className="text-[#E6DCCA]">not</strong>{" "}
+          a medical device or a substitute for professional medical,
+          psychological, or sleep-related advice. Don&rsquo;t use the Service
+          while driving or doing anything that requires your full attention.
         </p>
       </ProseSection>
 

@@ -29,5 +29,5 @@ New visitor. Sign-up is the hard case; sign-in is mechanical.
 ## Notes
 
 - **Confirm-password is intentional.** The critique recommended removing it; the product call is to keep it as a familiar sign-up pattern. Worker should not propose removal again.
-- Google OAuth needs Supabase provider provisioning (see `docs/google-auth-plan.md` + C1 in `docs/automation-rollout.md`). Apple Sign-In needs Apple Developer + Supabase provider provisioning (C2).
+- Google OAuth needs Supabase provider provisioning (see `docs/google-auth-plan.md` + C1 in `docs/archive/automation-rollout.md`). Apple Sign-In needs Apple Developer + Supabase provider provisioning (C2).
 - The two OAuth deltas can't be implemented until provisioning is done. Worker should check for `auth.providers.google` / `auth.providers.apple` before opening a PR that adds the buttons.

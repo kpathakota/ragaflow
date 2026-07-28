@@ -536,7 +536,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowUITests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = Ragaflow;
 			};
 			name = Debug;
@@ -556,7 +556,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowUITests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_TARGET_NAME = Ragaflow;
 			};
 			name = Release;
@@ -636,7 +636,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};
@@ -722,7 +722,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.app;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -741,7 +741,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowTests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ragaflow.app/Ragaflow";
 			};
 			name = Debug;
@@ -761,7 +761,7 @@
 				);
 				PRODUCT_BUNDLE_IDENTIFIER = com.ragaflow.RagaflowTests;
 				SDKROOT = iphoneos;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Ragaflow.app/Ragaflow";
 			};
 			name = Release;

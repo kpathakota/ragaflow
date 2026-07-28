@@ -37,21 +37,17 @@ targets:
         CFBundleDisplayName: Ragaflow
         CFBundleIdentifier: $(PRODUCT_BUNDLE_IDENTIFIER)
         CFBundleVersion: "1"
-        CFBundleShortVersionString: "0.1.0"
+        CFBundleShortVersionString: "1.0.0"
         CFBundlePackageType: APPL
         CFBundleExecutable: $(EXECUTABLE_NAME)
         LSRequiresIPhoneOS: true
         UILaunchScreen: {}
         UIRequiredDeviceCapabilities:
-          - armv7
+          - arm64
         UISupportedInterfaceOrientations:
           - UIInterfaceOrientationPortrait
-        UISupportedInterfaceOrientations~ipad:
-          - UIInterfaceOrientationPortrait
-          - UIInterfaceOrientationPortraitUpsideDown
-          - UIInterfaceOrientationLandscapeLeft
-          - UIInterfaceOrientationLandscapeRight
         UIUserInterfaceStyle: Dark
+        ITSAppUsesNonExemptEncryption: false
         UIBackgroundModes:
           - audio
         SUPABASE_URL: $(SUPABASE_URL)
@@ -61,7 +57,7 @@ targets:
         PRODUCT_BUNDLE_IDENTIFIER: com.ragaflow.app
         DEVELOPMENT_TEAM: A2S25D7DN9
         CODE_SIGN_STYLE: Automatic
-        TARGETED_DEVICE_FAMILY: "1,2"
+        TARGETED_DEVICE_FAMILY: "1"
         GENERATE_INFOPLIST_FILE: false
     configFiles:
       Debug: Ragaflow/Configuration/Debug.xcconfig
@@ -85,6 +81,7 @@ targets:
       - target: Ragaflow
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: A2S25D7DN9
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: true
@@ -101,6 +98,7 @@ targets:
       - target: Ragaflow
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: A2S25D7DN9
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: true
