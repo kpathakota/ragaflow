@@ -34,6 +34,6 @@ Neither platform has both defaults *and* full subscription/certification UX. A u
 
 ## Notes
 
-- **Subscription tier UX is unblocked.** Worker cannot start the "tier selection before Subscribe" delta until A4 in `docs/automation-rollout.md` is decided (tier-select modal vs. tier-select page vs. status quo).
-- **Web↔iOS parity policy is unblocked.** This screen is the canonical test case for A3 in `docs/automation-rollout.md`. The PR that ships this screen will set the implicit precedent for every other screen, so A3 should be decided before this one is picked off the queue.
+- **Subscription tier UX is unblocked.** Worker cannot start the "tier selection before Subscribe" delta until A4 in `docs/archive/automation-rollout.md` is decided (tier-select modal vs. tier-select page vs. status quo).
+- **Web↔iOS parity policy is unblocked.** This screen is the canonical test case for A3 in `docs/archive/automation-rollout.md`. The PR that ships this screen will set the implicit precedent for every other screen, so A3 should be decided before this one is picked off the queue.
 - **Cross-link from Explore design philosophy:** the certifications grid is the *deep* place for ragam learning. When a rasika hits silver/gold tier on a ragam, surface richer ragam context (history, time-of-day, evocative description, signature recordings) — this is the payoff for sustained listening.

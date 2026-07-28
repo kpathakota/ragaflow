@@ -32,7 +32,11 @@ Privacy/Terms/Support URLs) deploys from `main`.
 - [x] **App icon** — real branded 1024 icon (tanpura rosette), already passing
       ASC validation via TestFlight uploads
 - [x] **Listing kit** — copy/keywords/reviewer notes in
-      `docs/app-store-listing.md`; 6 screenshots at 6.9" spec captured
+      `docs/app-store-listing.md`
+- [x] **Bundle metadata for 1.0** — iPhone-only (`TARGETED_DEVICE_FAMILY = 1`,
+      so no iPad screenshot set is required), version `1.0.0` to match the
+      listing, `UIRequiredDeviceCapabilities` = `arm64` (was a stale `armv7`;
+      deployment target stays iOS 17)
 
 **Must build before submission — account deletion (SHIPPED 2026-07-22):**
 
@@ -45,24 +49,28 @@ Privacy/Terms/Support URLs) deploys from `main`.
       - **Web** — `/profile` delete flow **verified on prod** (rows gone,
         analytics anonymized, re-registration clean)
       - **iOS** — Profile → Delete Account with destructive confirmation;
-        69/69 unit tests; **pending TestFlight verification** once the next
-        build exists (needs the dev → main merge below)
+        69/69 unit tests; **verified on device 2026-07-28**
       - **Docs** — privacy policy/page + support page now say "delete in the
         app (Profile → Delete account), or email us"
-      - Remaining test-matrix items: iOS on-device pass + the 409
-        active-subscription path on both platforms (flip a throwaway's
-        `subscription_status` in the SQL editor)
+      - Remaining test-matrix item: the 409 active-subscription path on both
+        platforms (flip a throwaway's `subscription_status` in the SQL editor)
 
 **Not code / not `main` (after the merge, owner: human):**
 
 - [x] Merge `dev → main` → Xcode Cloud builds → select the build in ASC
-- [ ] Get account deletion into main. 
-- [ ] Verify `ragaflow.io/privacy` + `/terms` + `/support` live in production
-- [ ] `support@ragaflow.io` mailbox (email routing on ragaflow.io) — listing
-      contact + privacy-policy deletion requests land here
+- [x] Account deletion is in `main` (PR #66, 2026-07-22)
+- [x] Verify `ragaflow.io/privacy` + `/terms` + `/support` live in production
+      — all four routes (+ `/landing`) return 200, checked 2026-07-28
+- [x] `support@ragaflow.io` mailbox — DNS side is done (`ragaflow.io` MX points
+      at Porkbun forwarding, SPF present); still send a test to confirm the
+  `support@` alias itself delivers. Tested!
+- [x] **Re-capture 6.9" screenshots** — `ios/scripts/screenshot.sh` writes to
+      `/tmp/ios-shots`, which has since been cleared, so the captured set is
+      gone. Needs a machine with Xcode + simulator (not installed on this one).
+      iPhone sizes only now that iPad support is dropped.
 - [ ] ASC: paste listing copy, upload screenshots, App Privacy labels, age
       rating 4+, demo account in review notes → submit
-- [ ] **Not required for submission:** the domain split (env-gated, off until
+- [x] **Not required for submission:** the domain split (env-gated, off until
       flipped — see `docs/domain-split-runbook.md`) and the color pass
 - [ ] Build an app walkthrough in derive.to. 
 
@@ -82,7 +90,7 @@ Privacy/Terms/Support URLs) deploys from `main`.
 
 ## Sequence
 
-See `docs/automation-rollout.md` for the orchestration plan; this is the user-facing rollout:
+See `docs/archive/automation-rollout.md` for the orchestration plan; this is the user-facing rollout:
 
 1. Lock per-screen JTBDs into `docs/screens/` (decisions A1–A5)
 2. Wing an initial palette + typography lock, apply to web + iOS

@@ -585,7 +585,7 @@ Audio currently resets to 0:00 on every session end (completion, stop, restart).
 - Profile page shows plan status + subscribe CTA or manage link
 - Subscription states: `free`, `active`, `past_due`, `canceled`, `expired`, `lifetime`
 - SECURITY DEFINER function for webhook writes (migration 008)
-- See `docs/payments-design.md` for full design and testing checklist
+- See `docs/archive/payments-design.md` for full design and testing checklist
 
 **Task 2.7: Track Variant Switching** *(needs more PM discussion)*
 - Percussion toggle, frequency selector

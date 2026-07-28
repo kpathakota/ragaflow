@@ -92,4 +92,4 @@ ios/
 - **M3:** Apple IAP via StoreKit 2
 - **M4:** Offline downloads
 
-See `docs/ios-plan.md` for the full implementation plan.
+See `docs/archive/ios-plan.md` for the full implementation plan.
