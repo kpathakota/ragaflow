@@ -160,7 +160,7 @@ export default async function Home() {
         )}
 
         {/* Scenario cards — stacked on phone, three-up on desktop */}
-        <div className="mt-7 grid grid-cols-1 gap-2.5 sm:mt-10 sm:grid-cols-3 sm:gap-3">
+        <div className="mt-7 grid grid-cols-1 gap-2.5 sm:mt-10 md:grid-cols-3 md:gap-3">
           {scenarios.map((s) => (
             <Link
               key={s.key}

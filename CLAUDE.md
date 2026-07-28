@@ -2,7 +2,7 @@
 
 Ragaflow is a web + iOS app that serves Indian classical ragas for focus, sleep, and meditation. Rasikas (users) select a scenario, browse tracks tagged to that scenario, and play audio sessions. Tracks belong to ragams (melodic frameworks) and are tagged with scenarios and emotions — not hard-mapped 1:1.
 
-See `docs/spec.md` and `docs/dev-design.md` for the full product specification and development plan. See `docs/ios-plan.md` for the iOS app implementation plan.
+See `docs/spec.md` and `docs/dev-design.md` for the full product specification and development plan. See `docs/archive/ios-plan.md` for the iOS app implementation plan.
 
 ## Monorepo structure
 
@@ -85,8 +85,8 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 - `docs/account-deletion-design.md` — account deletion design (flow, edge function, test matrix)
 - `docs/spec.md` — product specification
 - `docs/dev-design.md` — development design & execution plan
-- `docs/ios-plan.md` — iOS implementation plan (milestones M0–M5)
-- `docs/payments-design.md` — Polar.sh payments design (web)
+- `docs/archive/ios-plan.md` — iOS implementation plan (milestones M0–M5)
+- `docs/archive/payments-design.md` — Polar.sh payments design (web)
 
 ### Web data layer
 - `web/lib/types.ts` — TypeScript types for all entities

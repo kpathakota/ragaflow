@@ -81,6 +81,7 @@ targets:
       - target: Ragaflow
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: A2S25D7DN9
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: true
@@ -97,6 +98,7 @@ targets:
       - target: Ragaflow
     settings:
       base:
+        TARGETED_DEVICE_FAMILY: "1"
         DEVELOPMENT_TEAM: A2S25D7DN9
         CODE_SIGN_STYLE: Automatic
         GENERATE_INFOPLIST_FILE: true

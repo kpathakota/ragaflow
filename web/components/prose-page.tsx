@@ -16,8 +16,8 @@ type ProsePageProps = {
 export function ProsePage({ title, subtitle, children }: ProsePageProps) {
   return (
     <div className="relative min-h-screen overflow-hidden bg-[#0F0B07] px-5 pt-2 pb-16 sm:px-8 sm:pb-24 flex flex-col items-center">
-      {/* max-w-2xl ≈ 75 characters at this type size — the readable measure. */}
-      <div className="relative w-full max-w-sm sm:max-w-2xl">
+      {/* ~78 characters per line at 16px — max-w-2xl measured ~90, too wide. */}
+      <div className="relative w-full max-w-sm sm:max-w-xl">
         <div className="pt-1 sm:pt-4">
           <Link
             href="/"

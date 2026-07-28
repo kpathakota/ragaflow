@@ -90,7 +90,7 @@ Privacy/Terms/Support URLs) deploys from `main`.
 
 ## Sequence
 
-See `docs/automation-rollout.md` for the orchestration plan; this is the user-facing rollout:
+See `docs/archive/automation-rollout.md` for the orchestration plan; this is the user-facing rollout:
 
 1. Lock per-screen JTBDs into `docs/screens/` (decisions A1–A5)
 2. Wing an initial palette + typography lock, apply to web + iOS

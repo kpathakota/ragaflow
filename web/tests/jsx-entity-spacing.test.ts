@@ -19,8 +19,15 @@ import { join } from "node:path";
  * The fix is always an explicit {" "} instead of a literal space.
  */
 
-const INLINE_CLOSE_THEN_TEXT =
-  /<\/(strong|em|b|i|span|a|code)>[ \t]+(?=\S)([^<{]*)/g;
+/**
+ * Any node boundary the text can follow — a closing tag (`</strong>`,
+ * `</Link>`), a self-closing element (`<MailLink />`), or an expression
+ * (`{name}`). The original version of this guard only matched a handful of
+ * closing HTML tags, which missed the `<MailLink /> and we&rsquo;ll …` shape
+ * that is live on the support page.
+ */
+const NODE_BOUNDARY_THEN_TEXT =
+  /(?:<\/[A-Za-z][\w.]*>|\/>|\})[ \t]+(?=\S)([^<{]*)/g;
 const HTML_ENTITY = /&\w+;/;
 
 function tsxFiles(dir: string): string[] {
@@ -38,10 +45,14 @@ describe("JSX spacing around HTML entities", () => {
   it("never relies on a literal space before an entity-bearing text chunk", () => {
     const offenders: string[] = [];
 
-    for (const file of [...tsxFiles("app"), ...tsxFiles("components")]) {
+    for (const file of [
+      ...tsxFiles("app"),
+      ...tsxFiles("components"),
+      ...tsxFiles("lib"),
+    ]) {
       const source = readFileSync(file, "utf8");
-      for (const match of source.matchAll(INLINE_CLOSE_THEN_TEXT)) {
-        if (!HTML_ENTITY.test(match[2])) continue;
+      for (const match of source.matchAll(NODE_BOUNDARY_THEN_TEXT)) {
+        if (!HTML_ENTITY.test(match[1])) continue;
         const line = source.slice(0, match.index).split("\n").length;
         offenders.push(`${file}:${line} — ${match[0].trim().slice(0, 60)}`);
       }

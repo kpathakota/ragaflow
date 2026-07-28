@@ -71,7 +71,7 @@ export default function LandingPage() {
         </section>
 
         {/* What makes it different — stacked on phone, three-up on desktop */}
-        <section className="grid grid-cols-1 gap-9 py-8 sm:grid-cols-3 sm:gap-8 sm:py-12">
+        <section className="grid grid-cols-1 gap-9 py-8 sm:py-12 md:grid-cols-3 md:gap-8">
           {VALUE_PROPS.map((prop) => (
             <div key={prop.title} className="text-center">
               <h2 className="font-serif text-[22px] font-medium text-[#E6DCCA]">
@@ -89,7 +89,7 @@ export default function LandingPage() {
           <h2 className="mb-6 text-center font-serif text-[22px] font-medium text-[#E6DCCA] sm:mb-8">
             Three moods
           </h2>
-          <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+          <div className="grid grid-cols-1 gap-3 md:grid-cols-3">
             {scenarios.map((s) => (
               <div
                 key={s.key}

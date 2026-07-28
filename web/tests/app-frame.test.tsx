@@ -1,14 +1,12 @@
 import { describe, it, expect } from "vitest";
 import { render } from "@testing-library/react";
+import { readFileSync, existsSync } from "node:fs";
+import { join } from "node:path";
 import { AppFrame } from "@/components/app-frame";
 import ModeLayout from "@/app/mode/layout";
 import ExploreLayout from "@/app/explore/layout";
 import ProfileLayout from "@/app/profile/layout";
 import AuthLayout from "@/app/auth/layout";
-import PrivacyPage from "@/app/privacy/page";
-import TermsPage from "@/app/terms/page";
-import SupportPage from "@/app/support/page";
-import LandingPage from "@/app/landing/page";
 
 /**
  * The phone frame applies to the interactive app surfaces only. The public
@@ -47,18 +45,29 @@ describe("app route segments are framed", () => {
   }
 });
 
-describe("content pages are not framed", () => {
-  const pages = [
-    ["privacy", PrivacyPage],
-    ["terms", TermsPage],
-    ["support", SupportPage],
-    ["landing", LandingPage],
-  ] as const;
+/**
+ * The frame is applied by layouts, never by the page components — so asserting
+ * that a page component renders no `.app-frame` proves nothing (it never could).
+ * The real invariants are structural: the root layout must not reintroduce a
+ * global frame, and the content routes must not gain a layout that adds one.
+ */
+describe("content routes stay unframed", () => {
+  const CONTENT_ROUTES = ["", "landing", "privacy", "terms", "support"];
 
-  for (const [name, Page] of pages) {
-    it(`/${name} stays full-width on desktop`, () => {
-      const { container } = render(<Page />);
-      expect(container.querySelector(".app-frame")).toBeNull();
+  it("the root layout applies no global frame", () => {
+    const root = readFileSync(join("app", "layout.tsx"), "utf8");
+    expect(root).not.toContain("app-frame");
+    expect(root).not.toContain("AppFrame");
+  });
+
+  for (const route of CONTENT_ROUTES) {
+    it(`/${route} has no layout reintroducing the frame`, () => {
+      const layout = join("app", route, "layout.tsx");
+      // The root layout is the only layout on these routes. If someone adds a
+      // segment layout here later, it must not pull in AppFrame.
+      if (route !== "" && existsSync(layout)) {
+        expect(readFileSync(layout, "utf8")).not.toContain("AppFrame");
+      }
     });
   }
 });

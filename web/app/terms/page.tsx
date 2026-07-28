@@ -111,9 +111,8 @@ export default function TermsPage() {
           permitted by law. Ragaflow is for relaxation and focus; it is{" "}
           <strong className="text-[#E6DCCA]">not</strong>{" "}
           a medical device or a substitute for professional medical,
-          psychological, or sleep-related
-          advice. Don&rsquo;t use the Service while driving or doing anything that
-          requires your full attention.
+          psychological, or sleep-related advice. Don&rsquo;t use the Service
+          while driving or doing anything that requires your full attention.
         </p>
       </ProseSection>
 

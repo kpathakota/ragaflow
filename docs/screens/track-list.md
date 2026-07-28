@@ -30,5 +30,5 @@ Returning rasika who skipped Quick Play because they want to choose. A first-tim
 
 ## Notes
 
-- **Editor's pick mechanism is unblocked.** Worker cannot start the badge delta until A5 in `docs/automation-rollout.md` is decided: manual `editors_pick boolean` on `tracks`, per-scenario editorial table, or tag-based.
+- **Editor's pick mechanism is unblocked.** Worker cannot start the badge delta until A5 in `docs/archive/automation-rollout.md` is decided: manual `editors_pick boolean` on `tracks`, per-scenario editorial table, or tag-based.
 - **Analytics parity gap** (`scenario_view` on web but not iOS) is captured but tied to the A3 (parity policy) decision. Worker should add the iOS event when shipping this screen regardless of A3 — it's a one-line fix.

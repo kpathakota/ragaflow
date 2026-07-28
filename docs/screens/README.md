@@ -4,7 +4,7 @@ Locked JTBDs for the six Ragaflow screens. Each file is the **contract** the wor
 
 Status lifecycle: `locked-jtbd` → `queued` → `active` → `shipped`.
 
-**Locked:** 2026-06-14 (A1 from `docs/automation-rollout.md`)
+**Locked:** 2026-06-14 (A1 from `docs/archive/automation-rollout.md`)
 
 ## Queue order
 

@@ -1,11 +1,11 @@
 ---
 name: modernize-screen
-description: "Autonomous screen-modernization worker: reads a locked screen spec, implements the web deltas with tests, captures before/after screenshots, and opens a PR against dev. The core of the beta automation loop (docs/automation-rollout.md)."
+description: "Autonomous screen-modernization worker: reads a locked screen spec, implements the web deltas with tests, captures before/after screenshots, and opens a PR against dev. The core of the beta automation loop (docs/archive/automation-rollout.md)."
 ---
 
 # Modernize Screen Worker
 
-The worker step of the beta automation loop (`docs/automation-rollout.md`). Fired by
+The worker step of the beta automation loop (`docs/archive/automation-rollout.md`). Fired by
 cron (3h cadence) or RemoteTrigger ("ship now" from the phone). It takes **one
 screen**, ships its **web** deltas in a single PR against `dev`, and attaches
 before/after screenshots so the PR can be reviewed entirely from GitHub mobile.
@@ -21,7 +21,7 @@ never blocks the web PR on iOS.
 
 ## Locked decisions this worker honors
 
-From `docs/automation-rollout.md` (A2–A5, locked 2026-06-23):
+From `docs/archive/automation-rollout.md` (A2–A5, locked 2026-06-23):
 
 - **A2 queue order:** Player → Explore → Track List → Profile → Auth. (Home already shipped.)
 - **A3 parity:** web leads; open the iOS follow-up as a separate PR/issue after web merges.
