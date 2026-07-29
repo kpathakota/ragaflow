@@ -102,3 +102,7 @@ tests/integration/screenshots/
 
 # Obsidian local vault state
 .obsidian/
+
+# App Store submission screenshots — large binaries, and the uploaded copies
+# live in App Store Connect. Regenerate with ios/scripts/screenshot.sh.
+docs/screenshots/

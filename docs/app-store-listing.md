@@ -84,12 +84,12 @@ want, e.g. `,carnatic music` won't fit but a short one like `,tanpura` would.)
 
 ## URLs
 
-| Field | Value | Status |
-|-------|-------|--------|
-| **Marketing URL** | `https://ragaflow.io` | ✅ live |
-| **Support URL** | `https://ragaflow.io/support` | ✅ live |
+| Field                  | Value                         | Status |
+| ---------------------- | ----------------------------- | ------ |
+| **Marketing URL**      | `https://ragaflow.io`         | ✅ live |
+| **Support URL**        | `https://ragaflow.io/support` | ✅ live |
 | **Privacy Policy URL** | `https://ragaflow.io/privacy` | ✅ live |
-| **Terms URL** | `https://ragaflow.io/terms` | ✅ live |
+| **Terms URL**          | `https://ragaflow.io/terms`   | ✅ live |
 
 > All four returned 200 on 2026-07-28. Apple **rejects** submissions without a
 > reachable Privacy Policy URL, so re-check these after any domain-split flip
