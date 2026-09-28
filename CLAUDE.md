@@ -85,6 +85,7 @@ Types defined in `web/lib/types.ts` (web) and `ios/Ragaflow/Models/` (iOS). Seed
 - `docs/account-deletion-design.md` — account deletion design (flow, edge function, test matrix)
 - `docs/spec.md` — product specification
 - `docs/dev-design.md` — development design & execution plan
+- `docs/backlog.md` — stack-ranked GA backlog (2026-09-28): web↔iOS parity matrix, accounting bugs, P0 = gate + tier page + StoreKit, P1 = funnel analytics + auth + marketing surface
 - `docs/archive/ios-plan.md` — iOS implementation plan (milestones M0–M5)
 - `docs/archive/payments-design.md` — Polar.sh payments design (web)
 
